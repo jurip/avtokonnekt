@@ -22,12 +22,12 @@ import 'package:localstorage/localstorage.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const String site = "http://89.111.173.110:8080/";
+//const String site = "http://89.111.173.110:8080/";
 late final ValueNotifier<String> notifier;
 late final ValueNotifier<String> password;
 late final ValueNotifier<String> token;
 
-//const String site = "http://95.84.221.108:2222/";
+const String site = "http://95.84.221.108:2222/";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
