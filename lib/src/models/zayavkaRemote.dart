@@ -39,7 +39,7 @@ mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
 
   @override
   FutureOr<Map<String, dynamic>> get defaultParams => 
-  {'username': notifier.value};
+  {'username': user.value};
   @override
   String urlForFindAll(Map<String, dynamic> params) => 
   'services/flutterService/getAllActiveZayavkas';

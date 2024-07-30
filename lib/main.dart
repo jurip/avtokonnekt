@@ -21,21 +21,23 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
-//const String site = "http://89.111.173.110:8080/";
-late final ValueNotifier<String> notifier;
+const String site = "http://89.111.173.110:8080/";
+late final ValueNotifier<String> user;
 late final ValueNotifier<String> password;
 late final ValueNotifier<String> token;
 
-const String site = "http://95.84.221.108:2222/";
+//const String site = "http://95.84.221.108:2222/";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initLocalStorage();
+  
 
-  notifier = ValueNotifier(localStorage.getItem('user') ?? '');
-  notifier.addListener(() {
-    localStorage.setItem('user', notifier.value.toString());
+  user = ValueNotifier(localStorage.getItem('user') ?? '');
+  user.addListener(() {
+    localStorage.setItem('user', user.value.toString());
   });
   password = ValueNotifier(localStorage.getItem('password') ?? '');
   password.addListener(() {
@@ -84,7 +86,7 @@ final GoRouter __router = GoRouter(
           ),
         ],
         redirect: (context, state) {
-          final bool userAutheticated = notifier.value != '';
+          final bool userAutheticated = user.value != '';
 
           final bool onloginPage = state.fullPath == '/login';
 
@@ -158,8 +160,10 @@ class LoginPage extends HookConsumerWidget {
             if (t != "") {
               bool ok = await login(t, passwordController.text, mytoken);
               if (ok) {
-                notifier.value = t;
+                user.value = t;
                 password.value = passwordController.text;
+                ref.duties.clear();
+                ref.duties.findAll();
                 context.go(MyZayavkiPage.routeName);
               }
             }
@@ -230,7 +234,7 @@ class ChekiScreen extends HookConsumerWidget {
                 var nomer = nomerController.text;
                 Chek a = Chek(
                     comment: nomer,
-                    username: notifier.value,
+                    username: user.value,
                     date: DateTime.now());
                 a.saveLocal();
                 Navigator.pop(context);
@@ -253,6 +257,7 @@ class ChekiScreen extends HookConsumerWidget {
 
           return ListView(
             children: [
+             
               ElevatedButton(
                 child: const Text('Добавить отчет о покупках'),
                 onPressed: () {
@@ -375,24 +380,28 @@ class TasksScreen extends HookConsumerWidget {
     showDialog(
       context: context,
       builder: (_) {
-        final stateUslugas = ref.uslugaSelects.watchAll(remote: false);
+        TextEditingController search =  TextEditingController();
+        final stateUslugas = ref.uslugaSelects.watchAll(remote: false, params: {'text':search.text});
+        
         return AlertDialog(
           title: Text('Выбрать услугу'),
           content: ListView(
             shrinkWrap: true,
             children: [
+              TextFormField(
+                controller: search,
+                decoration: InputDecoration(hintText: 'фильтр'),
+              ),
+
               for (UslugaSelect u in stateUslugas.model.toList(growable: true))
-                GestureDetector(
-                  child: Text(u.title.toString(), style: TextStyle(fontSize: 18),),
-                  onLongPress: () {
-                    Usluga newU = Usluga(
+               ElevatedButton(child: Text( u.title.toString())
+                 , onPressed: () { Usluga newU = Usluga(
                         avtomobil: BelongsTo(avto), title: u.title.toString());
                     avto.performance_service.add(newU);
                     newU.saveLocal();
                     avto.saveLocal();
                     zayavka.saveLocal();
-                    Navigator.pop(context);
-                  },
+                    Navigator.pop(context); },
                 ),
             ],
           ),
@@ -507,6 +516,13 @@ class TasksScreen extends HookConsumerWidget {
                 children: [
                   for (final duty in stateDuty.model)
                     Text('${duty.fio} - ${duty.status}' ,style: TextStyle(fontSize: 20),),
+                     ElevatedButton(
+                child: const Text('выйти'),
+                onPressed: () {
+                  logout();
+                  context.go('/login');
+                },
+              ),
                   for (final zayavka in stateLocal.model)
                     ExpansionTile(
                         title: Text('${zayavka.nomer}'),
@@ -526,8 +542,20 @@ class TasksScreen extends HookConsumerWidget {
                                     ),
                                     ListTile(
                                       isThreeLine: true,
-                                      subtitle: Text(
-                                          '${zayavka.nachalo}\n${zayavka.client}\n${zayavka.adres}\n${zayavka.contact_number} ${zayavka.contact_name}\n${zayavka.message} '),
+                                      subtitle: Column(mainAxisAlignment: MainAxisAlignment.start, children: [ Text(
+                                          '${zayavka.nachalo}\n${zayavka.client}\n${zayavka.adres}'),
+                                          GestureDetector(child: Text('${zayavka.contact_number}',),
+                                          onTap: () => launchUrlString("tel://${zayavka.contact_number}"),
+                                          
+                                          ),
+                                           GestureDetector(child: Icon(Icons.phone),
+                                          onTap: () => launchUrlString("tel://${zayavka.contact_number}"),
+                                          
+                                          ),
+                                         
+                                          Text(
+                                          '${zayavka.contact_name}\n${zayavka.message} '),
+                                      ])
                                     ),
                                     ExpansionTile(title: Text('Автомобили'),
                                     children: [ Row(
@@ -626,11 +654,16 @@ class TasksScreen extends HookConsumerWidget {
                                               for (Usluga usluga in avto
                                                   .performance_service
                                                   .toList())
-                                                Row(
-                                                  children: <Widget>[
+                                               
+                                                    ElevatedButton(onPressed: () {
+                                                       usluga.deleteLocal();
+                                                    avto.saveLocal();
+                                                    zayavka.saveLocal();
+
+                                                    }, child: 
                                                   Text('${usluga.title}' ,overflow: TextOverflow.fade, softWrap: false,),
-                                                  
-                                                ]),
+                                                
+                                                ),
                                             
                                         ElevatedButton(
                                           child: const Text('оборудование'),
@@ -676,6 +709,12 @@ class TasksScreen extends HookConsumerWidget {
                 ],
               ));
         });
+  }
+
+  void logout() {
+     user.value = '';
+    password.value = '';
+
   }
 }
 
