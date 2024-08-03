@@ -1,7 +1,6 @@
 import 'package:flutter_data/flutter_data.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'avtomobilRemote.dart';
 import 'chek.dart';
 
 part 'chekFoto.g.dart';

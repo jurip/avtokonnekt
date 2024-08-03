@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/src/models/calendarEvent.dart';
@@ -24,12 +23,12 @@ class ZayavkaRemote extends DataModel<ZayavkaRemote> {
   final String? manager_name;
   final String? manager_number;
   final String? service;
-  final HasMany<AvtomobilRemote> avtomobili;
-  final HasMany<CalendarEvent> events;
+  final HasMany<AvtomobilRemote> avtomobili = HasMany<AvtomobilRemote>();
+  final HasMany<CalendarEvent> events = HasMany<CalendarEvent>();
 
    ZayavkaRemote(this.id, {this.nomer ,this.nachalo, this.client, this.adres, this.contact_name,
      this.contact_number, this.end_date_time, this.message, this.service,
-     required this.avtomobili,required this.events, this.comment_address, this.manager_name, this.manager_number});
+       this.comment_address, this.manager_name, this.manager_number});
 
 }
 mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {

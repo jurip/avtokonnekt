@@ -1,10 +1,8 @@
-import 'dart:async';
 
 import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/src/models/chekFoto.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../main.dart';
 
 part 'chek.g.dart';
 
