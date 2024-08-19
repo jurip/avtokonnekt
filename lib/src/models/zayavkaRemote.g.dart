@@ -105,13 +105,11 @@ ZayavkaRemote _$ZayavkaRemoteFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['end_date_time'] as String),
       message: json['message'] as String?,
       service: json['service'] as String?,
-      avtomobili: HasMany<AvtomobilRemote>.fromJson(
-          json['avtomobili'] as Map<String, dynamic>),
-      events: HasMany<CalendarEvent>.fromJson(
-          json['events'] as Map<String, dynamic>),
       comment_address: json['comment_address'] as String?,
       manager_name: json['manager_name'] as String?,
       manager_number: json['manager_number'] as String?,
+      lat: json['lat'] as String?,
+      lng: json['lng'] as String?,
     );
 
 Map<String, dynamic> _$ZayavkaRemoteToJson(ZayavkaRemote instance) =>
@@ -129,6 +127,6 @@ Map<String, dynamic> _$ZayavkaRemoteToJson(ZayavkaRemote instance) =>
       'manager_name': instance.manager_name,
       'manager_number': instance.manager_number,
       'service': instance.service,
-      'avtomobili': instance.avtomobili,
-      'events': instance.events,
+      'lat': instance.lat,
+      'lng': instance.lng,
     };

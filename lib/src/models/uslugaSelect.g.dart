@@ -61,10 +61,14 @@ extension UslugaSelectRelationshipGraphNodeX
 UslugaSelect _$UslugaSelectFromJson(Map<String, dynamic> json) => UslugaSelect(
       id: json['id'] as String?,
       title: json['title'] as String?,
+      code: json['code'] as String?,
+      prioritet: json['prioritet'] as String?,
     );
 
 Map<String, dynamic> _$UslugaSelectToJson(UslugaSelect instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
+      'code': instance.code,
+      'prioritet': instance.prioritet,
     };
