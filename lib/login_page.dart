@@ -1,6 +1,7 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/send_zayavka_to_calendar.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:fluttsec/src/remote/get_token_from_server.dart';
@@ -36,6 +37,7 @@ class LoginPage extends HookConsumerWidget {
         ),
         ElevatedButton(
           onPressed: () async {
+            if (!await checkConnection()) return;
             token.value = await getTokenFromServer();
             var mytoken = token.value;
             String t = loginController.text;
@@ -51,13 +53,31 @@ class LoginPage extends HookConsumerWidget {
                 for (ZayavkaRemote z in zs) {
                   sendZayavkaToCalendar(z, getLocation('UTC'), myCal);
                 }
-                
-                 FirebaseMessaging.instance.getToken().then((value) {
-  String? token = value;
-  updateUser(user.value, token!, mytoken);
-});
+
+                FirebaseMessaging.instance.getToken().then((value) {
+                  String? token = value;
+                  updateUser(user.value, token!, mytoken);
+                });
                 context.go(MyZayavkiPage.routeName);
+              } else {
+                Fluttertoast.showToast(
+                    msg: "Не правильный логин/пароль",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
               }
+            }else{
+              Fluttertoast.showToast(
+                    msg: "Введите логин/пароль логин/пароль",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.red,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
             }
           },
           child: const Text('Войти'),

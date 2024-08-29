@@ -69,6 +69,7 @@ extension UslugaRelationshipGraphNodeX on RelationshipGraphNode<Usluga> {
 Usluga _$UslugaFromJson(Map<String, dynamic> json) => Usluga(
       id: json['id'] as String?,
       title: json['title'] as String?,
+      code: json['code'] as String?,
       avtomobil: BelongsTo<AvtomobilRemote>.fromJson(
           json['avtomobil'] as Map<String, dynamic>),
     );
@@ -76,5 +77,6 @@ Usluga _$UslugaFromJson(Map<String, dynamic> json) => Usluga(
 Map<String, dynamic> _$UslugaToJson(Usluga instance) => <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
+      'code': instance.code,
       'avtomobil': instance.avtomobil,
     };

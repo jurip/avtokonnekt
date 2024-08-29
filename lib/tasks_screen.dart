@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:device_calendar/device_calendar.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/main.dart';
+import 'package:intl/intl.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/remote/save_with_photos.dart';
@@ -31,6 +33,7 @@ class TasksScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+<<<<<<< HEAD
     useEffect(() {
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         ZayavkaRemote z = ZayavkaRemote(message.data["id"],
@@ -48,6 +51,8 @@ class TasksScreen extends HookConsumerWidget {
       return null;
     });
 
+=======
+>>>>>>> 3e1287e3a4deac239124337294a683c2956743ed
     return ref.watch(repositoryInitializerProvider).when(
         error: (error, _) => Text(error.toString()),
         loading: () => const CircularProgressIndicator(),
@@ -70,7 +75,7 @@ class TasksScreen extends HookConsumerWidget {
                   for (final duty in stateDuty.model)
                     Text(
                       '${duty.fio} - ${duty.status}',
-                      style: TextStyle(fontSize: 20),
+                      style: TextStyle(fontSize: 25),
                     ),
                   ElevatedButton(
                     child: const Text('выйти'),
@@ -81,7 +86,8 @@ class TasksScreen extends HookConsumerWidget {
                   ),
                   for (final zayavka in stateLocal.model)
                     ExpansionTile(
-                        title: Text('${zayavka.nomer}'),
+                        title: Text('${zayavka.nomer}',
+                            style: TextStyle(fontSize: 23)),
                         children: <Widget>[
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -102,35 +108,70 @@ class TasksScreen extends HookConsumerWidget {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                  '${zayavka.nachalo}\n${zayavka.client}'),
+                                              if (zayavka.nachalo != null)
+                                                Text(
+                                                    '${DateFormat('MM.dd.yy – kk:mm').format(zayavka.nachalo!)}',
+                                                    style: TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                              Text('${zayavka.client}'),
                                               GestureDetector(
-                                                child: Text(
-                                                  '${zayavka.adres}',
-                                                ),
+                                                child: Text('${zayavka.adres}',
+                                                    style: TextStyle(
+                                                        fontSize: 23)),
                                                 onTap: () =>
                                                     MapsLauncher.launchQuery(
                                                         zayavka.adres!),
                                               ),
+<<<<<<< HEAD
                                               if(zayavka.lat!=null&&zayavka.lng!=null)
                                                GestureDetector(
                                                 child: Icon(Icons.navigation),
                                                 onTap: () =>  MapsLauncher.launchCoordinates(double.parse( zayavka.lat!), double.parse( zayavka.lng!)),
                                               ),
+=======
+                                              ElevatedButton(
+                                                  child: const Icon(
+                                                      Icons.navigation),
+                                                  onPressed: () {
+                                                    if (zayavka.lat != "" &&
+                                                        zayavka.lng != "")
+                                                      MapsLauncher
+                                                          .launchCoordinates(
+                                                              double.parse(
+                                                                  zayavka.lat!),
+                                                              double.parse(
+                                                                  zayavka
+                                                                      .lng!));
+                                                    else
+                                                      MapsLauncher.launchQuery(
+                                                          zayavka.adres!);
+                                                  }),
+>>>>>>> 3e1287e3a4deac239124337294a683c2956743ed
                                               GestureDetector(
                                                 child: Text(
-                                                  '${zayavka.contact_number}',
-                                                ),
+                                                    '${zayavka.contact_number}',
+                                                    style: TextStyle(
+                                                        fontSize: 23)),
                                                 onTap: () => launchUrlString(
                                                     "tel://${zayavka.contact_number}"),
                                               ),
-                                              GestureDetector(
-                                                child: Icon(Icons.phone),
-                                                onTap: () => launchUrlString(
+                                              ElevatedButton(
+                                                child: const Icon(Icons.phone),
+                                                onPressed: () => launchUrlString(
                                                     "tel://${zayavka.contact_number}"),
                                               ),
-                                              Text(
-                                                  '${zayavka.contact_name}\n${zayavka.message} '),
+                                              Text('${zayavka.contact_name}',
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                              Text('${zayavka.message} ',
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                          FontWeight.w500)),
                                             ])),
                                     ExpansionTile(
                                         title: Text('Автомобили'),
@@ -163,14 +204,17 @@ class TasksScreen extends HookConsumerWidget {
                                                       onPressed: avto.status !=
                                                               "NOVAYA"
                                                           ? null
-                                                          : () async {
+                                                          : () {
                                                               checkConnection();
-                                                              bool ok =
-                                                                  await saveWithPhotos(
+                                                              bool ok = true;
+                                                              Future<bool>
+                                                                  resultOfSave =
+                                                                  saveWithPhotos(
                                                                       avto,
                                                                       ref,
                                                                       token
                                                                           .value);
+<<<<<<< HEAD
                                                               if (ok) {
                                                                 avto.status =
                                                                     "GOTOWAYA";
@@ -218,6 +262,27 @@ class TasksScreen extends HookConsumerWidget {
                                                                     fontSize:
                                                                         16.0);
                                                               }
+=======
+                                                              resultOfSave.then(
+                                                                (value) {
+                                                                  if (value) {
+                                                                    avto.status =
+                                                                        "GOTOWAYA";
+                                                                    avto.saveLocal();
+                                                                    zayavka
+                                                                        .saveLocal();
+                                                                    infoToast(
+                                                                        "Сохранено в системе");
+                                                                  } else {
+                                                                    infoToast(
+                                                                        "Ошибка при сохранении в системе");
+                                                                  }
+                                                                },
+                                                              );
+
+                                                              infoToast(
+                                                                  "Отправлено");
+>>>>>>> 3e1287e3a4deac239124337294a683c2956743ed
                                                             },
                                                       child:
                                                           const Text("готово")),
@@ -227,6 +292,14 @@ class TasksScreen extends HookConsumerWidget {
                                                   ),
                                                   const SizedBox(width: 8),
                                                   Text(avto.marka ?? "-"),
+                                                  ElevatedButton(
+                                                      onPressed: () =>
+                                                          showDeleteAlertAvto(
+                                                              context,
+                                                              zayavka,
+                                                              avto),
+                                                      child: const Icon(
+                                                          Icons.delete)),
                                                   ElevatedButton(
                                                     style: ButtonStyle(
                                                       backgroundColor:
@@ -239,10 +312,11 @@ class TasksScreen extends HookConsumerWidget {
                                                             "NOVAYA"
                                                         ? null
                                                         : () {
-                                                            addLocalFiles(
+                                                            addFotos(
                                                                 zayavka, avto);
                                                           },
                                                   ),
+<<<<<<< HEAD
                                                   CarouselSlider(
                                                     options: CarouselOptions(
                                                         height: 200.0),
@@ -262,7 +336,70 @@ class TasksScreen extends HookConsumerWidget {
                                                               height: 180,
                                                             ))
                                                     ],
+=======
+                                                  ElevatedButton(
+                                                    style: ButtonStyle(
+                                                      backgroundColor:
+                                                          WidgetStateProperty
+                                                              .all<Color>(Colors
+                                                                  .blue), // Change button color
+                                                    ),
+                                                    child: const Text('камера'),
+                                                    onPressed: avto.status !=
+                                                            "NOVAYA"
+                                                        ? null
+                                                        : () {
+                                                            addFoto(
+                                                                zayavka, avto);
+                                                          },
+>>>>>>> 3e1287e3a4deac239124337294a683c2956743ed
                                                   ),
+                                                  CarouselSlider(
+                                                      options: CarouselOptions(
+                                                          height: 230.0),
+                                                      items: [
+                                                        for (Foto foto in avto
+                                                            .fotos
+                                                            .toList())
+                                                          Stack(
+                                                              children: <Widget>[
+                                                                ClipRRect(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            8.0),
+                                                                    child:
+                                                                        Image(
+                                                                      image: FileImage(
+                                                                          File(foto
+                                                                              .fileLocal!)),
+                                                                      height:
+                                                                          180,
+                                                                    )),
+                                                                Positioned(
+                                                                    right: -2,
+                                                                    top: -9,
+                                                                    child:
+                                                                        IconButton(
+                                                                      icon:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .cancel,
+                                                                        color: Colors
+                                                                            .black
+                                                                            .withOpacity(0.5),
+                                                                        size:
+                                                                            50,
+                                                                      ),
+                                                                      onPressed:
+                                                                          () {
+                                                                        foto.deleteLocal();
+                                                                        avto.saveLocal();
+                                                                        zayavka
+                                                                            .saveLocal();
+                                                                      },
+                                                                    ))
+                                                              ])
+                                                      ]),
                                                   ElevatedButton(
                                                     style: ButtonStyle(
                                                       backgroundColor:
@@ -271,6 +408,7 @@ class TasksScreen extends HookConsumerWidget {
                                                                   .blue), // Change button color
                                                     ),
                                                     child: const Text('услуга'),
+<<<<<<< HEAD
                                                     onPressed: avto.status !=
                                                             "NOVAYA"
                                                         ? null
@@ -301,22 +439,54 @@ class TasksScreen extends HookConsumerWidget {
                                                             }
 
                                                           },
+=======
+                                                    onPressed:
+                                                        avto.status != "NOVAYA"
+                                                            ? null
+                                                            : () async {
+                                                                UslugaSelect?
+                                                                    result =
+                                                                    await Navigator
+                                                                        .push(
+                                                                  context,
+                                                                  // Create the SelectionScreen in the next step.
+                                                                  MaterialPageRoute(
+                                                                      builder: (context) =>
+                                                                          UslugaSelectScreen(
+                                                                              avto: avto)),
+                                                                );
+                                                                zayavka
+                                                                    .saveLocal();
+                                                              },
+>>>>>>> 3e1287e3a4deac239124337294a683c2956743ed
                                                   ),
                                                   for (Usluga usluga in avto
                                                       .performance_service
                                                       .toList())
-                                                    ElevatedButton(
-                                                      onPressed: () {
-                                                        usluga.deleteLocal();
-                                                        avto.saveLocal();
-                                                        zayavka.saveLocal();
-                                                      },
-                                                      child: Text(
-                                                        '${usluga.title}',
-                                                        overflow:
-                                                            TextOverflow.fade,
-                                                        softWrap: false,
-                                                      ),
+                                                    Row(
+                                                      children: [
+                                                        Flexible(
+                                                          child: Text(
+                                                            style: TextStyle(
+                                                                fontSize: 23),
+                                                            '${usluga.title}',
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .fade,
+                                                            softWrap: false,
+                                                          ),
+                                                        ),
+                                                        ElevatedButton(
+                                                            onPressed: () {
+                                                              usluga
+                                                                  .deleteLocal();
+                                                              avto.saveLocal();
+                                                              zayavka
+                                                                  .saveLocal();
+                                                            },
+                                                            child: Icon(
+                                                                Icons.delete))
+                                                      ],
                                                     ),
                                                   ElevatedButton(
                                                     style: ButtonStyle(
@@ -358,20 +528,31 @@ class TasksScreen extends HookConsumerWidget {
                                                   ),
                                                   for (Oborudovanie oborudovanie
                                                       in avto.barcode.toList())
-                                                    ElevatedButton(
-                                                      onPressed: () {
-                                                        oborudovanie
-                                                            .deleteLocal();
-                                                        avto.saveLocal();
-                                                        zayavka.saveLocal();
-                                                      },
-                                                      child: Text(
-                                                        '${oborudovanie.code}',
-                                                        overflow:
-                                                            TextOverflow.fade,
-                                                        softWrap: false,
-                                                      ),
-                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Flexible(
+                                                          child: Text(
+                                                            style: TextStyle(
+                                                                fontSize: 23),
+                                                            '${oborudovanie.code}',
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .fade,
+                                                            softWrap: false,
+                                                          ),
+                                                        ),
+                                                        ElevatedButton(
+                                                            onPressed: () {
+                                                              oborudovanie
+                                                                  .deleteLocal();
+                                                              avto.saveLocal();
+                                                              zayavka
+                                                                  .saveLocal();
+                                                            },
+                                                            child: Icon(
+                                                                Icons.delete))
+                                                      ],
+                                                    )
                                                 ])
                                         ])
                                   ],
@@ -383,6 +564,17 @@ class TasksScreen extends HookConsumerWidget {
                 ],
               ));
         });
+  }
+
+  void infoToast(String text) {
+    Fluttertoast.showToast(
+        msg: text,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Color.fromARGB(255, 54, 155, 244),
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   void novoeAvto(context, ZayavkaRemote zayavka) {
@@ -507,9 +699,40 @@ class TasksScreen extends HookConsumerWidget {
     );
   }
 
+  void showDeleteAlertAvto(
+      context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text('Удаление автомобиля'),
+          content: ListView(
+            shrinkWrap: true,
+            children: [Text('Уверены что хотите удалить авто?')],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                avto.deleteLocal();
+                zayavka.saveLocal();
+                Navigator.pop(context);
+              },
+              child: Text('Удалить'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
 
+<<<<<<< HEAD
   addLocalFiles(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
     final ImagePicker _picker = ImagePicker();
 
@@ -518,6 +741,16 @@ class TasksScreen extends HookConsumerWidget {
     if (!pickedFileList.isEmpty) {
       for (var file in pickedFileList) {
         Foto f = Foto(fileLocal: file.path, avtomobil: BelongsTo(avto));
+=======
+  addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
+    final ImagePicker _picker = ImagePicker();
+
+    var pickedFiles = await _picker.pickMultiImage(imageQuality: 30);
+
+    if (!pickedFiles.isEmpty) {
+      for (var pickedFile in pickedFiles) {
+        Foto f = Foto(fileLocal: pickedFile.path, avtomobil: BelongsTo(avto));
+>>>>>>> 3e1287e3a4deac239124337294a683c2956743ed
         avto.fotos.add(f);
         f.saveLocal();
       }
@@ -526,6 +759,26 @@ class TasksScreen extends HookConsumerWidget {
     } else {
       final snackBar = SnackBar(
         content: const Text('файлы не добавлены'),
+      );
+    }
+  }
+
+  addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
+    final ImagePicker _picker = ImagePicker();
+
+    var pickedFile =
+        await _picker.pickImage(source: ImageSource.camera, imageQuality: 30);
+
+    if (pickedFile != null) {
+      Foto f = Foto(fileLocal: pickedFile.path, avtomobil: BelongsTo(avto));
+      avto.fotos.add(f);
+      f.saveLocal();
+
+      avto.saveLocal();
+      zayavka.saveLocal();
+    } else {
+      final snackBar = SnackBar(
+        content: const Text('фото не добавлено'),
       );
     }
   }

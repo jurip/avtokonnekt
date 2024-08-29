@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/checki_page.dart';
@@ -8,9 +9,12 @@ import 'package:fluttsec/login_page.dart';
 import 'package:fluttsec/my_zayavki_page.dart';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttsec/send_zayavka_to_calendar.dart';
+import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -27,9 +31,21 @@ late final ValueNotifier<String> token;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initLocalStorage();
-
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  print('User granted permission: ${settings.authorizationStatus}');
 
   // Set the background messaging handler early on, as a named top-level function
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -39,6 +55,7 @@ void main() async {
   }
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    //newZayavkaFromMessage(message);
     if (kDebugMode) {
       print('Handling a foreground message: ${message.messageId}');
       print('Message data: ${message.data}');
@@ -77,10 +94,22 @@ void main() async {
 
   runApp(
     ProviderScope(
-      child: MyHomePage(),
+      child: AppMy(),
       overrides: [configureRepositoryLocalStorage()],
     ),
   );
+}
+class AppMy extends HookConsumerWidget{
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ref.watch(repositoryInitializerProvider).when(
+        error: (error, _) => Text(error.toString()),
+        loading: () => const CircularProgressIndicator(),
+        data: (_) {
+          return MyHomePage();
+        });
+  }
+  
 }
 
 final _messageStreamController = BehaviorSubject<RemoteMessage>();
@@ -89,6 +118,7 @@ String? myCal;
 // TODO: Define the background message handler
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
+  //newZayavkaFromMessage(message);
   if (kDebugMode) {
     print("Handling a background message: ${message.messageId}");
     print('Message data: ${message.data}');
@@ -156,7 +186,7 @@ void showFlutterNotification(RemoteMessage message) {
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   String _lastMessage = "";
 
   _MyHomePageState() {
@@ -167,11 +197,64 @@ class _MyHomePageState extends State<MyHomePage> {
               '\nTitle=${message.notification?.title},'
               '\nBody=${message.notification?.body},'
               '\nData=${message.data}';
+              newZayavkaFromMessage(message);
         } else {
           _lastMessage = 'Received a data message: ${message.data}';
         }
       });
     });
+  }
+
+  // It is assumed that all messages contain a data field with the key 'type'
+  Future<void> setupInteractedMessage() async {
+    // Get any messages which caused the application to open from
+    // a terminated state.
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+
+    // If the message also contains a data property with a "type" of "chat",
+    // navigate to a chat screen
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
+
+    // Also handle any interaction when the app is in the background via a
+    // Stream listener
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+
+  void _handleMessage(RemoteMessage message) {
+    if (message.data['id'] != null) {
+      newZayavkaFromMessage(message);
+     
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Run code required to handle interacted messages in an async function
+    // as initState() must not be async
+    setupInteractedMessage();
+     WidgetsBinding.instance.addObserver(this);
+  }
+   @override
+  void dispose() {
+    //don't forget to dispose of it when not needed anymore
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+   late AppLifecycleState _lastState;    
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed && _lastState == AppLifecycleState.paused) {
+      //now you know that your app went to the background and is back to the foreground
+      
+    }
+    _lastState = state; //register the last state. When you get "paused" it means the app went to the background.
   }
 
   @override
@@ -236,6 +319,43 @@ Future<void> _launchUrl() async {
   if (!await launchUrl(_url)) {
     throw Exception('Could not launch $_url');
   }
+}
+
+void newZayavkaFromMessage(RemoteMessage message) {
+  var id = message.data["id"];
+  var nomer = message.data["nomer"];
+  var mes = message.data["message"];
+  var adres = message.data["adres"];
+  var nachalo = message.data["nachalo"];
+  var format = new DateFormat("yyyy-MM-dd hh:mm:ss");
+  DateTime nachalo_date = format.parse(nachalo);
+  DateTime end_date_time = format.parse(message.data["end_date_time"]);
+  var comment_address = message.data["comment_address"];
+  var service = message.data["service"];
+  var client = message.data["client"];
+  var contact_name = message.data["contact_name"];
+  var contact_number = message.data["contact_number"];
+  var manager_name = message.data["manager_name"];
+  var manager_number = message.data["manager_number"];
+  var lat = message.data["lat"];
+  var lng = message.data["lng"];
+  ZayavkaRemote z = ZayavkaRemote(id,
+      adres: adres,
+      client: client,
+      comment_address: comment_address,
+      contact_name: contact_name,
+      contact_number: contact_number,
+      nachalo: nachalo_date,
+      end_date_time: end_date_time,
+      service: service,
+      manager_name: manager_name,
+      manager_number: manager_number,
+      nomer: nomer,
+      message: mes,
+      lat: lat,
+      lng: lng);
+  z.saveLocal();
+  sendZayavkaToCalendar(z, getLocation('UTC'), myCal);
 }
 
 Future<bool> checkConnection() async {

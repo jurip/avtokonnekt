@@ -12,8 +12,12 @@ part 'uslugaSelect.g.dart';
 class UslugaSelect extends DataModel<UslugaSelect> {
   @override
   final String? id;
-  String? title;
-  UslugaSelect({this.id, this.title});
+  final String? title;
+  final String? code;
+  final String? prioritet;
+  UslugaSelect({this.id, required this.title, required this.code, required this.prioritet});
+ 
+
 
 }
 mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
