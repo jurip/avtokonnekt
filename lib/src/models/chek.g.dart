@@ -71,6 +71,7 @@ Chek _$ChekFromJson(Map<String, dynamic> json) => Chek(
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
       username: json['username'] as String?,
+      status: json['status'] as String? ?? "NOVAYA",
     );
 
 Map<String, dynamic> _$ChekToJson(Chek instance) => <String, dynamic>{
@@ -78,4 +79,5 @@ Map<String, dynamic> _$ChekToJson(Chek instance) => <String, dynamic>{
       'username': instance.username,
       'comment': instance.comment,
       'date': instance.date?.toIso8601String(),
+      'status': instance.status,
     };

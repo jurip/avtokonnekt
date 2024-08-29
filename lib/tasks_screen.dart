@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:device_calendar/device_calendar.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:fluttsec/usluga_select_screen.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -42,21 +44,20 @@ class TasksScreen extends HookConsumerWidget {
           print('Message notification: ${message.notification?.body}');
         }
       });
+
       return null;
     });
 
-    final searchController = useTextEditingController(text: '');
     return ref.watch(repositoryInitializerProvider).when(
         error: (error, _) => Text(error.toString()),
         loading: () => const CircularProgressIndicator(),
         data: (_) {
           final stateLocal = ref.zayavkaRemotes.watchAll();
           final stateDuty = ref.duties.watchAll();
-
+       
           return RefreshIndicator(
               key: _refreshIndicatorKey,
               onRefresh: () async {
-                await ref.uslugaSelects.findAll();
                 await ref.duties.findAll();
                 List<ZayavkaRemote> zs = await ref.zayavkaRemotes.findAll();
                 for (ZayavkaRemote z in zs) {
@@ -110,6 +111,11 @@ class TasksScreen extends HookConsumerWidget {
                                                 onTap: () =>
                                                     MapsLauncher.launchQuery(
                                                         zayavka.adres!),
+                                              ),
+                                              if(zayavka.lat!=null&&zayavka.lng!=null)
+                                               GestureDetector(
+                                                child: Icon(Icons.navigation),
+                                                onTap: () =>  MapsLauncher.launchCoordinates(double.parse( zayavka.lat!), double.parse( zayavka.lng!)),
                                               ),
                                               GestureDetector(
                                                 child: Text(
@@ -171,7 +177,7 @@ class TasksScreen extends HookConsumerWidget {
                                                                 avto.saveLocal();
                                                                 zayavka
                                                                     .saveLocal();
-                                                                    Fluttertoast.showToast(
+                                                                Fluttertoast.showToast(
                                                                     msg:
                                                                         "Отправлено",
                                                                     toastLength:
@@ -182,13 +188,16 @@ class TasksScreen extends HookConsumerWidget {
                                                                     timeInSecForIosWeb:
                                                                         1,
                                                                     backgroundColor:
-                                                                        Color.fromARGB(255, 54, 155, 244),
+                                                                        Color.fromARGB(
+                                                                            255,
+                                                                            54,
+                                                                            155,
+                                                                            244),
                                                                     textColor:
                                                                         Colors
                                                                             .white,
                                                                     fontSize:
                                                                         16.0);
-                                                              
                                                               } else {
                                                                 Fluttertoast.showToast(
                                                                     msg:
@@ -234,11 +243,10 @@ class TasksScreen extends HookConsumerWidget {
                                                                 zayavka, avto);
                                                           },
                                                   ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
-                                                    children: [
+                                                  CarouselSlider(
+                                                    options: CarouselOptions(
+                                                        height: 200.0),
+                                                    items: [
                                                       for (Foto foto in avto
                                                           .fotos
                                                           .toList())
@@ -251,7 +259,7 @@ class TasksScreen extends HookConsumerWidget {
                                                               image: FileImage(
                                                                   File(foto
                                                                       .fileLocal!)),
-                                                              width: 80,
+                                                              height: 180,
                                                             ))
                                                     ],
                                                   ),
@@ -263,16 +271,36 @@ class TasksScreen extends HookConsumerWidget {
                                                                   .blue), // Change button color
                                                     ),
                                                     child: const Text('услуга'),
-                                                    onPressed:
-                                                        avto.status != "NOVAYA"
-                                                            ? null
-                                                            : () {
-                                                                showUslugaSelect(
-                                                                    context,
-                                                                    zayavka,
-                                                                    avto,
-                                                                    ref);
-                                                              },
+                                                    onPressed: avto.status !=
+                                                            "NOVAYA"
+                                                        ? null
+                                                        : () async {
+                                                            UslugaSelect? result =
+                                                                await Navigator
+                                                                    .push(
+                                                              context,
+                                                              // Create the SelectionScreen in the next step.
+                                                              MaterialPageRoute(
+                                                                  builder:
+                                                                      (context) =>
+                                                                          UslugaSelectScreen()),
+                                                            );
+                                                            if(result!=null){
+                                                            Usluga newU = Usluga(
+                                                                avtomobil:
+                                                                    BelongsTo(
+                                                                        avto),
+                                                                title: result
+                                                                    .title
+                                                                    .toString());
+                                                            avto.performance_service
+                                                                .add(newU);
+                                                            newU.saveLocal();
+                                                            avto.saveLocal();
+                                                            zayavka.saveLocal();
+                                                            }
+
+                                                          },
                                                   ),
                                                   for (Usluga usluga in avto
                                                       .performance_service
@@ -405,50 +433,6 @@ class TasksScreen extends HookConsumerWidget {
     );
   }
 
-  void showUslugaSelect(
-      context, ZayavkaRemote zayavka, AvtomobilRemote avto, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        TextEditingController search = TextEditingController();
-        final stateUslugas = ref.uslugaSelects
-            .watchAll(remote: false, params: {'text': search.text});
-
-        return AlertDialog(
-          title: Text('Выбрать услугу'),
-          content: ListView(
-            shrinkWrap: true,
-            children: [
-              TextFormField(
-                controller: search,
-                decoration: InputDecoration(hintText: 'фильтр'),
-              ),
-              for (UslugaSelect u in stateUslugas.model.toList(growable: true))
-                ElevatedButton(
-                  child: Text(u.title.toString()),
-                  onPressed: () {
-                    Usluga newU = Usluga(
-                        avtomobil: BelongsTo(avto), title: u.title.toString());
-                    avto.performance_service.add(newU);
-                    newU.saveLocal();
-                    avto.saveLocal();
-                    zayavka.saveLocal();
-                    Navigator.pop(context);
-                  },
-                ),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Отмена'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void showBarcode(context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
     showDialog(
       context: context,
@@ -527,12 +511,13 @@ class TasksScreen extends HookConsumerWidget {
       GlobalKey<RefreshIndicatorState>();
 
   addLocalFiles(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
-    var result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    final ImagePicker _picker = ImagePicker();
 
-    if (result != null) {
-      List<String?> files = result.paths.map((path) => path!).toList();
-      for (var file in files) {
-        Foto f = Foto(fileLocal: file, avtomobil: BelongsTo(avto));
+    final List<XFile> pickedFileList = await _picker.pickMultiImage();
+
+    if (!pickedFileList.isEmpty) {
+      for (var file in pickedFileList) {
+        Foto f = Foto(fileLocal: file.path, avtomobil: BelongsTo(avto));
         avto.fotos.add(f);
         f.saveLocal();
       }
