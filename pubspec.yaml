@@ -66,3 +66,11 @@ flutter:
   assets:
     # Add assets from the images directory to the application.
     - assets/images/
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
+        - asset: fonts/Roboto-Italic.ttf
+          style: italic
+        - asset: fonts/Roboto-Bold.ttf
+          weight: 700

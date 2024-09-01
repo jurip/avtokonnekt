@@ -38,6 +38,13 @@ mixin $AvtomobilRemoteLocalAdapter on LocalAdapter<AvtomobilRemote> {
       type: 'oborudovanies',
       kind: 'HasMany',
       instance: (_) => (_ as AvtomobilRemote).barcode,
+    ),
+    'oborudovanieFotos': RelationshipMeta<OborudovanieFoto>(
+      name: 'oborudovanieFotos',
+      inverseName: 'avtomobil',
+      type: 'oborudovanieFotos',
+      kind: 'HasMany',
+      instance: (_) => (_ as AvtomobilRemote).oborudovanieFotos,
     )
   };
 
@@ -65,7 +72,7 @@ class $AvtomobilRemoteHiveLocalAdapter = HiveLocalAdapter<AvtomobilRemote>
     with $AvtomobilRemoteLocalAdapter;
 
 class $AvtomobilRemoteRemoteAdapter = RemoteAdapter<AvtomobilRemote>
-    with NothingMixin;
+    with JsonServerAdapter<AvtomobilRemote>;
 
 final internalAvtomobilRemotesRemoteAdapterProvider =
     Provider<RemoteAdapter<AvtomobilRemote>>((ref) =>
@@ -76,7 +83,10 @@ final avtomobilRemotesRepositoryProvider =
     Provider<Repository<AvtomobilRemote>>(
         (ref) => Repository<AvtomobilRemote>(ref));
 
-extension AvtomobilRemoteDataRepositoryX on Repository<AvtomobilRemote> {}
+extension AvtomobilRemoteDataRepositoryX on Repository<AvtomobilRemote> {
+  JsonServerAdapter<AvtomobilRemote> get jsonServerAdapter =>
+      remoteAdapter as JsonServerAdapter<AvtomobilRemote>;
+}
 
 extension AvtomobilRemoteRelationshipGraphNodeX
     on RelationshipGraphNode<AvtomobilRemote> {
@@ -110,6 +120,14 @@ extension AvtomobilRemoteRelationshipGraphNodeX
     return meta.clone(
         parent: this is RelationshipMeta ? this as RelationshipMeta : null);
   }
+
+  RelationshipGraphNode<OborudovanieFoto> get oborudovanieFotos {
+    final meta = $AvtomobilRemoteLocalAdapter
+            ._kAvtomobilRemoteRelationshipMetas['oborudovanieFotos']
+        as RelationshipMeta<OborudovanieFoto>;
+    return meta.clone(
+        parent: this is RelationshipMeta ? this as RelationshipMeta : null);
+  }
 }
 
 // **************************************************************************
@@ -119,13 +137,16 @@ extension AvtomobilRemoteRelationshipGraphNodeX
 AvtomobilRemote _$AvtomobilRemoteFromJson(Map<String, dynamic> json) =>
     AvtomobilRemote(
       id: json['id'] as String?,
-      zayavka: BelongsTo<ZayavkaRemote>.fromJson(
-          json['zayavka'] as Map<String, dynamic>),
       nomer: json['nomer'] as String?,
       marka: json['marka'] as String?,
+      nomerAG: json['nomerAG'] as String?,
       status: json['status'] as String?,
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
+      zayavka: json['zayavka'] == null
+          ? null
+          : BelongsTo<ZayavkaRemote>.fromJson(
+              json['zayavka'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$AvtomobilRemoteToJson(AvtomobilRemote instance) =>
@@ -133,6 +154,7 @@ Map<String, dynamic> _$AvtomobilRemoteToJson(AvtomobilRemote instance) =>
       'id': instance.id,
       'nomer': instance.nomer,
       'marka': instance.marka,
+      'nomerAG': instance.nomerAG,
       'date': instance.date?.toIso8601String(),
       'zayavka': instance.zayavka,
       'status': instance.status,

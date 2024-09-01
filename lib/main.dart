@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -5,12 +6,17 @@ import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/checki_page.dart';
+import 'package:fluttsec/cheki_screen.dart';
 import 'package:fluttsec/login_page.dart';
 import 'package:fluttsec/my_zayavki_page.dart';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttsec/send_zayavka_to_calendar.dart';
+import 'package:fluttsec/settings_page.dart';
+import 'package:fluttsec/settings_screen.dart';
+import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
+import 'package:fluttsec/tasks_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -18,12 +24,14 @@ import 'package:intl/intl.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:uuid/uuid.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
 
-//const String site = "http://95.84.221.108:2222/";
-const String site = "http://89.111.173.110:8080/";
+const String site = "http://5.228.73.174:2222/";
+//const String site = "http://89.111.173.110:8080/";
+
 late final ValueNotifier<String> user;
 late final ValueNotifier<String> password;
 late final ValueNotifier<String> token;
@@ -260,7 +268,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      
       routerConfig: __router,
+      theme: ThemeData(fontFamily: 'Roboto'),
     );
   }
 }
@@ -269,6 +279,137 @@ class MyHomePage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _MyHomePageState();
 }
+
+class RootScreen extends StatelessWidget {
+  const RootScreen({super.key, required this.navigationShell});
+
+  /// Контейнер для навигационного бара.
+  final StatefulNavigationShell navigationShell;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: navigationShell,
+      bottomNavigationBar: 
+      BottomNavigationBar(
+        onTap: (value) async {
+          if (value == 0) {
+            _launchUrl();
+          } else if (value == 1) {
+            context.go('/zayavki');
+          }else if (value == 2) {
+            context.go('/cheki');
+          }else if (value == 3) {
+            context.go('/settings');
+          }
+        },
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month_outlined, color: Colors.black,),
+            label: 'Календарь',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_business_rounded,color: Colors.black,),
+            label: 'Заявки',
+          ),
+           BottomNavigationBarItem(
+            icon: Icon(Icons.local_post_office, color: Colors.black,),
+            label: 'Офис',
+          ),
+          
+        ],
+        currentIndex: 1,
+      ),
+    );
+  }
+
+  // Возвращает лист элементов для нижнего навигационного бара.
+  List<BottomNavigationBarItem> get _buildBottomNavBarItems => [
+        
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.favorite),
+          label: 'Заявки',
+        ),
+       
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Настройки',
+        ),
+         const BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Офис',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.note),
+          label: 'Календарь',
+        ),
+
+      ];
+}
+
+
+
+final router = GoRouter(
+  initialLocation: '/zayavki',
+  redirect: (context, state) {
+          final bool userAutheticated = user.value != '';
+
+          final bool onloginPage = state.fullPath == '/login';
+
+          if (!userAutheticated && !onloginPage) {
+            return '/login';
+          }
+          if (userAutheticated && onloginPage) {
+            return '/zayavki';
+          }
+          //you must include this. so if condition not meet, there is no redirect
+          return null;
+        },
+  
+  routes: <RouteBase>[
+    
+    // BottomNavigationBar
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) =>
+          RootScreen(navigationShell: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/zayavki',
+              builder: (context, state) => TasksScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/settings',
+              builder: (context, state) => SettingsScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/cheki',
+              builder: (context, state) => ChekiScreen(),
+            ),
+          ],
+        ),
+      ],
+    ),
+    GoRoute(
+            path: '/login',
+            builder: (BuildContext context, GoRouterState state) {
+              return LoginPage();
+            },
+          ),
+  ],
+  
+);
+
+
 
 final GoRouter __router = GoRouter(
   routes: <RouteBase>[
@@ -288,6 +429,12 @@ final GoRouter __router = GoRouter(
             path: 'cheki',
             builder: (BuildContext context, GoRouterState state) {
               return CheckiPage();
+            },
+          ),
+          GoRoute(
+            path: 'settings',
+            builder: (BuildContext context, GoRouterState state) {
+              return SettingsPage();
             },
           ),
           GoRoute(
@@ -339,7 +486,21 @@ void newZayavkaFromMessage(RemoteMessage message) {
   var manager_number = message.data["manager_number"];
   var lat = message.data["lat"];
   var lng = message.data["lng"];
-  ZayavkaRemote z = ZayavkaRemote(id,
+  Set<AvtomobilRemote> avs ={};
+  if(message.data["avtomobili"]!=null){
+  List avtomobili = jsonDecode(message.data["avtomobili"]);
+  for(var i in avtomobili){
+    var a = i["nomer_avto"];
+    var s =i["marka_avto"];
+    var ag = i["nomerAG"];
+    var aid = i["id"];
+   AvtomobilRemote ar = AvtomobilRemote(id:aid, nomer: a,marka: s,nomerAG: ag, status: "NOVAYA");
+    avs.add(ar);
+    ar.saveLocal();
+  }
+  }
+  ZayavkaRemote z = ZayavkaRemote(id:id,
+      avtomobili: avs.asHasMany,
       adres: adres,
       client: client,
       comment_address: comment_address,
@@ -354,7 +515,11 @@ void newZayavkaFromMessage(RemoteMessage message) {
       message: mes,
       lat: lat,
       lng: lng);
+  
+
   z.saveLocal();
+
+
   sendZayavkaToCalendar(z, getLocation('UTC'), myCal);
 }
 

@@ -4,6 +4,7 @@ import 'package:fluttsec/main.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/foto.dart';
 import 'package:fluttsec/src/models/oborudovanie.dart';
+import 'package:fluttsec/src/models/oborudovanieFoto.dart';
 import 'package:fluttsec/src/models/usluga.dart';
 
 Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
@@ -13,14 +14,20 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
   };
 
   headers.addAll({'Authorization': 'Bearer $mytoken'});
+  var aid = a.id;
   var marka = a.marka;
   var nomer = a.nomer;
+  var nomerAG = a.nomerAG;
   var date = DateTime.now().toIso8601String();
   var status = "VYPOLNENA";
-  var zayavkaId = a.zayavka.value?.id;
+  var zayavkaId = a.zayavka!.value?.id;
   var fotos = [];
+  var oborudovanieFotos = [];
   for (Foto f in a.fotos.toList()) {
     if (f.file != null) fotos.add({"file": f.file});
+  }
+  for (OborudovanieFoto f in a.oborudovanieFotos.toList()) {
+    if (f.file != null) oborudovanieFotos.add({"file": f.file});
   }
   var performance_service = [];
   for (Usluga f in a.performance_service.toList()) {
@@ -33,11 +40,14 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
 
   var data = json.encode({
     "avto": {
+      "id": aid,
       "zayavka": {"id": "$zayavkaId"},
       "marka": "$marka",
       "nomer": "$nomer",
+      "nomerAG": "$nomerAG",
       "date": "$date",
       "fotos": fotos,
+      "oborudovanieFotos": oborudovanieFotos,
       "barcode": barcode,
       "performance_service": performance_service,
       "status": status

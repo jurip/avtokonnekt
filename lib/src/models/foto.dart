@@ -14,8 +14,6 @@ class Foto extends DataModel<Foto> {
   final String? fileLocal;
   final BelongsTo<AvtomobilRemote> avtomobil;
   Foto({this.id,this.file, this.fileLocal, required this.avtomobil});
-  Foto addFile(String f) {
-    return Foto(id: this.id,file:f,fileLocal:  this.fileLocal,avtomobil:  this.avtomobil);
-  }
+ 
 }
 

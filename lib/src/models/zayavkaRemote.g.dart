@@ -91,7 +91,11 @@ extension ZayavkaRemoteRelationshipGraphNodeX
 
 ZayavkaRemote _$ZayavkaRemoteFromJson(Map<String, dynamic> json) =>
     ZayavkaRemote(
-      json['id'] as String?,
+      avtomobili: json['avtomobili'] == null
+          ? null
+          : HasMany<AvtomobilRemote>.fromJson(
+              json['avtomobili'] as Map<String, dynamic>),
+      id: json['id'] as String?,
       nomer: json['nomer'] as String?,
       nachalo: json['nachalo'] == null
           ? null
@@ -129,4 +133,5 @@ Map<String, dynamic> _$ZayavkaRemoteToJson(ZayavkaRemote instance) =>
       'service': instance.service,
       'lat': instance.lat,
       'lng': instance.lng,
+      'avtomobili': instance.avtomobili,
     };

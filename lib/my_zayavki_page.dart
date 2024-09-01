@@ -19,12 +19,24 @@ Future<void> _launchUrl() async {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: Center(child: TasksScreen()),
+      body: 
+      Container(
+        child: Center(child: TasksScreen()),
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/11.jpg"),
+            fit: BoxFit.fill,
+          ),
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 1,
         onTap: (value) async {
           if (value == 0) {
             _launchUrl();
           } else if (value == 1) {
+            context.go('/zayavki');
+          }else if (value == 2) {
             context.go('/cheki');
           }
         },
@@ -33,10 +45,14 @@ Future<void> _launchUrl() async {
             icon: Icon(Icons.edit_calendar_rounded),
             label: 'Календарь',
           ),
+           BottomNavigationBarItem(
+            icon: Icon(Icons.task),
+            label: 'Заявки',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.local_post_office_rounded),
             label: 'Офис',
-          ),
+          )
         ],
       ),
     );

@@ -5,6 +5,7 @@ import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/usluga.dart';
 import 'package:fluttsec/src/models/uslugaSelect.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class UslugaSelectScreen extends HookConsumerWidget {
@@ -29,8 +30,9 @@ class UslugaSelectScreen extends HookConsumerWidget {
                   .where(
                     (UslugaSelect element) {
                       String t = element.title!.toLowerCase().replaceAll(' ', '').replaceAll(' ', '');
-                      String s = searchController.value.text.toLowerCase().replaceAll(' ', '');
-                      bool r = t.contains(s);
+                      List<String> s = searchController.value.text.toLowerCase().split(' ');
+                      
+                      bool r = s.every((element) => t.contains(element));
                         return r;
                     }
                   )
@@ -42,7 +44,13 @@ class UslugaSelectScreen extends HookConsumerWidget {
           // TODO: implement build
           return Scaffold(
               appBar: AppBar(
-                title: const Text('Выберите услугу'),
+                title: Row(children: [ 
+                  Text('Выберите услугу'),
+                  Spacer(),
+                  IconButton(onPressed: () => context.pop(),
+                   icon: Icon(Icons.check))
+                  ]
+                ),
               ),
               body: Center(
                   child: ListView(
@@ -80,9 +88,9 @@ class UslugaSelectScreen extends HookConsumerWidget {
                               Usluga newu = Usluga(
                                   title: u.title,
                                   code: u.code,
-                                  avtomobil: BelongsTo(avto));
+                                  avtomobil: BelongsTo<AvtomobilRemote>(avto));
 
-                              avto.performance_service.add(newu);
+                              
                               newu.saveLocal();
 
                               selectedUslusas.value = [
@@ -90,6 +98,7 @@ class UslugaSelectScreen extends HookConsumerWidget {
                               ];
                             }
                             avto.saveLocal();
+                            
                           }),
                       title: Text('${u.title}',style: TextStyle(fontSize: 23)),
                     ),

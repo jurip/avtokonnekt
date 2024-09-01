@@ -7,6 +7,7 @@ import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/remote/save_chek_with_photos.dart';
 import 'package:fluttsec/src/models/chek.dart';
 import 'package:fluttsec/src/models/chekFoto.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ChekiScreen extends HookConsumerWidget {
@@ -61,7 +62,11 @@ class ChekiScreen extends HookConsumerWidget {
 
           return ListView(
             children: [
-             
+               Align(
+  alignment: Alignment.topRight,
+  child: IconButton(onPressed: () => context.go('/settings'), icon: Icon(Icons.settings)),
+                 
+),
               ElevatedButton(
                 child: const Text('Добавить отчет о покупках'),
                 onPressed: () {

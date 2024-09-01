@@ -12,10 +12,12 @@ import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/calendarEvent.dart';
 import 'package:fluttsec/src/models/chekFoto.dart';
 import 'package:fluttsec/src/models/chek.dart';
+import 'package:fluttsec/src/models/currentUser.dart';
 import 'package:fluttsec/src/models/duty.dart';
 import 'package:fluttsec/src/models/foto.dart';
 import 'package:fluttsec/src/models/myToken.dart';
 import 'package:fluttsec/src/models/myUser.dart';
+import 'package:fluttsec/src/models/oborudovanieFoto.dart';
 import 'package:fluttsec/src/models/oborudovanie.dart';
 import 'package:fluttsec/src/models/uslugaSelect.dart';
 import 'package:fluttsec/src/models/usluga.dart';
@@ -44,10 +46,12 @@ final repositoryProviders = <String, Provider<Repository<DataModelMixin>>>{
 'calendarEvents': calendarEventsRepositoryProvider,
 'chekFotos': chekFotosRepositoryProvider,
 'cheks': cheksRepositoryProvider,
+'currentUsers': currentUsersRepositoryProvider,
 'duties': dutiesRepositoryProvider,
 'fotos': fotosRepositoryProvider,
 'myTokens': myTokensRepositoryProvider,
 'myUsers': myUsersRepositoryProvider,
+'oborudovanieFotos': oborudovanieFotosRepositoryProvider,
 'oborudovanies': oborudovaniesRepositoryProvider,
 'uslugaSelects': uslugaSelectsRepositoryProvider,
 'uslugas': uslugasRepositoryProvider,
@@ -60,16 +64,18 @@ final repositoryInitializerProvider =
     DataHelpers.setInternalType<CalendarEvent>('calendarEvents');
     DataHelpers.setInternalType<ChekFoto>('chekFotos');
     DataHelpers.setInternalType<Chek>('cheks');
+    DataHelpers.setInternalType<CurrentUser>('currentUsers');
     DataHelpers.setInternalType<Duty>('duties');
     DataHelpers.setInternalType<Foto>('fotos');
     DataHelpers.setInternalType<MyToken>('myTokens');
     DataHelpers.setInternalType<MyUser>('myUsers');
+    DataHelpers.setInternalType<OborudovanieFoto>('oborudovanieFotos');
     DataHelpers.setInternalType<Oborudovanie>('oborudovanies');
     DataHelpers.setInternalType<UslugaSelect>('uslugaSelects');
     DataHelpers.setInternalType<Usluga>('uslugas');
     DataHelpers.setInternalType<ZayavkaRemote>('zayavkaRemotes');
-    final adapters = <String, RemoteAdapter>{'avtomobilRemotes': ref.watch(internalAvtomobilRemotesRemoteAdapterProvider), 'calendarEvents': ref.watch(internalCalendarEventsRemoteAdapterProvider), 'chekFotos': ref.watch(internalChekFotosRemoteAdapterProvider), 'cheks': ref.watch(internalCheksRemoteAdapterProvider), 'duties': ref.watch(internalDutiesRemoteAdapterProvider), 'fotos': ref.watch(internalFotosRemoteAdapterProvider), 'myTokens': ref.watch(internalMyTokensRemoteAdapterProvider), 'myUsers': ref.watch(internalMyUsersRemoteAdapterProvider), 'oborudovanies': ref.watch(internalOborudovaniesRemoteAdapterProvider), 'uslugaSelects': ref.watch(internalUslugaSelectsRemoteAdapterProvider), 'uslugas': ref.watch(internalUslugasRemoteAdapterProvider), 'zayavkaRemotes': ref.watch(internalZayavkaRemotesRemoteAdapterProvider)};
-    final remotes = <String, bool>{'avtomobilRemotes': true, 'calendarEvents': true, 'chekFotos': true, 'cheks': true, 'duties': true, 'fotos': true, 'myTokens': true, 'myUsers': true, 'oborudovanies': true, 'uslugaSelects': true, 'uslugas': true, 'zayavkaRemotes': true};
+    final adapters = <String, RemoteAdapter>{'avtomobilRemotes': ref.watch(internalAvtomobilRemotesRemoteAdapterProvider), 'calendarEvents': ref.watch(internalCalendarEventsRemoteAdapterProvider), 'chekFotos': ref.watch(internalChekFotosRemoteAdapterProvider), 'cheks': ref.watch(internalCheksRemoteAdapterProvider), 'currentUsers': ref.watch(internalCurrentUsersRemoteAdapterProvider), 'duties': ref.watch(internalDutiesRemoteAdapterProvider), 'fotos': ref.watch(internalFotosRemoteAdapterProvider), 'myTokens': ref.watch(internalMyTokensRemoteAdapterProvider), 'myUsers': ref.watch(internalMyUsersRemoteAdapterProvider), 'oborudovanieFotos': ref.watch(internalOborudovanieFotosRemoteAdapterProvider), 'oborudovanies': ref.watch(internalOborudovaniesRemoteAdapterProvider), 'uslugaSelects': ref.watch(internalUslugaSelectsRemoteAdapterProvider), 'uslugas': ref.watch(internalUslugasRemoteAdapterProvider), 'zayavkaRemotes': ref.watch(internalZayavkaRemotesRemoteAdapterProvider)};
+    final remotes = <String, bool>{'avtomobilRemotes': true, 'calendarEvents': true, 'chekFotos': true, 'cheks': true, 'currentUsers': true, 'duties': true, 'fotos': true, 'myTokens': true, 'myUsers': true, 'oborudovanieFotos': true, 'oborudovanies': true, 'uslugaSelects': true, 'uslugas': true, 'zayavkaRemotes': true};
 
     await ref.watch(graphNotifierProvider).initialize();
 
@@ -91,10 +97,12 @@ extension RepositoryWidgetRefX on WidgetRef {
   Repository<CalendarEvent> get calendarEvents => watch(calendarEventsRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<ChekFoto> get chekFotos => watch(chekFotosRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<Chek> get cheks => watch(cheksRepositoryProvider)..remoteAdapter.internalWatch = watch;
+  Repository<CurrentUser> get currentUsers => watch(currentUsersRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<Duty> get duties => watch(dutiesRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<Foto> get fotos => watch(fotosRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<MyToken> get myTokens => watch(myTokensRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<MyUser> get myUsers => watch(myUsersRepositoryProvider)..remoteAdapter.internalWatch = watch;
+  Repository<OborudovanieFoto> get oborudovanieFotos => watch(oborudovanieFotosRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<Oborudovanie> get oborudovanies => watch(oborudovaniesRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<UslugaSelect> get uslugaSelects => watch(uslugaSelectsRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<Usluga> get uslugas => watch(uslugasRepositoryProvider)..remoteAdapter.internalWatch = watch;
@@ -107,10 +115,12 @@ extension RepositoryRefX on Ref {
   Repository<CalendarEvent> get calendarEvents => watch(calendarEventsRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<ChekFoto> get chekFotos => watch(chekFotosRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<Chek> get cheks => watch(cheksRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
+  Repository<CurrentUser> get currentUsers => watch(currentUsersRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<Duty> get duties => watch(dutiesRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<Foto> get fotos => watch(fotosRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<MyToken> get myTokens => watch(myTokensRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<MyUser> get myUsers => watch(myUsersRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
+  Repository<OborudovanieFoto> get oborudovanieFotos => watch(oborudovanieFotosRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<Oborudovanie> get oborudovanies => watch(oborudovaniesRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<UslugaSelect> get uslugaSelects => watch(uslugaSelectsRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<Usluga> get uslugas => watch(uslugasRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
