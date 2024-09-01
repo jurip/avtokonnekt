@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttsec/main.data.dart';
@@ -15,14 +16,17 @@ class UslugaSelectScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ref.watch(repositoryInitializerProvider).when(
+
         error: (error, _) => Text(error.toString()),
         loading: () => const CircularProgressIndicator(),
         data: (_) {
           final stateUslugas = ref.uslugaSelects.watchAll(remote: false);
+
           List<UslugaSelect> ff = List.from(stateUslugas.model);
           ff.sort((a, b) => a.prioritet!.compareTo(b.prioritet!));
           final filteredUslugas = useState(ff);
           final selectedUslusas = useState(avto.performance_service.toList());
+
           final searchController = useTextEditingController(text: '');
           searchController.addListener(
             () {

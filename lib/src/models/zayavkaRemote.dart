@@ -32,7 +32,6 @@ class ZayavkaRemote extends DataModel<ZayavkaRemote> {
      this.contact_number, this.end_date_time, this.message, this.service,
        this.comment_address, this.manager_name, this.manager_number, this.lat, this.lng});
 
-
 }
 mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
  

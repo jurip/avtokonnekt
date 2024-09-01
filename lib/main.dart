@@ -24,7 +24,6 @@ import 'package:intl/intl.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:uuid/uuid.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
