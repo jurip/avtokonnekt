@@ -1,12 +1,6 @@
-import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
-import 'package:fluttsec/src/remote/save_chek_with_photos.dart';
-import 'package:fluttsec/src/models/chek.dart';
-import 'package:fluttsec/src/models/chekFoto.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

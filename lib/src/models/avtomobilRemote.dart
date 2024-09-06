@@ -9,7 +9,6 @@ import 'package:fluttsec/src/models/oborudovanieFoto.dart';
 import 'package:fluttsec/src/models/usluga.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:uuid/uuid.dart';
 part 'avtomobilRemote.g.dart';
 
 @JsonSerializable()
