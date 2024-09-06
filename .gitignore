@@ -4,3 +4,4 @@
 build/*
 android/app/google-services.json
 android/app/release/
+firebase_options.dart
