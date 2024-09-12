@@ -20,6 +20,7 @@ class AvtomobilRemote extends DataModel<AvtomobilRemote> {
   final String? marka;
   final String? nomerAG;
   final DateTime? date;
+   String? comment;
   final BelongsTo<ZayavkaRemote>? zayavka;
 
    String? status;
@@ -27,7 +28,7 @@ class AvtomobilRemote extends DataModel<AvtomobilRemote> {
   final HasMany<Usluga> performance_service = HasMany<Usluga>();
   final HasMany<Oborudovanie> barcode = HasMany<Oborudovanie>();
   final HasMany<OborudovanieFoto> oborudovanieFotos = HasMany<OborudovanieFoto>();
-  AvtomobilRemote( {this.id, required this.nomer, this.marka,this.nomerAG, this.status, this.date, BelongsTo<ZayavkaRemote>? zayavka}) :
+  AvtomobilRemote( {this.id, required this.nomer, this.marka,this.nomerAG,this.comment, this.status, this.date, BelongsTo<ZayavkaRemote>? zayavka}) :
     zayavka = zayavka ?? BelongsTo();
 }
 

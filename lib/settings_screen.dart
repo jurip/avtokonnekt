@@ -27,6 +27,13 @@ class SettingsScreen extends HookConsumerWidget {
                       
                     },
                   ),
+                    ElevatedButton(
+                    child: const Text('Закрытые заявки'),
+                    onPressed: () {
+                      context.go('/history');
+                      
+                    },
+                  ),
                   SizedBox(height: 300,),
                   Image(image: AssetImage("assets/images/logoblack.png")),
                   SizedBox(height: 20,),

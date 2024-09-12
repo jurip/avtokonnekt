@@ -140,6 +140,7 @@ AvtomobilRemote _$AvtomobilRemoteFromJson(Map<String, dynamic> json) =>
       nomer: json['nomer'] as String?,
       marka: json['marka'] as String?,
       nomerAG: json['nomerAG'] as String?,
+      comment: json['comment'] as String?,
       status: json['status'] as String?,
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
@@ -156,6 +157,7 @@ Map<String, dynamic> _$AvtomobilRemoteToJson(AvtomobilRemote instance) =>
       'marka': instance.marka,
       'nomerAG': instance.nomerAG,
       'date': instance.date?.toIso8601String(),
+      'comment': instance.comment,
       'zayavka': instance.zayavka,
       'status': instance.status,
     };

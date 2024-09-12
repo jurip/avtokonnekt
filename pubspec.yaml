@@ -21,7 +21,7 @@ dependencies:
   json_annotation: ^4.7.0
   hooks_riverpod: ^2.5.1
   file_picker: ^8.0.6
-  simple_barcode_scanner: ^0.0.8
+  simple_barcode_scanner: ^0.1.1
   add_2_calendar: ^3.0.1
   flutter_hooks: ^0.20.5
   http: ^1.2.1
@@ -45,6 +45,7 @@ dependencies:
   fluttertoast: ^8.2.6
   carousel_slider: ^5.0.0
   image_picker: ^1.0.8
+  workmanager: ^0.5.2
 
 dev_dependencies:
   flutter_test:
@@ -54,7 +55,7 @@ dev_dependencies:
   # Highly RECOMMENDED (but not required) packages
   json_serializable: ^6.4.1
 
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
   test: ^1.25.2
 
 flutter:

@@ -5,10 +5,9 @@ import 'package:fluttsec/src/models/oborudovanieFoto.dart';
 import 'package:fluttsec/src/remote/save_avto.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/foto.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-Future<bool> saveWithPhotos(
-    AvtomobilRemote avto, WidgetRef ref, mytoken) async {
+Future<bool> sendAvto(
+    AvtomobilRemote avto, mytoken) async {
   for (Foto foto in avto.fotos.toList()) {
     var headers = {
       'Content-Type': 'image/jpeg',

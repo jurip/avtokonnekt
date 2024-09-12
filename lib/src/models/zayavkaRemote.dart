@@ -25,12 +25,13 @@ class ZayavkaRemote extends DataModel<ZayavkaRemote> {
   final String? service;
   final String? lat;
   final String? lng;
+ String? status;
   final HasMany<AvtomobilRemote>? avtomobili;
   final HasMany<CalendarEvent> events = HasMany<CalendarEvent>();
 
    ZayavkaRemote({this.avtomobili, this.id, this.nomer ,this.nachalo, this.client, this.adres, this.contact_name,
      this.contact_number, this.end_date_time, this.message, this.service,
-       this.comment_address, this.manager_name, this.manager_number, this.lat, this.lng});
+       this.comment_address, this.manager_name, this.manager_number, this.lat, this.lng, this.status});
 
 }
 mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {

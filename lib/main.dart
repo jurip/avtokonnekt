@@ -6,24 +6,24 @@ import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/checki_page.dart';
-import 'package:fluttsec/cheki_screen.dart';
+import 'package:fluttsec/historyPage.dart';
 import 'package:fluttsec/login_page.dart';
 import 'package:fluttsec/my_zayavki_page.dart';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttsec/send_zayavka_to_calendar.dart';
 import 'package:fluttsec/settings_page.dart';
-import 'package:fluttsec/settings_screen.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
-import 'package:fluttsec/tasks_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:localstorage/localstorage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
@@ -346,70 +346,6 @@ class RootScreen extends StatelessWidget {
       ];
 }
 
-
-
-final router = GoRouter(
-  initialLocation: '/zayavki',
-  redirect: (context, state) {
-          final bool userAutheticated = user.value != '';
-
-          final bool onloginPage = state.fullPath == '/login';
-
-          if (!userAutheticated && !onloginPage) {
-            return '/login';
-          }
-          if (userAutheticated && onloginPage) {
-            return '/zayavki';
-          }
-          //you must include this. so if condition not meet, there is no redirect
-          return null;
-        },
-  
-  routes: <RouteBase>[
-    
-    // BottomNavigationBar
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) =>
-          RootScreen(navigationShell: navigationShell),
-      branches: [
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/zayavki',
-              builder: (context, state) => TasksScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/settings',
-              builder: (context, state) => SettingsScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/cheki',
-              builder: (context, state) => ChekiScreen(),
-            ),
-          ],
-        ),
-      ],
-    ),
-    GoRoute(
-            path: '/login',
-            builder: (BuildContext context, GoRouterState state) {
-              return LoginPage();
-            },
-          ),
-  ],
-  
-);
-
-
-
 final GoRouter __router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
@@ -434,6 +370,12 @@ final GoRouter __router = GoRouter(
             path: 'settings',
             builder: (BuildContext context, GoRouterState state) {
               return SettingsPage();
+            },
+          ),
+           GoRoute(
+            path: 'history',
+            builder: (BuildContext context, GoRouterState state) {
+              return HistoryPage();
             },
           ),
           GoRoute(
@@ -485,6 +427,7 @@ void newZayavkaFromMessage(RemoteMessage message) {
   var manager_number = message.data["manager_number"];
   var lat = message.data["lat"];
   var lng = message.data["lng"];
+  var status = "NOVAYA";
   Set<AvtomobilRemote> avs ={};
   if(message.data["avtomobili"]!=null){
   List avtomobili = jsonDecode(message.data["avtomobili"]);
@@ -513,7 +456,8 @@ void newZayavkaFromMessage(RemoteMessage message) {
       nomer: nomer,
       message: mes,
       lat: lat,
-      lng: lng);
+      lng: lng,
+      status: status);
   
 
   z.saveLocal();
@@ -542,4 +486,61 @@ Future<bool> checkConnection() async {
     return false;
   }
   return false;
+}
+
+
+const simpleTaskKey = "be.tramckrijte.workmanagerExample.simpleTask";
+const rescheduledTaskKey = "be.tramckrijte.workmanagerExample.rescheduledTask";
+const failedTaskKey = "be.tramckrijte.workmanagerExample.failedTask";
+const simpleDelayedTask = "be.tramckrijte.workmanagerExample.simpleDelayedTask";
+const simplePeriodicTask =
+    "be.tramckrijte.workmanagerExample.simplePeriodicTask";
+const simplePeriodic1HourTask =
+    "be.tramckrijte.workmanagerExample.simplePeriodic1HourTask";
+
+@pragma(
+    'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    switch (task) {
+      case simpleTaskKey:
+        print("$simpleTaskKey was executed. inputData = $inputData");
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setBool("test", true);
+        print("Bool from prefs: ${prefs.getBool("test")}");
+        break;
+      case rescheduledTaskKey:
+        final key = inputData!['key']!;
+        final prefs = await SharedPreferences.getInstance();
+        if (prefs.containsKey('unique-$key')) {
+          print('has been running before, task is successful');
+          return true;
+        } else {
+          await prefs.setBool('unique-$key', true);
+          print('reschedule task');
+          return false;
+        }
+      case failedTaskKey:
+        print('failed task');
+        return Future.error('failed');
+      case simpleDelayedTask:
+        print("$simpleDelayedTask was executed");
+        break;
+      case simplePeriodicTask:
+        print("$simplePeriodicTask was executed");
+        break;
+      case simplePeriodic1HourTask:
+        print("$simplePeriodic1HourTask was executed");
+        break;
+      case Workmanager.iOSBackgroundTask:
+        print("The iOS background fetch was triggered");
+        //Directory? tempDir = await getTemporaryDirectory();
+       // String? tempPath = tempDir.path;
+        print(
+            "You can access other plugins in the background, for example Directory.getTemporaryDirectory(): ");
+        break;
+    }
+
+    return Future.value(true);
+  });
 }

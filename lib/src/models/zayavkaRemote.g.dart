@@ -114,6 +114,7 @@ ZayavkaRemote _$ZayavkaRemoteFromJson(Map<String, dynamic> json) =>
       manager_number: json['manager_number'] as String?,
       lat: json['lat'] as String?,
       lng: json['lng'] as String?,
+      status: json['status'] as String?,
     );
 
 Map<String, dynamic> _$ZayavkaRemoteToJson(ZayavkaRemote instance) =>
@@ -133,5 +134,6 @@ Map<String, dynamic> _$ZayavkaRemoteToJson(ZayavkaRemote instance) =>
       'service': instance.service,
       'lat': instance.lat,
       'lng': instance.lng,
+      'status': instance.status,
       'avtomobili': instance.avtomobili,
     };

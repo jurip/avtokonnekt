@@ -18,6 +18,7 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
   var marka = a.marka;
   var nomer = a.nomer;
   var nomerAG = a.nomerAG;
+  var comment = a.comment;
   var date = DateTime.now().toIso8601String();
   var status = "VYPOLNENA";
   var zayavkaId = a.zayavka!.value?.id;
@@ -31,7 +32,7 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
   }
   var performance_service = [];
   for (Usluga f in a.performance_service.toList()) {
-    performance_service.add({"title": f.title});
+    performance_service.add({"title": f.title, "dop": f.dop});
   }
   var barcode = [];
   for (Oborudovanie f in a.barcode.toList()) {
@@ -45,6 +46,7 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
       "marka": "$marka",
       "nomer": "$nomer",
       "nomerAG": "$nomerAG",
+      "comment": "$comment",
       "date": "$date",
       "fotos": fotos,
       "oborudovanieFotos": oborudovanieFotos,

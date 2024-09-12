@@ -12,6 +12,7 @@ class Usluga extends DataModel<Usluga> {
   final String? id;
   String? title;
   String? code;
+  String? dop = "N";
 
   final BelongsTo<AvtomobilRemote> avtomobil;
   Usluga({this.id,required this.title,required this.code, required this.avtomobil});
