@@ -87,7 +87,7 @@ class LoginPage extends HookConsumerWidget {
             if (t != "") {
               bool ok = await login(t, passwordController.text, mytoken);
               if (ok) {
-                List<CurrentUser> us = await ref.currentUsers.findAll();
+               
                 user.value = t;
                 password.value = passwordController.text;
                 ref.duties.clear();
@@ -96,10 +96,9 @@ class LoginPage extends HookConsumerWidget {
                 ref.currentUsers.findAll();
                 ref.calendarEvents.findAll();
                 ref.uslugaSelects.findAll();
-                List<ZayavkaRemote> zs = await ref.zayavkaRemotes.findAll();
-                for (ZayavkaRemote z in zs) {
-                  sendZayavkaToCalendar(z, getLocation('UTC'), myCal);
-                }
+                ref.zayavkaRemotes.clear();
+                ref.zayavkaRemotes.findAll();
+                
 
                 FirebaseMessaging.instance.getToken().then((value) {
                   String? token = value;

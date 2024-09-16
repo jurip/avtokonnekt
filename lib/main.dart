@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -29,13 +30,17 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
 
 //const String site = "http://5.228.73.174:2222/";
-const String site = "http://89.111.173.110:8080/";
+//const String site = "http://89.111.173.110:8080/";
+const String site = "http://193.227.240.27:8080/";
+
+
 
 late final ValueNotifier<String> user;
 late final ValueNotifier<String> password;
 late final ValueNotifier<String> token;
 
 void main() async {
+  
   WidgetsFlutterBinding.ensureInitialized();
   await initLocalStorage();
   WidgetsFlutterBinding.ensureInitialized();
@@ -99,6 +104,12 @@ void main() async {
     localStorage.setItem('token', token.value.toString());
   });
 
+
+    Workmanager().initialize(
+                      callbackDispatcher,
+                      
+                    );
+
   runApp(
     ProviderScope(
       child: AppMy(),
@@ -106,7 +117,8 @@ void main() async {
     ),
   );
 }
-class AppMy extends HookConsumerWidget{
+
+class AppMy extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ref.watch(repositoryInitializerProvider).when(
@@ -116,7 +128,6 @@ class AppMy extends HookConsumerWidget{
           return MyHomePage();
         });
   }
-  
 }
 
 final _messageStreamController = BehaviorSubject<RemoteMessage>();
@@ -204,7 +215,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               '\nTitle=${message.notification?.title},'
               '\nBody=${message.notification?.body},'
               '\nData=${message.data}';
-              newZayavkaFromMessage(message);
+          newZayavkaFromMessage(message);
         } else {
           _lastMessage = 'Received a data message: ${message.data}';
         }
@@ -233,7 +244,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void _handleMessage(RemoteMessage message) {
     if (message.data['id'] != null) {
       newZayavkaFromMessage(message);
-     
     }
   }
 
@@ -244,30 +254,32 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     // Run code required to handle interacted messages in an async function
     // as initState() must not be async
     setupInteractedMessage();
-     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
-   @override
+
+  @override
   void dispose() {
     //don't forget to dispose of it when not needed anymore
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
-   late AppLifecycleState _lastState;    
+
+  late AppLifecycleState _lastState;
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    if (state == AppLifecycleState.resumed && _lastState == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.resumed &&
+        _lastState == AppLifecycleState.paused) {
       //now you know that your app went to the background and is back to the foreground
-      
     }
-    _lastState = state; //register the last state. When you get "paused" it means the app went to the background.
+    _lastState =
+        state; //register the last state. When you get "paused" it means the app went to the background.
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      
       routerConfig: __router,
       theme: ThemeData(fontFamily: 'Roboto'),
     );
@@ -289,33 +301,40 @@ class RootScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: 
-      BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
         onTap: (value) async {
           if (value == 0) {
             _launchUrl();
           } else if (value == 1) {
             context.go('/zayavki');
-          }else if (value == 2) {
+          } else if (value == 2) {
             context.go('/cheki');
-          }else if (value == 3) {
+          } else if (value == 3) {
             context.go('/settings');
           }
         },
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined, color: Colors.black,),
+            icon: Icon(
+              Icons.calendar_month_outlined,
+              color: Colors.black,
+            ),
             label: 'Календарь',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_business_rounded,color: Colors.black,),
+            icon: Icon(
+              Icons.add_business_rounded,
+              color: Colors.black,
+            ),
             label: 'Заявки',
           ),
-           BottomNavigationBarItem(
-            icon: Icon(Icons.local_post_office, color: Colors.black,),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.local_post_office,
+              color: Colors.black,
+            ),
             label: 'Офис',
           ),
-          
         ],
         currentIndex: 1,
       ),
@@ -324,17 +343,15 @@ class RootScreen extends StatelessWidget {
 
   // Возвращает лист элементов для нижнего навигационного бара.
   List<BottomNavigationBarItem> get _buildBottomNavBarItems => [
-        
         const BottomNavigationBarItem(
           icon: Icon(Icons.favorite),
           label: 'Заявки',
         ),
-       
         const BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Настройки',
         ),
-         const BottomNavigationBarItem(
+        const BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'Офис',
         ),
@@ -342,7 +359,6 @@ class RootScreen extends StatelessWidget {
           icon: Icon(Icons.note),
           label: 'Календарь',
         ),
-
       ];
 }
 
@@ -372,7 +388,7 @@ final GoRouter __router = GoRouter(
               return SettingsPage();
             },
           ),
-           GoRoute(
+          GoRoute(
             path: 'history',
             builder: (BuildContext context, GoRouterState state) {
               return HistoryPage();
@@ -394,7 +410,7 @@ final GoRouter __router = GoRouter(
             return '/login';
           }
           if (userAutheticated && onloginPage) {
-            return '/';
+            return '/zayavki';
           }
           //you must include this. so if condition not meet, there is no redirect
           return null;
@@ -428,20 +444,22 @@ void newZayavkaFromMessage(RemoteMessage message) {
   var lat = message.data["lat"];
   var lng = message.data["lng"];
   var status = "NOVAYA";
-  Set<AvtomobilRemote> avs ={};
-  if(message.data["avtomobili"]!=null){
-  List avtomobili = jsonDecode(message.data["avtomobili"]);
-  for(var i in avtomobili){
-    var a = i["nomer_avto"];
-    var s =i["marka_avto"];
-    var ag = i["nomerAG"];
-    var aid = i["id"];
-   AvtomobilRemote ar = AvtomobilRemote(id:aid, nomer: a,marka: s,nomerAG: ag, status: "NOVAYA");
-    avs.add(ar);
-    ar.saveLocal();
+  Set<AvtomobilRemote> avs = {};
+  if (message.data["avtomobili"] != null) {
+    List avtomobili = jsonDecode(message.data["avtomobili"]);
+    for (var i in avtomobili) {
+      var a = i["nomer_avto"];
+      var s = i["marka_avto"];
+      var ag = i["nomerAG"];
+      var aid = i["id"];
+      AvtomobilRemote ar = AvtomobilRemote(
+          id: aid, nomer: a, marka: s, nomerAG: ag, status: "NOVAYA");
+      avs.add(ar);
+      ar.saveLocal();
+    }
   }
-  }
-  ZayavkaRemote z = ZayavkaRemote(id:id,
+  ZayavkaRemote z = ZayavkaRemote(
+      id: id,
       avtomobili: avs.asHasMany,
       adres: adres,
       client: client,
@@ -458,10 +476,8 @@ void newZayavkaFromMessage(RemoteMessage message) {
       lat: lat,
       lng: lng,
       status: status);
-  
 
   z.saveLocal();
-
 
   sendZayavkaToCalendar(z, getLocation('UTC'), myCal);
 }
@@ -488,7 +504,6 @@ Future<bool> checkConnection() async {
   return false;
 }
 
-
 const simpleTaskKey = "be.tramckrijte.workmanagerExample.simpleTask";
 const rescheduledTaskKey = "be.tramckrijte.workmanagerExample.rescheduledTask";
 const failedTaskKey = "be.tramckrijte.workmanagerExample.failedTask";
@@ -498,49 +513,191 @@ const simplePeriodicTask =
 const simplePeriodic1HourTask =
     "be.tramckrijte.workmanagerExample.simplePeriodic1HourTask";
 
+Future<bool> sendAvtomobil(
+    String mytoken,
+    List barcode,
+    String comment,
+    String date,
+    List fotos,
+    String marka,
+    String nomer,
+    String nomerAG,
+    List oborudovanieFotos,
+    List performance_service,
+    List performance_service_dop,
+    String status,
+    String id,
+    String zayavkaId) async {
+  List<String> rfoto = [];
+  List<String> roborudfoto = [];
+
+  for (String foto in fotos) {
+    var headers = {
+      'Content-Type': 'image/jpeg',
+      'Authorization': 'Bearer $mytoken'
+    };
+    var data = File(foto).readAsBytesSync();
+
+    var dio = Dio();
+    var response = await dio.request(
+      '${site}rest/files?name=cat-via-direct-request.jpg',
+      options: Options(
+        method: 'POST',
+        headers: headers,
+      ),
+      data: data,
+    );
+
+    if (response.statusCode == 201) {
+      print(response.data);
+      String f = response.data['fileRef'];
+      rfoto.add(f);
+    } else {
+      return false;
+    }
+  }
+
+  for (String foto in oborudovanieFotos) {
+    var headers = {
+      'Content-Type': 'image/jpeg',
+      'Authorization': 'Bearer $mytoken'
+    };
+    var data = File(foto).readAsBytesSync();
+
+    var dio = Dio();
+    var response = await dio.request(
+      '${site}rest/files?name=cat-via-direct-request.jpg',
+      options: Options(
+        method: 'POST',
+        headers: headers,
+      ),
+      data: data,
+    );
+
+    if (response.statusCode == 201) {
+      print(response.data);
+      String f = response.data['fileRef'];
+      roborudfoto.add(f);
+    } else {
+      return false;
+    }
+  }
+
+  var headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
+
+  headers.addAll({'Authorization': 'Bearer $mytoken'});
+  var jfotos = [];
+
+  for (String f in rfoto) {
+    jfotos.add({"file": f});
+  }
+  var joborudovanieFotos = [];
+  for (String f in roborudfoto) {
+    joborudovanieFotos.add({"file": f});
+  }
+  var jperformance_service = [];
+  for (String f in performance_service) {
+    jperformance_service.add({"title": f, "dop": 'N'});
+  }
+  for (String f in performance_service_dop) {
+    jperformance_service.add({"title": f, "dop": 'Y'});
+  }
+  var jbarcode = [];
+  for (String f in barcode) {
+    jbarcode.add({"code": f});
+  }
+
+  var data = json.encode({
+    "avto": {
+      "id": id,
+      "zayavka": {"id": "$zayavkaId"},
+      "marka": "$marka",
+      "nomer": "$nomer",
+      "nomerAG": "$nomerAG",
+      "comment": "$comment",
+      "date": "$date",
+      "fotos": jfotos,
+      "oborudovanieFotos": joborudovanieFotos,
+      "barcode": jbarcode,
+      "performance_service": jperformance_service,
+      "status": status
+    }
+  });
+  var dio = Dio();
+  var response = await dio.request(
+    '${site}rest/services/flutterService/saveAvto',
+    options: Options(
+      method: 'POST',
+      headers: headers,
+    ),
+    data: data,
+  );
+
+  if (response.statusCode == 200) {
+    print(json.encode(response.data));
+    if (response.data == true) return true;
+  }
+  return false;
+}
+
 @pragma(
     'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     switch (task) {
-      case simpleTaskKey:
-        print("$simpleTaskKey was executed. inputData = $inputData");
-        final prefs = await SharedPreferences.getInstance();
-        prefs.setBool("test", true);
-        print("Bool from prefs: ${prefs.getBool("test")}");
-        break;
+    
       case rescheduledTaskKey:
-        final key = inputData!['key']!;
         final prefs = await SharedPreferences.getInstance();
-        if (prefs.containsKey('unique-$key')) {
-          print('has been running before, task is successful');
-          return true;
-        } else {
-          await prefs.setBool('unique-$key', true);
-          print('reschedule task');
+        String id = inputData!['id']!;
+       
+        if(!prefs.containsKey(id)){
+         return false;
+        }
+        bool r = false;
+        try {
+          r = await sendAvtomobil(
+              inputData!['token']!,
+              inputData['barcode']!,
+              inputData['comment']!,
+              inputData['date']!,
+              inputData['fotos'],
+              inputData['marka']!,
+              inputData['nomer']!,
+              inputData['nomerAG']!,
+              inputData['oborudovanieFotos'],
+              inputData['performance_service'],
+              inputData['performance_service_dop'],
+              inputData['status']!,
+              inputData['id']!,
+              inputData['zayavkaId']!);
+        } on Exception catch (e) {
+          print(e);
           return false;
         }
-      case failedTaskKey:
-        print('failed task');
-        return Future.error('failed');
-      case simpleDelayedTask:
-        print("$simpleDelayedTask was executed");
-        break;
-      case simplePeriodicTask:
-        print("$simplePeriodicTask was executed");
-        break;
-      case simplePeriodic1HourTask:
-        print("$simplePeriodic1HourTask was executed");
-        break;
-      case Workmanager.iOSBackgroundTask:
-        print("The iOS background fetch was triggered");
-        //Directory? tempDir = await getTemporaryDirectory();
-       // String? tempPath = tempDir.path;
-        print(
-            "You can access other plugins in the background, for example Directory.getTemporaryDirectory(): ");
-        break;
+        if (r) {
+          print(r);
+         
+          
+          
+          await prefs.remove(id);
+          
+        }
+
+        return r;
     }
 
-    return Future.value(true);
+    return true;
   });
+}
+
+void infoToast(String s) {
+  Fluttertoast.showToast(
+      msg: s,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      fontSize: 16.0);
 }

@@ -70,6 +70,7 @@ Usluga _$UslugaFromJson(Map<String, dynamic> json) => Usluga(
       id: json['id'] as String?,
       title: json['title'] as String?,
       code: json['code'] as String?,
+      count: (json['count'] as num).toInt(),
       avtomobil: BelongsTo<AvtomobilRemote>.fromJson(
           json['avtomobil'] as Map<String, dynamic>),
     )..dop = json['dop'] as String?;
@@ -78,6 +79,7 @@ Map<String, dynamic> _$UslugaToJson(Usluga instance) => <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
       'code': instance.code,
+      'count': instance.count,
       'dop': instance.dop,
       'avtomobil': instance.avtomobil,
     };

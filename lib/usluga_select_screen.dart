@@ -92,6 +92,7 @@ class UslugaSelectScreen extends HookConsumerWidget {
                               Usluga newu = Usluga(
                                   title: u.title,
                                   code: u.code,
+                                  count:1,
                                   avtomobil: BelongsTo<AvtomobilRemote>(avto));
 
                               

@@ -1,4 +1,8 @@
+import 'package:flutter_data/flutter_data.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttsec/avto_widget.dart';
+import 'package:fluttsec/cheki_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -12,15 +16,27 @@ class TasksScreenHistory extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
+var avtos = useState([]);
+    
+    useEffect(() {
+      Future<void>.microtask(() async {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.reload();
+         avtos.value = prefs.getKeys().toList();
+       
+      });
+    });
+
     return ref.watch(repositoryInitializerProvider).when(
         error: (error, _) => Text(error.toString()),
         loading: () => const CircularProgressIndicator(),
         data: (_) {
           final stateLocal =
-              ref.zayavkaRemotes.watchAll(remote: false // HTTP param
+              ref.zayavkaRemotes.watchAll(remote: false
                   );
            List<ZayavkaRemote> zFiltered = List.from(stateLocal.model);
-          zFiltered = zFiltered.where((element) => element.status=='UDALENA',).toList();
+          zFiltered = zFiltered.where((element) => element.status=='VYPOLNENA',).toList();
           zFiltered.sort((a, b) => b.nachalo!.compareTo(a.nachalo!));
          
           return 
@@ -29,6 +45,20 @@ class TasksScreenHistory extends HookConsumerWidget {
               // Pull from top to show refresh indicator.
              ListView(
                 children: [
+
+                   for(var a in avtos.value)
+                  Container(
+                    color: Colors.amber,
+      margin: EdgeInsets.all(10),
+      child:
+      GestureDetector(
+        onTap: () async{
+          AvtomobilRemote? ar = await ref.avtomobilRemotes.findOne(a);
+          ar!.status = "NOVAYA";
+          ar!.saveLocal();
+        },
+        child: 
+      Text("Отчет "+ a+" "))),
             
                   for (final ZayavkaRemote zayavka in zFiltered)
                     zayavkaWidget(zayavka, context),

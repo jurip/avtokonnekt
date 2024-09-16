@@ -354,7 +354,7 @@ class TasksScreen extends HookConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 if (await updateZayavka(zayavka, token.value))
-                zayavka.status = "UDALENA";
+                zayavka.status = "VYPOLNENA";
                 zayavka.saveLocal();
                 
                 Navigator.pop(context);

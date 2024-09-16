@@ -1,8 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_data/flutter_data.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
@@ -16,25 +16,25 @@ import 'package:fluttsec/src/remote/save_with_photos.dart';
 import 'package:fluttsec/usluga_select_screen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:workmanager/workmanager.dart';
 
 class AvtoWidget extends HookConsumerWidget {
   AvtomobilRemote avto;
-  
+
   ZayavkaRemote zayavka;
 
-  AvtoWidget(AvtomobilRemote this.avto,ZayavkaRemote this.zayavka, {super.key});
- void _saveComment(String text) {
-   
-  }
+  AvtoWidget(AvtomobilRemote this.avto, ZayavkaRemote this.zayavka,
+      {super.key});
+  void _saveComment(String text) {}
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     avto = ref.avtomobilRemotes.watch(avto);
     zayavka = ref.zayavkaRemotes.watch(zayavka);
-     var commentController = TextEditingController(text:avto.comment);
-   
-      return ExpansionTile(
+    var commentController = TextEditingController(text: avto.comment);
+
+    return ExpansionTile(
         trailing: SizedBox.shrink(),
         collapsedShape: const ContinuousRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(20))),
@@ -42,13 +42,12 @@ class AvtoWidget extends HookConsumerWidget {
           Expanded(
             flex: 2,
             child: Text(
-                '${avto.nomer}\n${avto.marka}${(avto.nomerAG == null 
-                || avto.nomerAG == "null") ? '' : '\nАГ:'+avto.nomerAG!}'),
+                '${avto.nomer}\n${avto.marka}${(avto.nomerAG == null || avto.nomerAG == "null"|| avto.nomerAG == "") ? '' : '\nАГ:' + avto.nomerAG!}'),
           ),
           ElevatedButton(
-              onPressed:avto.status != "NOVAYA"
-                ? null
-                : () => showDeleteAlertAvto(context, zayavka, avto),
+              onPressed: avto.status != "NOVAYA"
+                  ? null
+                  : () => showDeleteAlertAvto(context, zayavka, avto),
               child: const Icon(Icons.cancel)),
         ]),
         collapsedBackgroundColor: avto.status != "NOVAYA"
@@ -109,12 +108,12 @@ class AvtoWidget extends HookConsumerWidget {
                               size: 50,
                             ),
                             onPressed: avto.status != "NOVAYA"
-                ? null
-                :() {
-                              foto.deleteLocal();
-                              avto.saveLocal();
-                              zayavka.saveLocal();
-                            },
+                                ? null
+                                : () {
+                                    foto.deleteLocal();
+                                    avto.saveLocal();
+                                    zayavka.saveLocal();
+                                  },
                           ))
                     ])
                 ]),
@@ -161,19 +160,18 @@ class AvtoWidget extends HookConsumerWidget {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed:avto.status != "NOVAYA"
-                ? null
-                : () {
-                        usluga.dop = usluga.dop == "Y" ? "N" : "Y";
-                        usluga.saveLocal();
-                        avto.saveLocal();
-                        zayavka.saveLocal();
-                      },
+                      onPressed: avto.status != "NOVAYA"
+                          ? null
+                          : () {
+                              usluga.dop = usluga.dop == "Y" ? "N" : "Y";
+                              usluga.saveLocal();
+                              avto.saveLocal();
+                              zayavka.saveLocal();
+                            },
                       child: usluga.dop == "Y"
                           ? Icon(Icons.timer)
                           : Icon(Icons.timer_outlined),
                     ),
-                   
                   ],
                 ),
               ),
@@ -295,78 +293,138 @@ class AvtoWidget extends HookConsumerWidget {
                 ])
             ]),
           TextFormField(
-           
             controller: commentController,
             decoration: InputDecoration(hintText: 'коммментарий'),
           ),
-          ElevatedButton(onPressed: () {
-            if(commentController.text.length>199)
-            commentController.text = commentController.text.substring(0,199);
-            avto.comment = commentController.text;
-            avto.saveLocal();
-            zayavka.saveLocal();
-          }, child: Icon(Icons.add)),
+          ElevatedButton(
+              onPressed: () {
+                if (commentController.text.length > 199)
+                  commentController.text =
+                      commentController.text.substring(0, 199);
+                avto.comment = commentController.text;
+                avto.saveLocal();
+                zayavka.saveLocal();
+              },
+              child: Icon(Icons.add)),
           ElevatedButton(
               onPressed: avto.status != "NOVAYA"
                   ? null
                   : () async {
-                      await sendAvtoOtchet();
-Workmanager().initialize(
-                      callbackDispatcher,
-                      isInDebugMode: true,
-                    );
-                      Workmanager().registerOneOffTask(
-                      simpleTaskKey,
-                      simpleTaskKey,
-                      inputData: <String, dynamic>{
-                        'int': 1,
-                        'bool': true,
-                        'double': 1.0,
-                        'string': 'string',
-                        'array': [1, 2, 3],
-                      },
-                    );
+                      showDialog(
+                        context: context,
+                        builder: (_) {
+                          return AlertDialog(
+                            title: Text('Отправка отчета'),
+                            content: ListView(
+                              shrinkWrap: true,
+                              children: [
+                                Text('Уверены что хотите отправить отчет?')
+                              ],
+                            ),
+                            actions: [
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text('Отмена'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  sendAvtoOtchet();
+                                  Navigator.pop(context);
+                                },
+                                child: Text('Отправить'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
                     },
               child: const Text("готово")),
         ]);
   }
 
   Future<void> sendAvtoOtchet() async {
-    if (await checkConnection()) {
-      avto.status = 'TEMP';
+    avto.status = 'TEMP';
+    avto.saveLocal();
+    zayavka.saveLocal();
+    bool r = false;
+    if (avto.zayavka?.id == null) showError(avto.toString());
+    try {
+      r = await sendAvto(avto, token.value);
+    } on Exception catch (e) {
+      avto.status = "PENDING";
       avto.saveLocal();
       zayavka.saveLocal();
-      bool r = false;
-      if (avto.zayavka?.id == null)
-        showError(avto.toString());
-      try {
-        r = await sendAvto(avto, token.value);
-      } on Exception catch (e) {
-        avto.status = "NOVAYA";
-        avto.saveLocal();
-        zayavka.saveLocal();
-        showError(e.toString());
-        // make it explicit that this function can throw exceptions
-        rethrow;
-      }
-    
-      if (r) {
-        avto.status = "GOTOWAYA";
-        avto.saveLocal();
-        zayavka.saveLocal();
-        infoToast("Сохранено в системе");
-      } else {
-        avto.status = "NOVAYA";
-        avto.saveLocal();
-        zayavka.saveLocal();
-    
-        infoToast("Ошибка при сохранении в системе");
-      }
-    
-      infoToast("Отправлено");
+
+      var b = avto.barcode
+          .map(
+            (Oborudovanie p0) => p0.code!,
+          )
+          .toList();
+      var f = avto.fotos.map((p0) => p0.fileLocal!).toList();
+      var o = avto.oborudovanieFotos
+          .map((OborudovanieFoto p0) => p0.fileLocal!)
+          .toList();
+      var p = avto.performance_service
+          .where(
+            (element) => element.dop == 'N',
+          )
+          .map(
+            (p0) => p0.code!,
+          )
+          .toList();
+      var pd = avto.performance_service
+          .where(
+            (element) => element.dop == 'Y',
+          )
+          .map((p0) => p0.code!)
+          .toList();
+
+      final prefs = await SharedPreferences.getInstance();
+
+      prefs.setString(avto.id!, "Eee");
+
+      Workmanager().  registerOneOffTask(
+        avto.id!,
+        rescheduledTaskKey,
+        initialDelay: Duration(seconds: 10),
+        existingWorkPolicy: ExistingWorkPolicy.keep,
+        constraints: Constraints(
+          networkType: NetworkType.connected,
+        ),
+        inputData: <String, dynamic>{
+          'token': token.value,
+          'barcode': b,
+          'comment': avto.comment ?? '',
+          'date': DateTime.now().toIso8601String(),
+          'fotos': f,
+          'marka': avto.marka ?? "",
+          'nomer': avto.nomer ?? "",
+          'nomerAG': avto.nomerAG ?? "",
+          'oborudovanieFotos': o,
+          'performance_service': p,
+          'performance_service_dop': pd,
+          'status': avto.status!,
+          'id': avto.id.toString(),
+          'zayavkaId': avto.zayavka!.id.toString()
+        },
+      );
+    }
+
+    if (r) {
+      avto.status = "GOTOWAYA";
+      avto.saveLocal();
+      zayavka.saveLocal();
+      infoToast("Сохранено в системе");
+    } else {
+      avto.status = "PENDING";
+      avto.saveLocal();
+      zayavka.saveLocal();
+
+      infoToast("Не удалось отправить, добавляем в загрузки");
     }
   }
- addOborudovanieFotos(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
+
+  addOborudovanieFotos(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
     final ImagePicker _picker = ImagePicker();
 
     var pickedFiles =
@@ -412,92 +470,77 @@ Workmanager().initialize(
     infoToast("На сервере произошла ошибка" + e);
     return null;
   }
-  
-  void infoToast(String s) {
-    Fluttertoast.showToast(
-        msg: s,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        
-        fontSize: 16.0
-    );
-
-  }
-  
- 
 }
 
-  void showDeleteAlertAvto(
-      context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: Text('Удаление автомобиля'),
-          content: ListView(
-            shrinkWrap: true,
-            children: [Text('Уверены что хотите удалить авто?')],
+void showDeleteAlertAvto(context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
+  showDialog(
+    context: context,
+    builder: (_) {
+      return AlertDialog(
+        title: Text('Удаление автомобиля'),
+        content: ListView(
+          shrinkWrap: true,
+          children: [Text('Уверены что хотите удалить авто?')],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Отмена'),
           ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Отмена'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                avto.deleteLocal();
-                zayavka.saveLocal();
-                Navigator.pop(context);
-              },
-              child: Text('Удалить'),
-            ),
-          ],
-        );
-      },
+          ElevatedButton(
+            onPressed: () {
+              avto.deleteLocal();
+              zayavka.saveLocal();
+              Navigator.pop(context);
+            },
+            child: Text('Удалить'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void addOborudovanieFotos(ZayavkaRemote zayavka, AvtomobilRemote avto) {}
+addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
+  final ImagePicker _picker = ImagePicker();
+
+  var pickedFile = await _picker.pickImage(
+      source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+
+  if (pickedFile != null) {
+    Foto f = Foto(
+        fileLocal: pickedFile.path,
+        avtomobil: BelongsTo<AvtomobilRemote>(avto));
+    f.saveLocal();
+
+    avto.saveLocal();
+    zayavka.saveLocal();
+  } else {
+    final snackBar = SnackBar(
+      content: const Text('фото не добавлено'),
     );
   }
-void addOborudovanieFotos(ZayavkaRemote zayavka, AvtomobilRemote avto) {
 }
- addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
-    final ImagePicker _picker = ImagePicker();
 
-    var pickedFile = await _picker.pickImage(
-        source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
+  final ImagePicker _picker = ImagePicker();
 
-    if (pickedFile != null) {
+  var pickedFiles =
+      await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
+
+  if (!pickedFiles.isEmpty) {
+    for (var pickedFile in pickedFiles) {
       Foto f = Foto(
           fileLocal: pickedFile.path,
           avtomobil: BelongsTo<AvtomobilRemote>(avto));
       f.saveLocal();
-
-      avto.saveLocal();
-      zayavka.saveLocal();
-    } else {
-      final snackBar = SnackBar(
-        content: const Text('фото не добавлено'),
-      );
     }
+    avto.saveLocal();
+    zayavka.saveLocal();
+  } else {
+    final snackBar = SnackBar(
+      content: const Text('файлы не добавлены'),
+    );
   }
-
-addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
-    final ImagePicker _picker = ImagePicker();
-
-    var pickedFiles =
-        await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
-
-    if (!pickedFiles.isEmpty) {
-      for (var pickedFile in pickedFiles) {
-        Foto f = Foto(
-            fileLocal: pickedFile.path,
-            avtomobil: BelongsTo<AvtomobilRemote>(avto));
-        f.saveLocal();
-      }
-      avto.saveLocal();
-      zayavka.saveLocal();
-    } else {
-      final snackBar = SnackBar(
-        content: const Text('файлы не добавлены'),
-      );
-    }
-  }
+}

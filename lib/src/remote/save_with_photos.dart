@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:fluttsec/main.dart';
@@ -5,9 +6,16 @@ import 'package:fluttsec/src/models/oborudovanieFoto.dart';
 import 'package:fluttsec/src/remote/save_avto.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/foto.dart';
+import 'package:workmanager/workmanager.dart';
 
+
+
+  
 Future<bool> sendAvto(
     AvtomobilRemote avto, mytoken) async {
+      
+ 
+
   for (Foto foto in avto.fotos.toList()) {
     var headers = {
       'Content-Type': 'image/jpeg',
@@ -32,6 +40,7 @@ Future<bool> sendAvto(
     } else {
       return false;
     }
+
   }
 
   for (OborudovanieFoto foto in avto.oborudovanieFotos.toList()) {

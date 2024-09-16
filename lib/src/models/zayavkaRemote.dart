@@ -44,7 +44,7 @@ mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
   {'username': user.value};
   @override
   String urlForFindAll(Map<String, dynamic> params) => 
-  'services/flutterService/getAllActiveZayavkas';
+  'services/flutterService/getAllReadyZayavkas';
   @override
   String get baseUrl => '${site}rest/';
   
