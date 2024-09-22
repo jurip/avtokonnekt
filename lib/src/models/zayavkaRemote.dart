@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/main.dart';
+import 'package:fluttsec/src/models/avtomobilLocal.dart';
 import 'package:fluttsec/src/models/calendarEvent.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -26,7 +27,10 @@ class ZayavkaRemote extends DataModel<ZayavkaRemote> {
   final String? lat;
   final String? lng;
  String? status;
-  final HasMany<AvtomobilRemote>? avtomobili;
+  final HasMany<AvtomobilRemote>? avtomobili ;
+  final HasMany<AvtomobilLocal> avtomobiliLocal = HasMany<AvtomobilLocal>() ;
+  
+  //final HasMany<AvtomobilRemote> otchety  = HasMany<AvtomobilRemote>();
   final HasMany<CalendarEvent> events = HasMany<CalendarEvent>();
 
    ZayavkaRemote({this.avtomobili, this.id, this.nomer ,this.nachalo, this.client, this.adres, this.contact_name,

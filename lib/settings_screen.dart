@@ -30,6 +30,13 @@ class SettingsScreen extends HookConsumerWidget {
                       
                     },
                   ),
+                   ElevatedButton(
+                    child: const Text('Загрузить заявки с сервера(неотправленные отчеты будут потеряны)'),
+                    onPressed: () {
+                      ref.zayavkaRemotes.findAll();
+                      
+                    },
+                  ),
                     ElevatedButton(
                     child: const Text('Закрытые заявки'),
                     onPressed: () {
@@ -37,7 +44,13 @@ class SettingsScreen extends HookConsumerWidget {
                       
                     },
                   ),
-                 
+                 ElevatedButton(
+                    child: const Text('Отчеты'),
+                    onPressed: () {
+                      context.go('/otchety');
+                      
+                    },
+                  ),
                   SizedBox(height: 300,),
                   Image(image: AssetImage("assets/images/logoblack.png")),
                   SizedBox(height: 20,),

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_data/flutter_data.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/checki_page.dart';
@@ -12,6 +13,7 @@ import 'package:fluttsec/login_page.dart';
 import 'package:fluttsec/my_zayavki_page.dart';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttsec/otchetyPage.dart';
 import 'package:fluttsec/send_zayavka_to_calendar.dart';
 import 'package:fluttsec/settings_page.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
@@ -30,17 +32,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
 
 //const String site = "http://5.228.73.174:2222/";
-//const String site = "http://89.111.173.110:8080/";
-const String site = "http://193.227.240.27:8080/";
-
-
+const String site = "http://89.111.173.110:8080/";
+//const String site = "http://193.227.240.27:8080/";
 
 late final ValueNotifier<String> user;
 late final ValueNotifier<String> password;
 late final ValueNotifier<String> token;
 
 void main() async {
-  
   WidgetsFlutterBinding.ensureInitialized();
   await initLocalStorage();
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,7 +66,8 @@ void main() async {
   }
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    //newZayavkaFromMessage(message);
+    //saveToPrefs(message);
+    newZayavkaFromMessage(message.data);
     if (kDebugMode) {
       print('Handling a foreground message: ${message.messageId}');
       print('Message data: ${message.data}');
@@ -104,11 +104,12 @@ void main() async {
     localStorage.setItem('token', token.value.toString());
   });
 
-
+/*
     Workmanager().initialize(
                       callbackDispatcher,
                       
                     );
+*/
 
   runApp(
     ProviderScope(
@@ -133,16 +134,17 @@ class AppMy extends HookConsumerWidget {
 final _messageStreamController = BehaviorSubject<RemoteMessage>();
 String? myCal;
 
-// TODO: Define the background message handler
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  //newZayavkaFromMessage(message);
-  if (kDebugMode) {
-    print("Handling a background message: ${message.messageId}");
-    print('Message data: ${message.data}');
-    print('Message notification: ${message.notification?.title}');
-    print('Message notification: ${message.notification?.body}');
-  }
+
+Future<bool> saveToPrefs(RemoteMessage message) async {
+  print("\n\n\nobject пытаемся сохранить");
+  var sp = await SharedPreferences.getInstance();
+  print("\n\n\nobject получили схаред");
+
+  var ok = await sp.setString(
+      "zayavka-" + message.data["id"], json.encode(message.data));
+      print("\n\n\nobject сохранили");
+      print(ok.toString());
+  return ok;
 }
 
 late AndroidNotificationChannel channel;
@@ -215,9 +217,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               '\nTitle=${message.notification?.title},'
               '\nBody=${message.notification?.body},'
               '\nData=${message.data}';
-          newZayavkaFromMessage(message);
+          //newZayavkaFromMessage(message.data);
         } else {
           _lastMessage = 'Received a data message: ${message.data}';
+
+          newZayavkaFromMessage(message.data);
         }
       });
     });
@@ -241,9 +245,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
   }
 
+//zhmakaem na push
   void _handleMessage(RemoteMessage message) {
     if (message.data['id'] != null) {
-      newZayavkaFromMessage(message);
+      //saveToPrefs(message);
+      //newZayavkaFromMessage(message.data);
     }
   }
 
@@ -395,6 +401,12 @@ final GoRouter __router = GoRouter(
             },
           ),
           GoRoute(
+            path: 'otchety',
+            builder: (BuildContext context, GoRouterState state) {
+              return OtchetyPage();
+            },
+          ),
+          GoRoute(
             path: 'login',
             builder: (BuildContext context, GoRouterState state) {
               return LoginPage();
@@ -425,28 +437,28 @@ Future<void> _launchUrl() async {
   }
 }
 
-void newZayavkaFromMessage(RemoteMessage message) {
-  var id = message.data["id"];
-  var nomer = message.data["nomer"];
-  var mes = message.data["message"];
-  var adres = message.data["adres"];
-  var nachalo = message.data["nachalo"];
+void newZayavkaFromMessage(Map data) {
+  var id = data["id"];
+  var nomer = data["nomer"];
+  var mes = data["message"];
+  var adres = data["adres"];
+  var nachalo = data["nachalo"];
   var format = new DateFormat("yyyy-MM-dd hh:mm:ss");
   DateTime nachalo_date = format.parse(nachalo);
-  DateTime end_date_time = format.parse(message.data["end_date_time"]);
-  var comment_address = message.data["comment_address"];
-  var service = message.data["service"];
-  var client = message.data["client"];
-  var contact_name = message.data["contact_name"];
-  var contact_number = message.data["contact_number"];
-  var manager_name = message.data["manager_name"];
-  var manager_number = message.data["manager_number"];
-  var lat = message.data["lat"];
-  var lng = message.data["lng"];
+  DateTime end_date_time = format.parse(data["end_date_time"]);
+  var comment_address = data["comment_address"];
+  var service = data["service"];
+  var client = data["client"];
+  var contact_name = data["contact_name"];
+  var contact_number = data["contact_number"];
+  var manager_name = data["manager_name"];
+  var manager_number = data["manager_number"];
+  var lat = data["lat"];
+  var lng = data["lng"];
   var status = "NOVAYA";
   Set<AvtomobilRemote> avs = {};
-  if (message.data["avtomobili"] != null) {
-    List avtomobili = jsonDecode(message.data["avtomobili"]);
+  if (data["avtomobili"] != null) {
+    List avtomobili = jsonDecode(data["avtomobili"]);
     for (var i in avtomobili) {
       var a = i["nomer_avto"];
       var s = i["marka_avto"];
@@ -643,6 +655,7 @@ Future<bool> sendAvtomobil(
   return false;
 }
 
+/*
 @pragma(
     'vm:entry-point') // Mandatory if the App is obfuscated or using Flutter 3.1+
 void callbackDispatcher() {
@@ -692,7 +705,7 @@ void callbackDispatcher() {
     return true;
   });
 }
-
+*/
 void infoToast(String s) {
   Fluttertoast.showToast(
       msg: s,
@@ -700,4 +713,38 @@ void infoToast(String s) {
       gravity: ToastGravity.CENTER,
       timeInSecForIosWeb: 1,
       fontSize: 16.0);
+}
+
+Future<bool> loadZayavkaFromPrefs() async {
+  var prefs = await SharedPreferences.getInstance();
+  await prefs.reload();
+  // Do the staff
+  var keys = prefs.getKeys();
+  for (var key in keys) {
+    if (key.startsWith("zayavka")) {
+      String z = prefs.getString(key)!;
+      var map = jsonDecode(z);
+      newZayavkaFromMessage(map);
+      return await prefs.remove(key);
+    }
+  }
+  return false;
+}
+
+
+
+// TODO: Define the background message handler
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
+  await saveToPrefs(message);
+  //newZayavkaFromMessage(message.data);
+
+  if (kDebugMode) {
+    print("Handling a background message: ${message.messageId}");
+    print('Message data: ${message.data}');
+    print('Message notification: ${message.notification?.title}');
+    print('Message notification: ${message.notification?.body}');
+  }
 }

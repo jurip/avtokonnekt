@@ -21,9 +21,16 @@ var avtos = useState([]);
     
     useEffect(() {
       Future<void>.microtask(() async {
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.reload();
-         avtos.value = prefs.getKeys().toList();
+
+        SharedPreferences.getInstance().then((prefs) => {
+  prefs.reload().then((_) {
+    // Do the staff
+     avtos.value = prefs.getKeys().toList();
+  })
+});
+
+       
+        
        
       });
     });

@@ -1,5 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttsec/avto_widget.dart';
+import 'package:fluttsec/src/models/avtomobilLocal.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:uuid/uuid.dart';
 import 'package:device_calendar/device_calendar.dart';
@@ -23,29 +29,54 @@ class TasksScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+     
+    
+    useOnAppLifecycleStateChange(
+      (previous, current) async {
+        String s = current.name;
+        if(s=='resumed'){
+         if(await loadZayavkaFromPrefs()){
+         }
+        }
+      }
+    );
+  
+   
+     
+
+ useEffect(() {
+      loadZayavkaFromPrefs();
+      return () => {};
+    }, []);
+   
     return ref.watch(repositoryInitializerProvider).when(
         error: (error, _) => Text(error.toString()),
         loading: () => const CircularProgressIndicator(),
         data: (_) {
+          
           final stateLocal =
               ref.zayavkaRemotes.watchAll(remote: false // HTTP param
                   );
-           List<ZayavkaRemote> zFiltered = List.from(stateLocal.model);
-          zFiltered = zFiltered.where((element) => element.status=='NOVAYA',).toList();
+          List<ZayavkaRemote> zFiltered = List.from(stateLocal.model);
+          zFiltered = zFiltered
+              .where(
+                (element) => element.status == 'NOVAYA',
+              )
+              .toList();
           zFiltered.sort((a, b) => b.nachalo!.compareTo(a.nachalo!));
           final stateDuty = ref.duties.watchAll();
           final stateCurrentUser = ref.currentUsers.watchAll();
+
+          final stateAvtoLocal =
+              ref.avtomobilRemotes.watchAll(remote: false // HTTP param
+                  );
 
           return RefreshIndicator(
               key: _refreshIndicatorKey,
               onRefresh: () async {
                 await ref.duties.findAll();
-                //List<ZayavkaRemote> zs =
-                 //   await ref.zayavkaRemotes.findAll(// HTTP param
-                     //   );
-                //for (ZayavkaRemote z in zs) {
-                //  sendZayavkaToCalendar(z, getLocation('UTC'), myCal);
-               // }
+
+                // sendToCalendar(ref);
               },
               // Pull from top to show refresh indicator.
               child: ListView(
@@ -78,6 +109,18 @@ class TasksScreen extends HookConsumerWidget {
                 ],
               ));
         });
+  }
+
+  
+  void sendToCalendar(WidgetRef ref) {
+    ref.zayavkaRemotes.findAll().asStream().forEach(
+      (element) {
+        for (var z in element) {
+          sendZayavkaToCalendar(z, getLocation('UTC'), myCal);
+          schitatShablonyOtchetov(z);
+        }
+      },
+    );
   }
 
   Container zayavkaWidget(ZayavkaRemote zayavka, BuildContext context) {
@@ -166,14 +209,12 @@ class TasksScreen extends HookConsumerWidget {
                                     width: 20,
                                   ),
                                   ElevatedButton(
-                                    child: const Icon(Icons.phone),
-                                    onPressed: () { 
-                                      var s = zayavka.contact_number!;
-                                      if (s.startsWith('7')) s = '+' + s;
-                                      launchUrlString(
-                                        "tel://${s}");
-                                    }
-                                  ),
+                                      child: const Icon(Icons.phone),
+                                      onPressed: () {
+                                        var s = zayavka.contact_number!;
+                                        if (s.startsWith('7')) s = '+' + s;
+                                        launchUrlString("tel://${s}");
+                                      }),
                                 ]),
                                 SelectableText(contextMenuBuilder:
                                         (context, editableTextState) {
@@ -281,6 +322,14 @@ class TasksScreen extends HookConsumerWidget {
                     marka: marka,
                     status: "NOVAYA");
                 a.saveLocal();
+
+                AvtomobilLocal al = AvtomobilLocal(
+                    id: uuid.v4(),
+                    zayavka: BelongsTo<ZayavkaRemote>(zayavka),
+                    nomer: nomer,
+                    marka: marka,
+                    status: "NOVAYA");
+                al.saveLocal();
                 zayavka.saveLocal();
                 Navigator.pop(context);
               },
@@ -354,9 +403,9 @@ class TasksScreen extends HookConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 if (await updateZayavka(zayavka, token.value))
-                zayavka.status = "VYPOLNENA";
+                  zayavka.status = "VYPOLNENA";
                 zayavka.saveLocal();
-                
+
                 Navigator.pop(context);
               },
               child: Text('Готово'),
@@ -391,6 +440,15 @@ class TasksScreen extends HookConsumerWidget {
       GlobalKey<RefreshIndicatorState>();
 }
 
+void schitatShablonyOtchetov(ZayavkaRemote z) {
+  for (AvtomobilRemote shablon in z.avtomobili?.toList() ?? []) {
+    /*  if(!z.otchety.map((p0) => p0.id,).contains(shablon.id)){
+      AvtomobilRemote o = new AvtomobilRemote(id:shablon.id, nomer: shablon.nomer, marka: shablon.marka, nomerAG: shablon.nomerAG);
+        z. }
+  */
+  }
+}
+
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -401,3 +459,5 @@ class UpperCaseTextFormatter extends TextInputFormatter {
     );
   }
 }
+
+
