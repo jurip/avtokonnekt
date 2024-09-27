@@ -13,6 +13,8 @@ import 'package:fluttsec/login_page.dart';
 import 'package:fluttsec/my_zayavki_page.dart';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttsec/oborudovanie_page.dart';
+import 'package:fluttsec/ofis_page.dart';
 import 'package:fluttsec/otchetyPage.dart';
 import 'package:fluttsec/send_zayavka_to_calendar.dart';
 import 'package:fluttsec/settings_page.dart';
@@ -31,9 +33,10 @@ import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
 
-//const String site = "http://5.228.73.174:2222/";
-const String site = "http://89.111.173.110:8080/";
+const String site = "http://5.228.73.174:2222/";
+//const String site = "http://89.111.173.110:8080/";
 //const String site = "http://193.227.240.27:8080/";
+late final ValueNotifier<String> company;
 
 late final ValueNotifier<String> user;
 late final ValueNotifier<String> password;
@@ -90,7 +93,10 @@ void main() async {
   } else {
     myCal = cx.id;
   }
-
+   company = ValueNotifier(localStorage.getItem('company') ?? '');
+  company.addListener(() {
+    localStorage.setItem('company', company.value.toString());
+  });
   user = ValueNotifier(localStorage.getItem('user') ?? '');
   user.addListener(() {
     localStorage.setItem('user', user.value.toString());
@@ -314,7 +320,7 @@ class RootScreen extends StatelessWidget {
           } else if (value == 1) {
             context.go('/zayavki');
           } else if (value == 2) {
-            context.go('/cheki');
+            context.go('/ofis');
           } else if (value == 3) {
             context.go('/settings');
           }
@@ -383,9 +389,21 @@ final GoRouter __router = GoRouter(
             },
           ),
           GoRoute(
+            path: 'ofis',
+            builder: (BuildContext context, GoRouterState state) {
+              return OfisPage();
+            },
+          ),
+          GoRoute(
             path: 'cheki',
             builder: (BuildContext context, GoRouterState state) {
               return CheckiPage();
+            },
+          ),
+           GoRoute(
+            path: 'peremeshenie',
+            builder: (BuildContext context, GoRouterState state) {
+              return OborudovaniePage();
             },
           ),
           GoRoute(

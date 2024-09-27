@@ -33,9 +33,15 @@ class AvtomobilRemote extends DataModel<AvtomobilRemote> {
 }
 
 mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
+
+  @override
+  DataRequestMethod methodForSave(id, Map<String, dynamic> params) {
+    // TODO: implement methodForSave
+    return DataRequestMethod.POST;
+  }
  
   @override
-  String urlForSave(id, Map<String, dynamic> params) => "entities/Avtomobil";
+  String urlForSave(id, Map<String, dynamic> params) => "services/flutterService/saveAvto";
 
   @override
   FutureOr<Map<String, dynamic>> get defaultParams => 

@@ -17,7 +17,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class LoginPage extends HookConsumerWidget {
   static final routeName = "/login";
-  
+  TextEditingController companyController = TextEditingController();
   TextEditingController loginController = TextEditingController();
 
   TextEditingController passwordController = TextEditingController();
@@ -45,6 +45,19 @@ class LoginPage extends HookConsumerWidget {
         Center(child:Text('ЭвоМонтаж',style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),),),
         SizedBox(height: 100,),
         if (isError.value) Text('     ОШИБКА АВТОРИЗАЦИИ. Укажите верный логин/пароль', style: TextStyle(fontSize: 20),), 
+        TextFormField(
+          
+          textAlign: TextAlign.center,
+          controller: companyController,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.grey.shade200,
+              contentPadding: const EdgeInsets.all(8.0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+              hintText: 'Компания'),
+        ),
         TextFormField(
           
           textAlign: TextAlign.center,
@@ -85,9 +98,9 @@ class LoginPage extends HookConsumerWidget {
             var mytoken = token.value;
             String t = loginController.text;
             if (t != "") {
-              bool ok = await login(t, passwordController.text, mytoken);
+              bool ok = await login(companyController.text+"|"+ t, passwordController.text, mytoken);
               if (ok) {
-               
+                company.value = companyController.text;
                 user.value = t;
                 password.value = passwordController.text;
                 ref.duties.clear();
@@ -97,13 +110,15 @@ class LoginPage extends HookConsumerWidget {
                 ref.calendarEvents.findAll();
                 ref.uslugaSelects.findAll();
                 ref.zayavkaRemotes.clear();
-                ref.zayavkaRemotes.findAll();
+                var l =  await ref.zayavkaRemotes.findAll();
                 
 
-                FirebaseMessaging.instance.getToken().then((value) {
-                  String? token = value;
-                  updateUser(user.value, token!, mytoken);
-                });
+                 var fcm  = await FirebaseMessaging.instance.getToken();
+                  
+                  bool ok = await updateUser(company.value+"|"+ user.value, fcm!, mytoken);
+                  if(!ok)
+                    infoToast("Не удалось подписаться на пуш-уведомления");
+               
                 context.go(MyZayavkiPage.routeName);
               } else {
                 isError.value = true;

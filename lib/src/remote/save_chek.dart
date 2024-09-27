@@ -23,7 +23,9 @@ Future<bool> saveChek(Chek a, mytoken) async {
       "date": "$date",
       "fotos": fotos,
       "comment": a.comment,
-      "username": a.username
+      "username": company.value+"|"+user.value,
+      "tenantAttribute":company.value
+
     }
   });
   var dio = Dio();

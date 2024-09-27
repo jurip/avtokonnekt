@@ -1,10 +1,15 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
+import 'package:fluttsec/src/models/pFoto.dart';
+import 'package:fluttsec/src/models/pOborudovanie.dart';
+import 'package:fluttsec/src/models/peremeshenieOborudovaniya.dart';
 import 'package:fluttsec/src/remote/save_chek_with_photos.dart';
 import 'package:fluttsec/src/models/chek.dart';
 import 'package:fluttsec/src/models/chekFoto.dart';
@@ -12,14 +17,14 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
-class ChekiScreen extends HookConsumerWidget {
+class OborudovanieScreen extends HookConsumerWidget {
   void showChekDialog(context, ref) {
     showDialog(
       context: context,
       builder: (_) {
         var nomerController = TextEditingController();
         return AlertDialog(
-          title: Text('Чеки'),
+          title: Text('Оборудование'),
           content: ListView(
             shrinkWrap: true,
             children: [
@@ -38,9 +43,10 @@ class ChekiScreen extends HookConsumerWidget {
               onPressed: () async {
                 // Send them to your email maybe?
                 var nomer = nomerController.text;
-                Chek a = Chek(
+                PeremesheniyeOborudovaniya a = PeremesheniyeOborudovaniya(
                     comment: nomer,
-                    username: user.value,
+                    status: "NOVAYA",
+                    
                     date: DateTime.now());
                 a.saveLocal();
                 Navigator.pop(context);
@@ -62,7 +68,7 @@ class ChekiScreen extends HookConsumerWidget {
         error: (error, _) => Text(error.toString()),
         loading: () => const CircularProgressIndicator(),
         data: (_) {
-          var chekState = ref.cheks.watchAll(remote: false);
+          var chekState = ref.peremesheniyeOborudovaniyas.watchAll(remote: false);
 
           return ListView(
             children: [
@@ -71,7 +77,7 @@ class ChekiScreen extends HookConsumerWidget {
   child: IconButton(onPressed: () => context.go('/settings'), icon: Icon(Icons.settings)),
                  
 ),
-TextButton(onPressed: () => showChekDialog(context, ref), child: Text("Добавить отчет"))
+TextButton(onPressed: () => showChekDialog(context, ref), child: Text("Добавить перемещение"))
 
 ,
 for (var chek in chekState.model.toList(growable: true))
@@ -88,7 +94,7 @@ for (var chek in chekState.model.toList(growable: true))
           ElevatedButton(
               onPressed: chek.status != "NOVAYA"
                   ? null
-                  : () => showChekDialog(context, ref), //showDeleteAlertAvto(context, zayavka, avto),
+                  : () => showDeleteAlertAvto(context, chek),
               child: const Icon(Icons.cancel)),
         ]),
         collapsedBackgroundColor: chek.status != "NOVAYA"
@@ -97,6 +103,72 @@ for (var chek in chekState.model.toList(growable: true))
         children: <Widget>[
           const SizedBox(width: 8),
           const SizedBox(width: 8),
+
+
+        Text(
+            'Оборудование:',
+            style: TextStyle(fontSize: 20),
+          ),
+          ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all<Color>(
+                  Colors.blue.shade100), // Change button color
+            ),
+            child: const Icon(Icons.barcode_reader),
+            onPressed: chek.status != "NOVAYA"
+                ? null
+                : () async {
+                    var res = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const SimpleBarcodeScannerPage(),
+                        ));
+                    if (res is String && res != '-1') {
+                      POborudovanie o = POborudovanie(
+                          peremeshenie: BelongsTo<PeremesheniyeOborudovaniya>(chek),
+                          code: res);
+
+                      o.saveLocal();
+                      chek.saveLocal();
+                      
+                    }
+                  },
+          ),
+          for (POborudovanie oborudovanie in chek.barcode.toList())
+            Container(
+              padding: EdgeInsets.all(0),
+              child: Container(
+                margin: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.blue.shade200,
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Expanded(
+                      child: Text(
+                        style: TextStyle(fontSize: 17),
+                        '${oborudovanie.code}',
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
+                    ),
+                    ElevatedButton(
+                        onPressed: () {
+                          oborudovanie.deleteLocal();
+                          chek.saveLocal();
+                          
+                        },
+                        child: Icon(Icons.cancel))
+                  ],
+                ),
+              ),
+            ),
+
           Text(
             'Фотоотчет:',
             style: TextStyle(fontSize: 20),
@@ -131,7 +203,7 @@ for (var chek in chekState.model.toList(growable: true))
             CarouselSlider(
                 options: CarouselOptions(autoPlay: true, height: 150.0),
                 items: [
-                  for (ChekFoto foto in chek.fotos.toList())
+                  for (PFoto foto in chek.fotos.toList())
                     Stack(children: <Widget>[
                       ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
@@ -169,11 +241,11 @@ for (var chek in chekState.model.toList(growable: true))
                         context: context,
                         builder: (_) {
                           return AlertDialog(
-                            title: Text('Отправка чека'),
+                            title: Text('Отправка отчета'),
                             content: ListView(
                               shrinkWrap: true,
                               children: [
-                                Text('Уверены что хотите отправить чек?')
+                                Text('Уверены что хотите отправить отчет?')
                               ],
                             ),
                             actions: [
@@ -184,12 +256,12 @@ for (var chek in chekState.model.toList(growable: true))
                               ElevatedButton(
                                 onPressed: () async {
                                   checkConnection();
-                                      bool ok = await saveChekWithPhotos(
+                                      bool ok = await saveOborudovanie(
                                           chek, ref, token.value);
                                       if (ok) {
                                         chek.status = "GOTOWAYA";
                                         chek.saveLocal();
-                                        context.pop();
+                                        Navigator.pop(context);
                                       }
                                 },
                                 child: Text('Отправить'),
@@ -206,13 +278,89 @@ for (var chek in chekState.model.toList(growable: true))
           );
         });
   }
-  addChekLocalFiles(Chek chek) async {
+  Future<bool> saveOborudovanie(PeremesheniyeOborudovaniya chek, WidgetRef ref, mytoken) async {
+  for (PFoto foto in chek.fotos.toList()) {
+    var headers = {
+      'Content-Type': 'image/jpeg',
+      'Authorization': 'Bearer $mytoken'
+    };
+    var data = File(foto.fileLocal!).readAsBytesSync();
+
+    var dio = Dio();
+    var response = await dio.request(
+      '${site}rest/files?name=peremeshenie.jpg',
+      options: Options(
+        method: 'POST',
+        headers: headers,
+      ),
+      data: data,
+    );
+
+    if (response.statusCode == 201) {
+      print(response.data);
+      String f = response.data['fileRef'];
+      foto.file = f;
+    } else {
+      return false;
+    }
+  }
+  return saveChek(chek, mytoken);
+}
+Future<bool> saveChek(PeremesheniyeOborudovaniya a, mytoken) async {
+  var headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
+
+  headers.addAll({'Authorization': 'Bearer $mytoken'});
+
+  var date = DateTime.now().toIso8601String();
+  var fotos = [];
+  for (PFoto f in a.fotos.toList()) {
+    if (f.file != null) fotos.add({"file": f.file});
+  }
+  var ob = [];
+   for (POborudovanie f in a.barcode.toList()) {
+    ob.add({"code": f.code});
+  }
+
+  var data = json.encode({
+    "peremeshenie": {
+      "date": "$date",
+      "fotos": fotos,
+      "barcode":ob,
+      "comment": a.comment,
+      "username": company.value+"|"+user.value,
+      "tenantAttribute":company.value
+
+    }
+  });
+  var dio = Dio();
+  var response = await dio.request(
+    '${site}rest/services/flutterService/savePeremeshenie',
+    options: Options(
+      method: 'POST',
+      headers: headers,
+    ),
+    data: data,
+  );
+
+  if (response.statusCode == 200) {
+    print(json.encode(response.data));
+  } else {
+    return false;
+  }
+  return true;
+}
+
+
+  addChekLocalFiles(PeremesheniyeOborudovaniya chek) async {
   var result = await FilePicker.platform.pickFiles(allowMultiple: true);
 
   if (result != null) {
     List<String?> files = result.paths.map((path) => path!).toList();
     for (var file in files) {
-      ChekFoto f = ChekFoto(fileLocal: file, chek: BelongsTo(chek));
+      PFoto f = PFoto(fileLocal: file, peremeshenie: BelongsTo(chek));
       chek.fotos.add(f);
       f.saveLocal();
     }
@@ -223,4 +371,32 @@ for (var chek in chekState.model.toList(growable: true))
     );
   }
 }
+}
+void showDeleteAlertAvto(context, PeremesheniyeOborudovaniya avto) {
+  showDialog(
+    context: context,
+    builder: (_) {
+      return AlertDialog(
+        title: Text('Удаление перемещения'),
+        content: ListView(
+          shrinkWrap: true,
+          children: [Text('Уверены что хотите удалить перемещение?')],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Отмена'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              avto.deleteLocal();
+              
+              Navigator.pop(context);
+            },
+            child: Text('Удалить'),
+          ),
+        ],
+      );
+    },
+  );
 }

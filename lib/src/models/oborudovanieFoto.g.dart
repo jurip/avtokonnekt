@@ -74,7 +74,7 @@ extension OborudovanieFotoRelationshipGraphNodeX
 
 OborudovanieFoto _$OborudovanieFotoFromJson(Map<String, dynamic> json) =>
     OborudovanieFoto(
-      id: json['id'] as String?,
+      id: json['id'],
       file: json['file'] as String?,
       fileLocal: json['fileLocal'] as String?,
       avtomobil: BelongsTo<AvtomobilRemote>.fromJson(

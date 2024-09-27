@@ -66,7 +66,7 @@ extension FotoRelationshipGraphNodeX on RelationshipGraphNode<Foto> {
 // **************************************************************************
 
 Foto _$FotoFromJson(Map<String, dynamic> json) => Foto(
-      id: json['id'] as String?,
+      id: json['id'],
       file: json['file'] as String?,
       fileLocal: json['fileLocal'] as String?,
       avtomobil: BelongsTo<AvtomobilRemote>.fromJson(

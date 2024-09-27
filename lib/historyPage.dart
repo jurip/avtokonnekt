@@ -25,7 +25,7 @@ class HistoryPage extends HookConsumerWidget {
           } else if (value == 1) {
             context.go('/zayavki');
           }else if (value == 2) {
-            context.go('/cheki');
+            context.go('/ofis');
           }
         },
         items: const <BottomNavigationBarItem>[

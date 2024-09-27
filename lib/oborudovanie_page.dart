@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:fluttsec/otchety_screen.dart';
-import 'package:fluttsec/tasks_screen_history.dart';
+import 'package:fluttsec/cheki_screen.dart';
+import 'package:fluttsec/oborudovanie_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class OtchetyPage extends HookConsumerWidget {
+class OborudovaniePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: Container(
+    return  Scaffold(body:  Container(
+          alignment: Alignment.bottomCenter,
           decoration: BoxDecoration(
+          
           image: DecorationImage(
             image: AssetImage("assets/images/11.jpg"),
             fit: BoxFit.fill,
           ),
         ),
-          child: Center(child: OtchetyScreen()),
-      ),
-     bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
+          child: 
+        Center(child: OborudovanieScreen()))
+        ,
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex:2,
         onTap: (value) async {
           if (value == 0) {
             _launchUrl();
@@ -43,8 +45,8 @@ class OtchetyPage extends HookConsumerWidget {
             label: 'Офис',
           )
         ],
-      ),
-    );
+      ),);
+      
   }
   final Uri _url = Uri.parse('content://com.android.calendar/time/');
 Future<void> _launchUrl() async {

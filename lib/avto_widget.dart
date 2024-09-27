@@ -18,6 +18,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
+import 'package:uuid/uuid.dart';
 import 'package:workmanager/workmanager.dart';
 
 class AvtoWidget extends HookConsumerWidget {
@@ -134,7 +135,7 @@ class AvtoWidget extends HookConsumerWidget {
                       context,
                       // Create the SelectionScreen in the next step.
                       MaterialPageRoute(
-                          builder: (context) => UslugaSelectScreen(avto: avto)),
+                          builder: (context) => UslugaSelectScreen(avto: avto, zayavka: zayavka)),
                     );
                     zayavka.saveLocal();
                   },
@@ -304,8 +305,9 @@ class AvtoWidget extends HookConsumerWidget {
                 avto.comment = commentController.text;
                 avto.saveLocal();
                 zayavka.saveLocal();
+                infoToast("комментарий сохранен");
               },
-              child: Icon(Icons.add)),
+              child: Text("сохранить комментарий")),
           ElevatedButton(
               onPressed: avto.status != "NOVAYA"
                   ? null
@@ -329,6 +331,7 @@ class AvtoWidget extends HookConsumerWidget {
                               ElevatedButton(
                                 onPressed: () {
                                   sendAvtoOtchet();
+                                  //ref.avtomobilRemotes.save(avto);
                                   Navigator.pop(context);
                                 },
                                 child: Text('Отправить'),
@@ -435,6 +438,7 @@ class AvtoWidget extends HookConsumerWidget {
     if (!pickedFiles.isEmpty) {
       for (var pickedFile in pickedFiles) {
         OborudovanieFoto f = OborudovanieFoto(
+            id:Uuid().v4(),
             fileLocal: pickedFile.path,
             avtomobil: BelongsTo<AvtomobilRemote>(avto));
         f.saveLocal();

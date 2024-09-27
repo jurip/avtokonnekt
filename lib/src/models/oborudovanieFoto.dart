@@ -1,5 +1,6 @@
 import 'package:flutter_data/flutter_data.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import 'avtomobilRemote.dart';
 
@@ -13,7 +14,7 @@ class OborudovanieFoto extends DataModel<OborudovanieFoto> {
   String? file;
   final String? fileLocal;
   final BelongsTo<AvtomobilRemote> avtomobil;
-  OborudovanieFoto({this.id, this.file,this.fileLocal, required this.avtomobil});
+  OborudovanieFoto({id, this.file,this.fileLocal, required this.avtomobil}):id=id??Uuid().v4();
 
 }
 

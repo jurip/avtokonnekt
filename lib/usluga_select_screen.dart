@@ -6,13 +6,16 @@ import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/usluga.dart';
 import 'package:fluttsec/src/models/uslugaSelect.dart';
+import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 class UslugaSelectScreen extends HookConsumerWidget {
-  const UslugaSelectScreen({super.key, required this.avto});
+  const UslugaSelectScreen({super.key, required this.avto, required this.zayavka});
 
   final AvtomobilRemote avto;
+  final ZayavkaRemote zayavka;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ref.watch(repositoryInitializerProvider).when(
@@ -79,8 +82,11 @@ class UslugaSelectScreen extends HookConsumerWidget {
                                     (element) => element.code == u.code,
                                   )
                                   .forEach(
-                                    (element) => avto.performance_service
-                                        .remove(element),
+                                    (element) {
+                                      
+                                        element.deleteLocal();
+
+                                    },
                                   );
                               selectedUslusas.value = [
                                 ...selectedUslusas.value
@@ -90,9 +96,10 @@ class UslugaSelectScreen extends HookConsumerWidget {
                               ];
                             } else {
                               Usluga newu = Usluga(
+                                 id:Uuid().v4(),
                                   title: u.title,
                                   code: u.code,
-                                  count:1,
+                                  
                                   avtomobil: BelongsTo<AvtomobilRemote>(avto));
 
                               
@@ -103,6 +110,7 @@ class UslugaSelectScreen extends HookConsumerWidget {
                               ];
                             }
                             avto.saveLocal();
+                            zayavka.saveLocal();
                             
                           }),
                       title: Text('${u.title}',style: TextStyle(fontSize: 23)),

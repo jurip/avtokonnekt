@@ -71,7 +71,7 @@ extension OborudovanieRelationshipGraphNodeX
 // **************************************************************************
 
 Oborudovanie _$OborudovanieFromJson(Map<String, dynamic> json) => Oborudovanie(
-      id: json['id'] as String?,
+      id: json['id'],
       code: json['code'] as String?,
       avtomobil: BelongsTo<AvtomobilRemote>.fromJson(
           json['avtomobil'] as Map<String, dynamic>),

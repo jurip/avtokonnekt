@@ -52,7 +52,9 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
       "oborudovanieFotos": oborudovanieFotos,
       "barcode": barcode,
       "performance_service": performance_service,
-      "status": status
+      "status": status,
+      "username": company.value+"|"+user.value,
+      "tenantAttribute":company.value
     }
   });
   var dio = Dio();

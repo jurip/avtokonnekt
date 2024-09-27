@@ -4,6 +4,7 @@ import 'package:fluttsec/main.dart';
 import 'package:fluttsec/src/models/avtomobilLocal.dart';
 import 'package:fluttsec/src/models/calendarEvent.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
+import 'package:fluttsec/src/models/formaAvtomobilRemote.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'zayavkaRemote.g.dart';
 
@@ -28,12 +29,9 @@ class ZayavkaRemote extends DataModel<ZayavkaRemote> {
   final String? lng;
  String? status;
   final HasMany<AvtomobilRemote>? avtomobili ;
-  final HasMany<AvtomobilLocal> avtomobiliLocal = HasMany<AvtomobilLocal>() ;
-  
-  //final HasMany<AvtomobilRemote> otchety  = HasMany<AvtomobilRemote>();
-  final HasMany<CalendarEvent> events = HasMany<CalendarEvent>();
+   final HasMany<CalendarEvent> events = HasMany<CalendarEvent>();
 
-   ZayavkaRemote({this.avtomobili, this.id, this.nomer ,this.nachalo, this.client, this.adres, this.contact_name,
+   ZayavkaRemote({this.avtomobili,this.id, this.nomer ,this.nachalo, this.client, this.adres, this.contact_name,
      this.contact_number, this.end_date_time, this.message, this.service,
        this.comment_address, this.manager_name, this.manager_number, this.lat, this.lng, this.status});
 
@@ -45,7 +43,7 @@ mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
 
   @override
   FutureOr<Map<String, dynamic>> get defaultParams => 
-  {'username': user.value};
+  {'username': company.value+"|"+ user.value};
   @override
   String urlForFindAll(Map<String, dynamic> params) => 
   'services/flutterService/getAllReadyZayavkas';

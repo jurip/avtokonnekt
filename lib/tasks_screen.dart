@@ -1,11 +1,9 @@
-import 'dart:async';
-import 'dart:convert';
+
 
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttsec/avto_widget.dart';
 import 'package:fluttsec/src/models/avtomobilLocal.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:uuid/uuid.dart';
 import 'package:device_calendar/device_calendar.dart';
@@ -22,8 +20,6 @@ import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:fluttsec/src/remote/update_zayavka.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:workmanager/workmanager.dart';
-
 class TasksScreen extends HookConsumerWidget {
   TasksScreen({super.key});
 
@@ -117,7 +113,7 @@ class TasksScreen extends HookConsumerWidget {
       (element) {
         for (var z in element) {
           sendZayavkaToCalendar(z, getLocation('UTC'), myCal);
-          schitatShablonyOtchetov(z);
+          
         }
       },
     );
@@ -142,8 +138,10 @@ class TasksScreen extends HookConsumerWidget {
                     Text('${zayavka.client}', style: TextStyle(fontSize: 18)),
               ),
               Column(children: [
+                if(zayavka.nachalo!=null)
                 Text('${DateFormat('dd.MM.yyyy').format(zayavka.nachalo!)}',
                     style: TextStyle(fontSize: 15)),
+                    if(zayavka.nachalo!=null)
                 Text('${DateFormat('kk:mm').format(zayavka.nachalo!)}',
                     style: TextStyle(fontSize: 15)),
               ]),
@@ -440,14 +438,6 @@ class TasksScreen extends HookConsumerWidget {
       GlobalKey<RefreshIndicatorState>();
 }
 
-void schitatShablonyOtchetov(ZayavkaRemote z) {
-  for (AvtomobilRemote shablon in z.avtomobili?.toList() ?? []) {
-    /*  if(!z.otchety.map((p0) => p0.id,).contains(shablon.id)){
-      AvtomobilRemote o = new AvtomobilRemote(id:shablon.id, nomer: shablon.nomer, marka: shablon.marka, nomerAG: shablon.nomerAG);
-        z. }
-  */
-  }
-}
 
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override

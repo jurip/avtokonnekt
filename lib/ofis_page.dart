@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fluttsec/otchety_screen.dart';
-import 'package:fluttsec/tasks_screen_history.dart';
+import 'package:fluttsec/ofis_screen.dart';
+import 'package:fluttsec/settings_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class OtchetyPage extends HookConsumerWidget {
+class OfisPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
@@ -16,7 +16,7 @@ class OtchetyPage extends HookConsumerWidget {
             fit: BoxFit.fill,
           ),
         ),
-          child: Center(child: OtchetyScreen()),
+          child: Center(child: OfisScreen()),
       ),
      bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,

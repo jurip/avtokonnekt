@@ -16,16 +16,16 @@ Future<bool> sendAvto(
       
  
 
-  for (Foto foto in avto.fotos.toList()) {
+  for (Foto avtoFoto in avto.fotos.toList()) {
     var headers = {
       'Content-Type': 'image/jpeg',
       'Authorization': 'Bearer $mytoken'
     };
-    var data = File(foto.fileLocal!).readAsBytesSync();
+    var data = File(avtoFoto.fileLocal!).readAsBytesSync();
 
     var dio = Dio();
     var response = await dio.request(
-      '${site}rest/files?name=cat-via-direct-request.jpg',
+      '${site}rest/files?name=avtofoto.jpg',
       options: Options(
         method: 'POST',
         headers: headers,
@@ -36,23 +36,23 @@ Future<bool> sendAvto(
     if (response.statusCode == 201) {
       print(response.data);
       String f = response.data['fileRef'];
-      foto.file = f;
+      avtoFoto.file = f;
     } else {
       return false;
     }
 
   }
 
-  for (OborudovanieFoto foto in avto.oborudovanieFotos.toList()) {
+  for (OborudovanieFoto oborudovanieFoto in avto.oborudovanieFotos.toList()) {
     var headers = {
       'Content-Type': 'image/jpeg',
       'Authorization': 'Bearer $mytoken'
     };
-    var data = File(foto.fileLocal!).readAsBytesSync();
+    var data = File(oborudovanieFoto.fileLocal!).readAsBytesSync();
 
     var dio = Dio();
     var response = await dio.request(
-      '${site}rest/files?name=cat-via-direct-request.jpg',
+      '${site}rest/files?name=oborudovanie.jpg',
       options: Options(
         method: 'POST',
         headers: headers,
@@ -63,7 +63,7 @@ Future<bool> sendAvto(
     if (response.statusCode == 201) {
       print(response.data);
       String f = response.data['fileRef'];
-      foto.file = f;
+      oborudovanieFoto.file = f;
     } else {
       return false;
     }

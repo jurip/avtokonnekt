@@ -2,8 +2,7 @@
 import 'dart:async';
 
 import 'package:flutter_data/flutter_data.dart';
-import 'package:fluttsec/main.dart';
-import 'package:fluttsec/src/models/avtomobilRemote.dart';
+
 import 'package:fluttsec/src/models/foto.dart';
 import 'package:fluttsec/src/models/oborudovanie.dart';
 import 'package:fluttsec/src/models/oborudovanieFoto.dart';

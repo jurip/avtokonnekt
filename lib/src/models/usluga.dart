@@ -1,5 +1,6 @@
 import 'package:flutter_data/flutter_data.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import 'avtomobilRemote.dart';
 
@@ -12,11 +13,10 @@ class Usluga extends DataModel<Usluga> {
   final String? id;
   String? title;
   String? code;
-  int count=1;
   String? dop = "N";
 
   final BelongsTo<AvtomobilRemote> avtomobil;
-  Usluga({this.id,required this.title,required this.code,required this.count, required this.avtomobil});
+  Usluga({id,required this.title,required this.code, required this.avtomobil}):id=id??Uuid().v4();
 
 }
 
