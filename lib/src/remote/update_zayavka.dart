@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
 
-Future<bool> updateZayavka(ZayavkaRemote zayavka, String mytoken) async {
+Future<bool> updateZayavka(ZayavkaRemote zayavka, String mytoken, String status) async {
   var headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -12,7 +12,7 @@ Future<bool> updateZayavka(ZayavkaRemote zayavka, String mytoken) async {
   headers.addAll({'Authorization': 'Bearer $mytoken'});
 
   var data = json.encode({
-    "zayavka": {"id": "${zayavka.id}", "status": "VYPOLNENA"}
+    "zayavka": {"id": "${zayavka.id}", "status": status, }
   });
   var dio = Dio();
   var response = await dio.request(

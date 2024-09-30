@@ -161,6 +161,12 @@ class TasksScreen extends HookConsumerWidget {
                           showDeleteAlert(context, zayavka);
                         },
                       ),
+                      ElevatedButton(
+                        child: const Text('Отменилась'),
+                        onPressed: () async {
+                          showDeleteAlert(context, zayavka);
+                        },
+                      ),
                       ListTile(
                           isThreeLine: true,
                           subtitle: Column(
@@ -400,8 +406,39 @@ class TasksScreen extends HookConsumerWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (await updateZayavka(zayavka, token.value))
+                if (await updateZayavka(zayavka, token.value, "VYPOLNENA"))
                   zayavka.status = "VYPOLNENA";
+                zayavka.saveLocal();
+
+                Navigator.pop(context);
+              },
+              child: Text('Готово'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+   void showCancelAlert(context, ZayavkaRemote zayavka) {
+    showDialog(
+      context: context,
+      builder: (_) {
+       
+        return AlertDialog(
+          title: Text('Отмена заявки'),
+          content: ListView(
+            shrinkWrap: true,
+            children: [Text('Уверены что хотите отменить заявку?')],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (await updateZayavka(zayavka, token.value, "OTMENA"))
+                  zayavka.status = "OTMENA";
                 zayavka.saveLocal();
 
                 Navigator.pop(context);
