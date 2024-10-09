@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -15,7 +16,6 @@ import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttsec/oborudovanie_page.dart';
 import 'package:fluttsec/ofis_page.dart';
-import 'package:fluttsec/otchetyPage.dart';
 import 'package:fluttsec/send_zayavka_to_calendar.dart';
 import 'package:fluttsec/settings_page.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
@@ -45,9 +45,21 @@ late final ValueNotifier<String> token;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initLocalStorage();
-  WidgetsFlutterBinding.ensureInitialized();
+
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging messaging = FirebaseMessaging.instance;
+  
+   FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+
+
 
   NotificationSettings settings = await messaging.requestPermission(
     alert: true,
@@ -70,7 +82,7 @@ void main() async {
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     //saveToPrefs(message);
-    newZayavkaFromMessage(message.data);
+    newZayavkaFromMessageZ(message.data);
     if (kDebugMode) {
       print('Handling a foreground message: ${message.messageId}');
       print('Message data: ${message.data}');
@@ -83,15 +95,15 @@ void main() async {
 
   DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
   var cs = await _deviceCalendarPlugin.retrieveCalendars();
-  var cx = cs.data!.firstWhere(
+  var cx = cs.data?.firstWhere(
     (element) => element.name == 'bpium2',
     orElse: () => Calendar(id: null),
   );
-  if (cx.id == null) {
+  if (cx?.id == null) {
     var r = await _deviceCalendarPlugin.createCalendar("bpium2");
     myCal = r.data;
   } else {
-    myCal = cx.id;
+    myCal = cx?.id;
   }
    company = ValueNotifier(localStorage.getItem('company') ?? '');
   company.addListener(() {
@@ -109,6 +121,20 @@ void main() async {
   token.addListener(() {
     localStorage.setItem('token', token.value.toString());
   });
+
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+String? version = localStorage.getItem('version');
+String newVersion = packageInfo.version;
+if(version!=null){
+  if(version!=newVersion){
+    user.value = '';
+    password.value = '';
+    
+  }
+}
+localStorage.setItem("version", newVersion);
+
 
 /*
     Workmanager().initialize(
@@ -132,7 +158,7 @@ class AppMy extends HookConsumerWidget {
         error: (error, _) => Text(error.toString()),
         loading: () => const CircularProgressIndicator(),
         data: (_) {
-          return MyHomePage();
+          return MyHomePage(ref: ref);
         });
   }
 }
@@ -226,8 +252,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           //newZayavkaFromMessage(message.data);
         } else {
           _lastMessage = 'Received a data message: ${message.data}';
-
-          newZayavkaFromMessage(message.data);
+          //saveToPrefs(message);
+          newZayavkaFromMessageWithCalendar(widget.ref, message.data);
         }
       });
     });
@@ -299,6 +325,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 }
 
 class MyHomePage extends StatefulWidget {
+  final WidgetRef ref;
+  const MyHomePage ({ Key? key, required this.ref }): super(key: key);
+
   @override
   State<StatefulWidget> createState() => _MyHomePageState();
 }
@@ -418,12 +447,7 @@ final GoRouter __router = GoRouter(
               return HistoryPage();
             },
           ),
-          GoRoute(
-            path: 'otchety',
-            builder: (BuildContext context, GoRouterState state) {
-              return OtchetyPage();
-            },
-          ),
+         
           GoRoute(
             path: 'login',
             builder: (BuildContext context, GoRouterState state) {
@@ -454,15 +478,24 @@ Future<void> _launchUrl() async {
     throw Exception('Could not launch $_url');
   }
 }
+Future<ZayavkaRemote> newZayavkaFromMessageWithCalendar(WidgetRef ref, Map data) async {
 
-void newZayavkaFromMessage(Map data) {
+  
+
+  ZayavkaRemote z = await newZayavkaFromMessage(data, ref);
+  sendZayavkaToCalendar(ref, z, getLocation('UTC'), myCal);
+  return z;
+}
+
+Future<ZayavkaRemote> newZayavkaFromMessage( Map data,WidgetRef ref) async {
   var id = data["id"];
   var nomer = data["nomer"];
   var mes = data["message"];
   var adres = data["adres"];
   var nachalo = data["nachalo"];
   var format = new DateFormat("yyyy-MM-dd hh:mm:ss");
-  DateTime nachalo_date = format.parse(nachalo);
+
+  DateTime nachalo_date =  nachalo==null?DateTime.now():format.parse(nachalo);
   DateTime end_date_time = format.parse(data["end_date_time"]);
   var comment_address = data["comment_address"];
   var service = data["service"];
@@ -473,7 +506,7 @@ void newZayavkaFromMessage(Map data) {
   var manager_number = data["manager_number"];
   var lat = data["lat"];
   var lng = data["lng"];
-  var status = "NOVAYA";
+  var status = data['status'];
   Set<AvtomobilRemote> avs = {};
   if (data["avtomobili"] != null) {
     List avtomobili = jsonDecode(data["avtomobili"]);
@@ -488,7 +521,10 @@ void newZayavkaFromMessage(Map data) {
       ar.saveLocal();
     }
   }
-  ZayavkaRemote z = ZayavkaRemote(
+
+  ZayavkaRemote? z = await  ref.zayavkaRemotes.findOne(data["id"]);
+  if(z ==null){
+   z = ZayavkaRemote(
       id: id,
       avtomobili: avs.asHasMany,
       adres: adres,
@@ -507,10 +543,80 @@ void newZayavkaFromMessage(Map data) {
       lng: lng,
       status: status);
 
-  z.saveLocal();
+   z.saveLocal();  
+  }else{
+    z.status = status;
+      
 
-  sendZayavkaToCalendar(z, getLocation('UTC'), myCal);
+  }
+  
+
+  return z;
 }
+
+Future<ZayavkaRemote> newZayavkaFromMessageZ( Map data) async {
+  var id = data["id"];
+  var nomer = data["nomer"];
+  var mes = data["message"];
+  var adres = data["adres"];
+  var nachalo = data["nachalo"];
+  var format = new DateFormat("yyyy-MM-dd hh:mm:ss");
+
+  DateTime nachalo_date =  nachalo==null?DateTime.now():format.parse(nachalo);
+  DateTime end_date_time = format.parse(data["end_date_time"]);
+  var comment_address = data["comment_address"];
+  var service = data["service"];
+  var client = data["client"];
+  var contact_name = data["contact_name"];
+  var contact_number = data["contact_number"];
+  var manager_name = data["manager_name"];
+  var manager_number = data["manager_number"];
+  var lat = data["lat"];
+  var lng = data["lng"];
+  var status = data['status'];
+  Set<AvtomobilRemote> avs = {};
+  if (data["avtomobili"] != null) {
+    List avtomobili = jsonDecode(data["avtomobili"]);
+    for (var i in avtomobili) {
+      var a = i["nomer_avto"];
+      var s = i["marka_avto"];
+      var ag = i["nomerAG"];
+      var aid = i["id"];
+      AvtomobilRemote ar = AvtomobilRemote(
+          id: aid, nomer: a, marka: s, nomerAG: ag, status: "NOVAYA");
+      avs.add(ar);
+      ar.saveLocal();
+    }
+  }
+
+  ZayavkaRemote? z;
+ 
+   z = ZayavkaRemote(
+      id: id,
+      avtomobili: avs.asHasMany,
+      adres: adres,
+      client: client,
+      comment_address: comment_address,
+      contact_name: contact_name,
+      contact_number: contact_number,
+      nachalo: nachalo_date,
+      end_date_time: end_date_time,
+      service: service,
+      manager_name: manager_name,
+      manager_number: manager_number,
+      nomer: nomer,
+      message: mes,
+      lat: lat,
+      lng: lng,
+      status: status);
+
+   z.saveLocal();  
+ 
+  
+
+  return z;
+}
+
 
 Future<bool> checkConnection() async {
   try {
@@ -733,7 +839,7 @@ void infoToast(String s) {
       fontSize: 16.0);
 }
 
-Future<bool> loadZayavkaFromPrefs() async {
+Future<bool> loadZayavkaFromPrefs(WidgetRef ref) async {
   var prefs = await SharedPreferences.getInstance();
   await prefs.reload();
   // Do the staff
@@ -742,7 +848,7 @@ Future<bool> loadZayavkaFromPrefs() async {
     if (key.startsWith("zayavka")) {
       String z = prefs.getString(key)!;
       var map = jsonDecode(z);
-      newZayavkaFromMessage(map);
+      newZayavkaFromMessageWithCalendar(ref, map);
       return await prefs.remove(key);
     }
   }

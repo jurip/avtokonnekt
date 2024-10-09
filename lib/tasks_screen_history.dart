@@ -26,6 +26,8 @@ var avtos = useState([]);
   prefs.reload().then((_) {
     // Do the staff
      avtos.value = prefs.getKeys().toList();
+//todo
+     prefs.clear();
   })
 });
 

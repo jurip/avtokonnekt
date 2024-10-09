@@ -30,6 +30,8 @@ class SettingsScreen extends HookConsumerWidget {
                       
                     },
                   ),
+                 
+
                    ElevatedButton(
                     child: const Text('Загрузить заявки с сервера(неотправленные отчеты будут потеряны)'),
                     onPressed: () {
@@ -44,13 +46,7 @@ class SettingsScreen extends HookConsumerWidget {
                       
                     },
                   ),
-                 ElevatedButton(
-                    child: const Text('Отчеты'),
-                    onPressed: () {
-                      context.go('/otchety');
-                      
-                    },
-                  ),
+                
                   SizedBox(height: 300,),
                   Image(image: AssetImage("assets/images/logoblack.png")),
                   SizedBox(height: 20,),
@@ -68,7 +64,6 @@ void logout(WidgetRef ref) {
     password.value = '';
     ref.currentUsers.clear();
     ref.avtomobilRemotes.clear();
-    ref.calendarEvents.clear();
     ref.chekFotos.clear();
     ref.cheks.clear();
     ref.duties.clear();

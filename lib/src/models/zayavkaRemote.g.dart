@@ -17,13 +17,6 @@ mixin $ZayavkaRemoteLocalAdapter on LocalAdapter<ZayavkaRemote> {
       type: 'avtomobilRemotes',
       kind: 'HasMany',
       instance: (_) => (_ as ZayavkaRemote).avtomobili,
-    ),
-    'events': RelationshipMeta<CalendarEvent>(
-      name: 'events',
-      inverseName: 'zayavka',
-      type: 'calendarEvents',
-      kind: 'HasMany',
-      instance: (_) => (_ as ZayavkaRemote).events,
     )
   };
 
@@ -72,14 +65,6 @@ extension ZayavkaRemoteRelationshipGraphNodeX
     final meta = $ZayavkaRemoteLocalAdapter
             ._kZayavkaRemoteRelationshipMetas['avtomobili']
         as RelationshipMeta<AvtomobilRemote>;
-    return meta.clone(
-        parent: this is RelationshipMeta ? this as RelationshipMeta : null);
-  }
-
-  RelationshipGraphNode<CalendarEvent> get events {
-    final meta =
-        $ZayavkaRemoteLocalAdapter._kZayavkaRemoteRelationshipMetas['events']
-            as RelationshipMeta<CalendarEvent>;
     return meta.clone(
         parent: this is RelationshipMeta ? this as RelationshipMeta : null);
   }

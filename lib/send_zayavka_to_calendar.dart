@@ -1,11 +1,17 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter_data/flutter_data.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttsec/login_page.dart';
+import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/calendarEvent.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
 
-sendZayavkaToCalendar(ZayavkaRemote z, Location _currentLocation, myCal) async {
+
+sendZayavkaToCalendar(WidgetRef ref,  ZayavkaRemote z, Location _currentLocation, myCal) async {
   DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
-   if (z.events.isEmpty) {
+   var es =  await ref.calendarEvents.findAll(remote: false);
+   var exists =es.any((element) => element.zayavka.value?.nomer == z.nomer,);
+   if (!exists) {
       if (z.nachalo != null) {
         Event event = Event(myCal, title: z.nomer);
 
@@ -18,7 +24,6 @@ sendZayavkaToCalendar(ZayavkaRemote z, Location _currentLocation, myCal) async {
             await _deviceCalendarPlugin.createOrUpdateEvent(event);
         CalendarEvent ce =
             CalendarEvent(zayavka: BelongsTo(z), calId: r!.data!);
-        z.events.add(ce);
         ce.saveLocal();
         z.saveLocal();
       }

@@ -46,12 +46,12 @@ class AvtoWidget extends HookConsumerWidget {
                 '${avto.nomer}\n${avto.marka}${(avto.nomerAG == null || avto.nomerAG == "null"|| avto.nomerAG == "") ? '' : '\nАГ:' + avto.nomerAG!}'),
           ),
           ElevatedButton(
-              onPressed: avto.status != "NOVAYA"
+              onPressed: notNew
                   ? null
                   : () => showDeleteAlertAvto(context, zayavka, avto),
               child: const Icon(Icons.cancel)),
         ]),
-        collapsedBackgroundColor: avto.status != "NOVAYA"
+        collapsedBackgroundColor: notNew
             ? Colors.grey.shade200
             : Color.fromARGB(255, 247, 130, 139),
         children: <Widget>[
@@ -68,7 +68,7 @@ class AvtoWidget extends HookConsumerWidget {
                     Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.attach_file_rounded),
-              onPressed: avto.status != "NOVAYA"
+              onPressed: notNew
                   ? null
                   : () {
                       addFotos(zayavka, avto);
@@ -80,7 +80,7 @@ class AvtoWidget extends HookConsumerWidget {
                     Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.add_a_photo),
-              onPressed: avto.status != "NOVAYA"
+              onPressed: notNew
                   ? null
                   : () {
                       addFoto(zayavka, avto);
@@ -108,7 +108,7 @@ class AvtoWidget extends HookConsumerWidget {
                               color: Colors.black.withOpacity(0.5),
                               size: 50,
                             ),
-                            onPressed: avto.status != "NOVAYA"
+                            onPressed: notNew
                                 ? null
                                 : () {
                                     foto.deleteLocal();
@@ -128,7 +128,7 @@ class AvtoWidget extends HookConsumerWidget {
                   Colors.blue.shade100), // Change button color
             ),
             child: const Icon(Icons.build_circle_rounded),
-            onPressed: avto.status != "NOVAYA"
+            onPressed: notNew
                 ? null
                 : () async {
                     UslugaSelect? result = await Navigator.push(
@@ -161,7 +161,7 @@ class AvtoWidget extends HookConsumerWidget {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: avto.status != "NOVAYA"
+                      onPressed: notNew
                           ? null
                           : () {
                               usluga.dop = usluga.dop == "Y" ? "N" : "Y";
@@ -187,7 +187,7 @@ class AvtoWidget extends HookConsumerWidget {
                   Colors.blue.shade100), // Change button color
             ),
             child: const Icon(Icons.barcode_reader),
-            onPressed: avto.status != "NOVAYA"
+            onPressed: notNew
                 ? null
                 : () async {
                     var res = await Navigator.push(
@@ -247,7 +247,7 @@ class AvtoWidget extends HookConsumerWidget {
                     Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.attach_file),
-              onPressed: avto.status != "NOVAYA"
+              onPressed: notNew
                   ? null
                   : () {
                       addOborudovanieFotos(zayavka, avto);
@@ -259,7 +259,7 @@ class AvtoWidget extends HookConsumerWidget {
                     Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.add_a_photo),
-              onPressed: avto.status != "NOVAYA"
+              onPressed: notNew
                   ? null
                   : () {
                       addOborudovanieFoto(zayavka, avto);
@@ -309,7 +309,7 @@ class AvtoWidget extends HookConsumerWidget {
               },
               child: Text("сохранить комментарий")),
           ElevatedButton(
-              onPressed: avto.status != "NOVAYA"
+              onPressed: notNew
                   ? null
                   : () async {
                       showDialog(
@@ -329,7 +329,8 @@ class AvtoWidget extends HookConsumerWidget {
                                 child: Text('Отмена'),
                               ),
                               ElevatedButton(
-                                onPressed: () {
+                                onPressed: () async {
+                                  if(await checkConnection())
                                   sendAvtoOtchet();
                                   //ref.avtomobilRemotes.save(avto);
                                   Navigator.pop(context);
@@ -345,15 +346,16 @@ class AvtoWidget extends HookConsumerWidget {
         ]);
   }
 
+  bool get notNew => avto.status!="NOVAYA";
+
   Future<void> sendAvtoOtchet() async {
     avto.status = 'TEMP';
     avto.saveLocal();
     zayavka.saveLocal();
     bool r = false;
-    if (avto.zayavka?.id == null) showError(avto.toString());
     try {
       r = await sendAvto(avto, token.value);
-    } on Exception catch (e) {
+    }  catch (e) {
       /*
       avto.status = "PENDING";
       avto.saveLocal();
@@ -414,6 +416,7 @@ class AvtoWidget extends HookConsumerWidget {
       );
 
       */
+     
     }
 
     if (r) {

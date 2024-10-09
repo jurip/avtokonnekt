@@ -23,13 +23,17 @@ class AvtomobilRemote extends DataModel<AvtomobilRemote> {
    String? comment;
   final BelongsTo<ZayavkaRemote>? zayavka;
 
-   String? status;
+   String? status = "NOVAYA";
   final HasMany<Foto> fotos = HasMany<Foto>();
   final HasMany<Usluga> performance_service = HasMany<Usluga>();
   final HasMany<Oborudovanie> barcode = HasMany<Oborudovanie>();
   final HasMany<OborudovanieFoto> oborudovanieFotos = HasMany<OborudovanieFoto>();
   AvtomobilRemote( {this.id, required this.nomer, this.marka,this.nomerAG,this.comment, this.status, this.date, BelongsTo<ZayavkaRemote>? zayavka}) :
     zayavka = zayavka ?? BelongsTo();
+
+  bool isOpen(){
+     return status == "NOVAYA";
+  }
 }
 
 mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {

@@ -13,7 +13,6 @@ mixin $CalendarEventLocalAdapter on LocalAdapter<CalendarEvent> {
       {
     'zayavka': RelationshipMeta<ZayavkaRemote>(
       name: 'zayavka',
-      inverseName: 'events',
       type: 'zayavkaRemotes',
       kind: 'BelongsTo',
       instance: (_) => (_ as CalendarEvent).zayavka,

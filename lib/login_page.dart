@@ -94,7 +94,14 @@ class LoginPage extends HookConsumerWidget {
         ElevatedButton(
           onPressed: () async {
             if (!await checkConnection()) return;
-            token.value = await getTokenFromServer();
+
+            try{
+              token.value = await getTokenFromServer();
+            }
+            catch(e){
+              return;
+            }
+            
             var mytoken = token.value;
             String t = loginController.text;
             if (t != "") {
@@ -107,7 +114,6 @@ class LoginPage extends HookConsumerWidget {
                 ref.duties.findAll();
                 ref.currentUsers.clear();
                 ref.currentUsers.findAll();
-                ref.calendarEvents.findAll();
                 ref.uslugaSelects.findAll();
                 ref.zayavkaRemotes.clear();
                 var l =  await ref.zayavkaRemotes.findAll();

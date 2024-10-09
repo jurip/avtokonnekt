@@ -183,14 +183,17 @@ for (var chek in chekState.model.toList(growable: true))
                               ),
                               ElevatedButton(
                                 onPressed: () async {
-                                  checkConnection();
+                                  if(await checkConnection()){
+                                      infoToast("Посылаем");
                                       bool ok = await saveChekWithPhotos(
                                           chek, ref, token.value);
                                       if (ok) {
                                         chek.status = "GOTOWAYA";
                                         chek.saveLocal();
+                                        infoToast("Готово");
                                         context.pop();
                                       }
+                                  }
                                 },
                                 child: Text('Отправить'),
                               ),

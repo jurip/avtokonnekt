@@ -31,7 +31,7 @@ class TasksScreen extends HookConsumerWidget {
       (previous, current) async {
         String s = current.name;
         if(s=='resumed'){
-         if(await loadZayavkaFromPrefs()){
+         if(await loadZayavkaFromPrefs(ref)){
          }
         }
       }
@@ -41,7 +41,7 @@ class TasksScreen extends HookConsumerWidget {
      
 
  useEffect(() {
-      loadZayavkaFromPrefs();
+      loadZayavkaFromPrefs(ref);
       return () => {};
     }, []);
    
@@ -112,7 +112,7 @@ class TasksScreen extends HookConsumerWidget {
     ref.zayavkaRemotes.findAll().asStream().forEach(
       (element) {
         for (var z in element) {
-          sendZayavkaToCalendar(z, getLocation('UTC'), myCal);
+          sendZayavkaToCalendar(ref, z, getLocation('UTC'), myCal);
           
         }
       },
@@ -164,7 +164,7 @@ class TasksScreen extends HookConsumerWidget {
                       ElevatedButton(
                         child: const Text('Отменилась'),
                         onPressed: () async {
-                          showDeleteAlert(context, zayavka);
+                          showCancelAlert(context, zayavka);
                         },
                       ),
                       ListTile(
@@ -392,12 +392,15 @@ class TasksScreen extends HookConsumerWidget {
       context: context,
       builder: (_) {
         var codeController = TextEditingController();
+        var hasnoopendAvtos = zayavka.avtomobili?.where((p0) => p0.isOpen()).isEmpty;
+
+        var text = hasnoopendAvtos==false?"У вас остались незакрытые отчеты":'Уверены что хотите закрыть заявку?';
 
         return AlertDialog(
           title: Text('Закрытие заявки'),
           content: ListView(
             shrinkWrap: true,
-            children: [Text('Уверены что хотите закрыть заявку?')],
+            children: [Text(text)],
           ),
           actions: [
             ElevatedButton(
@@ -405,13 +408,13 @@ class TasksScreen extends HookConsumerWidget {
               child: Text('Отмена'),
             ),
             ElevatedButton(
-              onPressed: () async {
+              onPressed: hasnoopendAvtos==true? () async {
                 if (await updateZayavka(zayavka, token.value, "VYPOLNENA"))
                   zayavka.status = "VYPOLNENA";
                 zayavka.saveLocal();
 
                 Navigator.pop(context);
-              },
+              }:null,
               child: Text('Готово'),
             ),
           ],
