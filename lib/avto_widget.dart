@@ -331,6 +331,7 @@ class AvtoWidget extends HookConsumerWidget {
                               ElevatedButton(
                                 onPressed: () async {
                                   if(await checkConnection())
+                                  infoToast("Отппраявляем");
                                   sendAvtoOtchet();
                                   //ref.avtomobilRemotes.save(avto);
                                   Navigator.pop(context);
@@ -355,6 +356,7 @@ class AvtoWidget extends HookConsumerWidget {
     bool r = false;
     try {
       r = await sendAvto(avto, token.value);
+      
     }  catch (e) {
       /*
       avto.status = "PENDING";
