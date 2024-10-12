@@ -358,6 +358,7 @@ class AvtoWidget extends HookConsumerWidget {
       r = await sendAvto(avto, token.value);
       
     }  catch (e) {
+      infoToast("Ошибка при отправке\n"+e.toString());
       /*
       avto.status = "PENDING";
       avto.saveLocal();

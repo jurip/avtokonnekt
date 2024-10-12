@@ -71,7 +71,7 @@ class ChekiScreen extends HookConsumerWidget {
   child: IconButton(onPressed: () => context.go('/settings'), icon: Icon(Icons.settings)),
                  
 ),
-TextButton(onPressed: () => showChekDialog(context, ref), child: Text("Добавить отчет"))
+ElevatedButton(onPressed: () => showChekDialog(context, ref), child: Text("Добавить отчет"))
 
 ,
 for (var chek in chekState.model.toList(growable: true))
@@ -88,7 +88,7 @@ for (var chek in chekState.model.toList(growable: true))
           ElevatedButton(
               onPressed: chek.status != "NOVAYA"
                   ? null
-                  : () => showChekDialog(context, ref), //showDeleteAlertAvto(context, zayavka, avto),
+                  : () => showDeleteAlertAvto(context, chek), //showDeleteAlertAvto(context, zayavka, avto),
               child: const Icon(Icons.cancel)),
         ]),
         collapsedBackgroundColor: chek.status != "NOVAYA"
@@ -185,13 +185,25 @@ for (var chek in chekState.model.toList(growable: true))
                                 onPressed: () async {
                                   if(await checkConnection()){
                                       infoToast("Посылаем");
-                                      bool ok = await saveChekWithPhotos(
+                                      
+                                      chek.status = "TEMP";
+                                      chek.saveLocal();
+                                      bool ok = false;
+                                      try{
+                                        ok = 
+                                      await saveChekWithPhotos(
                                           chek, ref, token.value);
+                                      }catch(e){
+                                            infoToast("Ошибка при отправке\n"+e.toString());
+                                      }
                                       if (ok) {
                                         chek.status = "GOTOWAYA";
                                         chek.saveLocal();
                                         infoToast("Готово");
                                         context.pop();
+                                      }else{
+                                        infoToast("Не удалось отправить");
+                                        chek.status = "NOVAYA";
                                       }
                                   }
                                 },
@@ -225,5 +237,34 @@ for (var chek in chekState.model.toList(growable: true))
       content: const Text('файлы не добавлены'),
     );
   }
+}
+
+void showDeleteAlertAvto(context, Chek avto) {
+  showDialog(
+    context: context,
+    builder: (_) {
+      return AlertDialog(
+        title: Text('Удаление чека'),
+        content: ListView(
+          shrinkWrap: true,
+          children: [Text('Уверены что хотите удалить чек?')],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Отмена'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              avto.deleteLocal();
+              
+              Navigator.pop(context);
+            },
+            child: Text('Удалить'),
+          ),
+        ],
+      );
+    },
+  );
 }
 }

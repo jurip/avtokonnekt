@@ -77,7 +77,7 @@ class OborudovanieScreen extends HookConsumerWidget {
   child: IconButton(onPressed: () => context.go('/settings'), icon: Icon(Icons.settings)),
                  
 ),
-TextButton(onPressed: () => showChekDialog(context, ref), child: Text("Добавить перемещение"))
+ElevatedButton(onPressed: () => showChekDialog(context, ref), child: Text("Добавить перемещение"))
 
 ,
 for (var chek in chekState.model.toList(growable: true))
@@ -258,13 +258,23 @@ for (var chek in chekState.model.toList(growable: true))
                                   if(await checkConnection()){
                                       
                                     infoToast("Посылаем");
-                                      bool ok = await saveOborudovanie(
+                                    chek.saveLocal();
+                                    chek.status = "TEMP";
+                                    bool ok = false;
+                                    try{
+                                       ok = await saveOborudovanie(
                                           chek, ref, token.value);
+                                    }catch(e){
+                                      infoToast("Ошибка при отправке\n"+e.toString());
+                                    }
                                       if (ok) {
                                         chek.status = "GOTOWAYA";
                                         chek.saveLocal();
                                         infoToast("Готово");
                                         Navigator.pop(context);
+                                      }else{
+                                        infoToast("Не удалось послать");
+                                        chek.status="NOVAYA";
                                       }
                                 }
                                 },
