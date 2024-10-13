@@ -4,7 +4,6 @@ import 'package:fluttsec/main.dart';
 import 'package:fluttsec/src/models/avtomobilLocal.dart';
 import 'package:fluttsec/src/models/calendarEvent.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
-import 'package:fluttsec/src/models/formaAvtomobilRemote.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'zayavkaRemote.g.dart';
 

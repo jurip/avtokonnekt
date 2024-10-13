@@ -11,6 +11,7 @@ import 'package:fluttsec/src/models/chekFoto.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
+import 'package:uuid/uuid.dart';
 
 class ChekiScreen extends HookConsumerWidget {
   void showChekDialog(context, ref) {
@@ -39,6 +40,7 @@ class ChekiScreen extends HookConsumerWidget {
                 // Send them to your email maybe?
                 var nomer = nomerController.text;
                 Chek a = Chek(
+                    id:Uuid().v4(),
                     comment: nomer,
                     username: user.value,
                     date: DateTime.now());
@@ -228,7 +230,6 @@ for (var chek in chekState.model.toList(growable: true))
     List<String?> files = result.paths.map((path) => path!).toList();
     for (var file in files) {
       ChekFoto f = ChekFoto(fileLocal: file, chek: BelongsTo(chek));
-      chek.fotos.add(f);
       f.saveLocal();
     }
     chek.saveLocal();

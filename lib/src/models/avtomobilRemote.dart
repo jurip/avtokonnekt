@@ -49,7 +49,7 @@ mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {
 
   @override
   FutureOr<Map<String, dynamic>> get defaultParams => 
-  {'username': user.value};
+  {'username': company.value+"|"+user.value};
   
   @override
   String get baseUrl => '${site}rest/';

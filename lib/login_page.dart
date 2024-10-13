@@ -93,7 +93,10 @@ class LoginPage extends HookConsumerWidget {
           child: 
         ElevatedButton(
           onPressed: () async {
-            if (!await checkConnection()) return;
+            if (!await checkConnection()){ 
+              
+              return;
+            }
 
             try{
               token.value = await getTokenFromServer();
@@ -114,6 +117,7 @@ class LoginPage extends HookConsumerWidget {
                 ref.duties.findAll();
                 ref.currentUsers.clear();
                 ref.currentUsers.findAll();
+                ref.uslugaSelects.clear();
                 ref.uslugaSelects.findAll();
                 ref.zayavkaRemotes.clear();
                 var l =  await ref.zayavkaRemotes.findAll();

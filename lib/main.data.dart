@@ -15,7 +15,6 @@ import 'package:fluttsec/src/models/chekFoto.dart';
 import 'package:fluttsec/src/models/chek.dart';
 import 'package:fluttsec/src/models/currentUser.dart';
 import 'package:fluttsec/src/models/duty.dart';
-import 'package:fluttsec/src/models/formaAvtomobilRemote.dart';
 import 'package:fluttsec/src/models/foto.dart';
 import 'package:fluttsec/src/models/myToken.dart';
 import 'package:fluttsec/src/models/myUser.dart';
@@ -54,7 +53,6 @@ final repositoryProviders = <String, Provider<Repository<DataModelMixin>>>{
 'cheks': cheksRepositoryProvider,
 'currentUsers': currentUsersRepositoryProvider,
 'duties': dutiesRepositoryProvider,
-'formaAvtomobilRemotes': formaAvtomobilRemotesRepositoryProvider,
 'fotos': fotosRepositoryProvider,
 'myTokens': myTokensRepositoryProvider,
 'myUsers': myUsersRepositoryProvider,
@@ -77,7 +75,6 @@ final repositoryInitializerProvider =
     DataHelpers.setInternalType<Chek>('cheks');
     DataHelpers.setInternalType<CurrentUser>('currentUsers');
     DataHelpers.setInternalType<Duty>('duties');
-    DataHelpers.setInternalType<FormaAvtomobilRemote>('formaAvtomobilRemotes');
     DataHelpers.setInternalType<Foto>('fotos');
     DataHelpers.setInternalType<MyToken>('myTokens');
     DataHelpers.setInternalType<MyUser>('myUsers');
@@ -89,8 +86,8 @@ final repositoryInitializerProvider =
     DataHelpers.setInternalType<UslugaSelect>('uslugaSelects');
     DataHelpers.setInternalType<Usluga>('uslugas');
     DataHelpers.setInternalType<ZayavkaRemote>('zayavkaRemotes');
-    final adapters = <String, RemoteAdapter>{'avtomobilLocals': ref.watch(internalAvtomobilLocalsRemoteAdapterProvider), 'avtomobilRemotes': ref.watch(internalAvtomobilRemotesRemoteAdapterProvider), 'calendarEvents': ref.watch(internalCalendarEventsRemoteAdapterProvider), 'chekFotos': ref.watch(internalChekFotosRemoteAdapterProvider), 'cheks': ref.watch(internalCheksRemoteAdapterProvider), 'currentUsers': ref.watch(internalCurrentUsersRemoteAdapterProvider), 'duties': ref.watch(internalDutiesRemoteAdapterProvider), 'formaAvtomobilRemotes': ref.watch(internalFormaAvtomobilRemotesRemoteAdapterProvider), 'fotos': ref.watch(internalFotosRemoteAdapterProvider), 'myTokens': ref.watch(internalMyTokensRemoteAdapterProvider), 'myUsers': ref.watch(internalMyUsersRemoteAdapterProvider), 'oborudovanieFotos': ref.watch(internalOborudovanieFotosRemoteAdapterProvider), 'oborudovanies': ref.watch(internalOborudovaniesRemoteAdapterProvider), 'pFotos': ref.watch(internalPFotosRemoteAdapterProvider), 'pOborudovanies': ref.watch(internalPOborudovaniesRemoteAdapterProvider), 'peremesheniyeOborudovaniyas': ref.watch(internalPeremesheniyeOborudovaniyasRemoteAdapterProvider), 'uslugaSelects': ref.watch(internalUslugaSelectsRemoteAdapterProvider), 'uslugas': ref.watch(internalUslugasRemoteAdapterProvider), 'zayavkaRemotes': ref.watch(internalZayavkaRemotesRemoteAdapterProvider)};
-    final remotes = <String, bool>{'avtomobilLocals': true, 'avtomobilRemotes': true, 'calendarEvents': true, 'chekFotos': true, 'cheks': true, 'currentUsers': true, 'duties': true, 'formaAvtomobilRemotes': true, 'fotos': true, 'myTokens': true, 'myUsers': true, 'oborudovanieFotos': true, 'oborudovanies': true, 'pFotos': true, 'pOborudovanies': true, 'peremesheniyeOborudovaniyas': true, 'uslugaSelects': true, 'uslugas': true, 'zayavkaRemotes': true};
+    final adapters = <String, RemoteAdapter>{'avtomobilLocals': ref.watch(internalAvtomobilLocalsRemoteAdapterProvider), 'avtomobilRemotes': ref.watch(internalAvtomobilRemotesRemoteAdapterProvider), 'calendarEvents': ref.watch(internalCalendarEventsRemoteAdapterProvider), 'chekFotos': ref.watch(internalChekFotosRemoteAdapterProvider), 'cheks': ref.watch(internalCheksRemoteAdapterProvider), 'currentUsers': ref.watch(internalCurrentUsersRemoteAdapterProvider), 'duties': ref.watch(internalDutiesRemoteAdapterProvider), 'fotos': ref.watch(internalFotosRemoteAdapterProvider), 'myTokens': ref.watch(internalMyTokensRemoteAdapterProvider), 'myUsers': ref.watch(internalMyUsersRemoteAdapterProvider), 'oborudovanieFotos': ref.watch(internalOborudovanieFotosRemoteAdapterProvider), 'oborudovanies': ref.watch(internalOborudovaniesRemoteAdapterProvider), 'pFotos': ref.watch(internalPFotosRemoteAdapterProvider), 'pOborudovanies': ref.watch(internalPOborudovaniesRemoteAdapterProvider), 'peremesheniyeOborudovaniyas': ref.watch(internalPeremesheniyeOborudovaniyasRemoteAdapterProvider), 'uslugaSelects': ref.watch(internalUslugaSelectsRemoteAdapterProvider), 'uslugas': ref.watch(internalUslugasRemoteAdapterProvider), 'zayavkaRemotes': ref.watch(internalZayavkaRemotesRemoteAdapterProvider)};
+    final remotes = <String, bool>{'avtomobilLocals': true, 'avtomobilRemotes': true, 'calendarEvents': true, 'chekFotos': true, 'cheks': true, 'currentUsers': true, 'duties': true, 'fotos': true, 'myTokens': true, 'myUsers': true, 'oborudovanieFotos': true, 'oborudovanies': true, 'pFotos': true, 'pOborudovanies': true, 'peremesheniyeOborudovaniyas': true, 'uslugaSelects': true, 'uslugas': true, 'zayavkaRemotes': true};
 
     await ref.watch(graphNotifierProvider).initialize();
 
@@ -115,7 +112,6 @@ extension RepositoryWidgetRefX on WidgetRef {
   Repository<Chek> get cheks => watch(cheksRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<CurrentUser> get currentUsers => watch(currentUsersRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<Duty> get duties => watch(dutiesRepositoryProvider)..remoteAdapter.internalWatch = watch;
-  Repository<FormaAvtomobilRemote> get formaAvtomobilRemotes => watch(formaAvtomobilRemotesRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<Foto> get fotos => watch(fotosRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<MyToken> get myTokens => watch(myTokensRepositoryProvider)..remoteAdapter.internalWatch = watch;
   Repository<MyUser> get myUsers => watch(myUsersRepositoryProvider)..remoteAdapter.internalWatch = watch;
@@ -138,7 +134,6 @@ extension RepositoryRefX on Ref {
   Repository<Chek> get cheks => watch(cheksRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<CurrentUser> get currentUsers => watch(currentUsersRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<Duty> get duties => watch(dutiesRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
-  Repository<FormaAvtomobilRemote> get formaAvtomobilRemotes => watch(formaAvtomobilRemotesRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<Foto> get fotos => watch(fotosRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<MyToken> get myTokens => watch(myTokensRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;
   Repository<MyUser> get myUsers => watch(myUsersRepositoryProvider)..remoteAdapter.internalWatch = watch as Watcher;

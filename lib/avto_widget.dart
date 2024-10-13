@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_data/flutter_data.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
@@ -18,8 +19,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 import 'package:uuid/uuid.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class AvtoWidget extends HookConsumerWidget {
   AvtomobilRemote avto;
@@ -34,6 +37,9 @@ class AvtoWidget extends HookConsumerWidget {
     avto = ref.avtomobilRemotes.watch(avto);
     zayavka = ref.zayavkaRemotes.watch(zayavka);
     var commentController = TextEditingController(text: avto.comment);
+
+   
+    var _speechToText = useState(SpeechToText());
 
     return ExpansionTile(
         trailing: SizedBox.shrink(),
@@ -297,6 +303,17 @@ class AvtoWidget extends HookConsumerWidget {
             controller: commentController,
             decoration: InputDecoration(hintText: 'коммментарий'),
           ),
+          ElevatedButton(
+              onPressed: () {
+               _speechToText.value.listen(onResult: (result) {
+                  avto.comment = result.recognizedWords;
+                  avto.saveLocal();
+                zayavka.saveLocal();
+                infoToast("речь сохранена");
+               },);
+               
+              },
+              child: Text("записать речь")),
           ElevatedButton(
               onPressed: () {
                 if (commentController.text.length > 199)

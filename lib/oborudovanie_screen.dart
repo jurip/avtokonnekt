@@ -16,6 +16,7 @@ import 'package:fluttsec/src/models/chekFoto.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
+import 'package:uuid/uuid.dart';
 
 class OborudovanieScreen extends HookConsumerWidget {
   void showChekDialog(context, ref) {
@@ -43,7 +44,7 @@ class OborudovanieScreen extends HookConsumerWidget {
               onPressed: () async {
                 // Send them to your email maybe?
                 var nomer = nomerController.text;
-                PeremesheniyeOborudovaniya a = PeremesheniyeOborudovaniya(
+                PeremesheniyeOborudovaniya a = PeremesheniyeOborudovaniya(id: Uuid().v4(),
                     comment: nomer,
                     status: "NOVAYA",
                     
@@ -158,7 +159,9 @@ for (var chek in chekState.model.toList(growable: true))
                       ),
                     ),
                     ElevatedButton(
-                        onPressed: () {
+                        onPressed: chek.status != "NOVAYA"
+                ? null
+                :() {
                           oborudovanie.deleteLocal();
                           chek.saveLocal();
                           
@@ -375,8 +378,9 @@ Future<bool> saveChek(PeremesheniyeOborudovaniya a, mytoken) async {
     List<String?> files = result.paths.map((path) => path!).toList();
     for (var file in files) {
       PFoto f = PFoto(fileLocal: file, peremeshenie: BelongsTo(chek));
-      chek.fotos.add(f);
+      
       f.saveLocal();
+      chek.saveLocal();
     }
     chek.saveLocal();
   } else {
