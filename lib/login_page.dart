@@ -1,12 +1,8 @@
-import 'package:device_calendar/device_calendar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/main.data.dart';
-import 'package:fluttsec/send_zayavka_to_calendar.dart';
-import 'package:fluttsec/src/models/currentUser.dart';
-import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:fluttsec/src/remote/get_token_from_server.dart';
 import 'package:fluttsec/src/remote/login.dart';
 import 'package:fluttsec/main.dart';

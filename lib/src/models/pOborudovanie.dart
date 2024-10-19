@@ -3,7 +3,6 @@ import 'package:fluttsec/src/models/peremeshenieOborudovaniya.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart';
 
-import 'avtomobilRemote.dart';
 
 part 'pOborudovanie.g.dart';
 

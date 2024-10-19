@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttsec/cheki_screen.dart';
 import 'package:fluttsec/oborudovanie_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

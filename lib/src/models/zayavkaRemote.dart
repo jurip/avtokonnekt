@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/main.dart';
-import 'package:fluttsec/src/models/avtomobilLocal.dart';
-import 'package:fluttsec/src/models/calendarEvent.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'zayavkaRemote.g.dart';

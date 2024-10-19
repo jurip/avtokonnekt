@@ -10,9 +10,6 @@ import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/pFoto.dart';
 import 'package:fluttsec/src/models/pOborudovanie.dart';
 import 'package:fluttsec/src/models/peremeshenieOborudovaniya.dart';
-import 'package:fluttsec/src/remote/save_chek_with_photos.dart';
-import 'package:fluttsec/src/models/chek.dart';
-import 'package:fluttsec/src/models/chekFoto.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
@@ -257,7 +254,8 @@ for (var chek in chekState.model.toList(growable: true))
                                 child: Text('Отмена'),
                               ),
                               ElevatedButton(
-                                onPressed: () async {
+                                onPressed: chek.status!="NOVAYA"?null:() async {
+                                  Navigator.pop(context);
                                   if(await checkConnection()){
                                       
                                     infoToast("Посылаем");
@@ -274,12 +272,14 @@ for (var chek in chekState.model.toList(growable: true))
                                         chek.status = "GOTOWAYA";
                                         chek.saveLocal();
                                         infoToast("Готово");
-                                        Navigator.pop(context);
+                                        
                                       }else{
                                         infoToast("Не удалось послать");
                                         chek.status="NOVAYA";
+                                        chek.saveLocal();
                                       }
                                 }
+                                
                                 },
                                 child: Text('Отправить'),
                               ),

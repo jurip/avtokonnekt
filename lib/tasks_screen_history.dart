@@ -35,6 +35,7 @@ var avtos = useState([]);
         
        
       });
+      return null;
     });
 
     return ref.watch(repositoryInitializerProvider).when(
@@ -64,7 +65,7 @@ var avtos = useState([]);
         onTap: () async{
           AvtomobilRemote? ar = await ref.avtomobilRemotes.findOne(a);
           ar!.status = "NOVAYA";
-          ar!.saveLocal();
+          ar.saveLocal();
         },
         child: 
       Text("Отчет "+ a+" "))),

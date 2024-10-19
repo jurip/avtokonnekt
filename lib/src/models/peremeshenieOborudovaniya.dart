@@ -3,13 +3,8 @@ import 'dart:async';
 
 import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/main.dart';
-import 'package:fluttsec/src/models/foto.dart';
-import 'package:fluttsec/src/models/oborudovanie.dart';
-import 'package:fluttsec/src/models/oborudovanieFoto.dart';
 import 'package:fluttsec/src/models/pFoto.dart';
 import 'package:fluttsec/src/models/pOborudovanie.dart';
-import 'package:fluttsec/src/models/usluga.dart';
-import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'peremeshenieOborudovaniya.g.dart';
 

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -17,12 +16,10 @@ import 'package:fluttsec/src/remote/save_with_photos.dart';
 import 'package:fluttsec/usluga_select_screen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:uuid/uuid.dart';
-import 'package:workmanager/workmanager.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class AvtoWidget extends HookConsumerWidget {
   AvtomobilRemote avto;
@@ -40,6 +37,10 @@ class AvtoWidget extends HookConsumerWidget {
 
    
     var _speechToText = useState(SpeechToText());
+    useEffect(() {
+      _speechToText.value.initialize();
+    
+    },);
 
     return ExpansionTile(
         trailing: SizedBox.shrink(),
@@ -77,7 +78,7 @@ class AvtoWidget extends HookConsumerWidget {
               onPressed: notNew
                   ? null
                   : () {
-                      addFotos(zayavka, avto);
+                      addFotos(zayavka, avto, context);
                     },
             ),
             ElevatedButton(
@@ -256,7 +257,7 @@ class AvtoWidget extends HookConsumerWidget {
               onPressed: notNew
                   ? null
                   : () {
-                      addOborudovanieFotos(zayavka, avto);
+                      addOborudovanieFotos(zayavka, avto, context);
                     },
             ),
             ElevatedButton(
@@ -304,18 +305,22 @@ class AvtoWidget extends HookConsumerWidget {
             decoration: InputDecoration(hintText: 'коммментарий'),
           ),
           ElevatedButton(
-              onPressed: () {
+              onPressed: notNew
+                  ? null
+                  : () {
                _speechToText.value.listen(onResult: (result) {
                   avto.comment = result.recognizedWords;
                   avto.saveLocal();
                 zayavka.saveLocal();
-                infoToast("речь сохранена");
+                //infoToast("речь сохранена");
                },);
                
               },
               child: Text("записать речь")),
           ElevatedButton(
-              onPressed: () {
+              onPressed: notNew
+                  ? null
+                  :() {
                 if (commentController.text.length > 199)
                   commentController.text =
                       commentController.text.substring(0, 199);
@@ -452,17 +457,21 @@ class AvtoWidget extends HookConsumerWidget {
     }
   }
 
-  addOborudovanieFotos(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
+  addOborudovanieFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
     final ImagePicker _picker = ImagePicker();
 
-    var pickedFiles =
-        await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
+    var pickedFiles = await AssetPicker.pickAssets(
+  context,
+  pickerConfig: const AssetPickerConfig(maxAssets:60, ),
+);
+       // await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
 
-    if (!pickedFiles.isEmpty) {
+    if (!pickedFiles!.isEmpty) {
       for (var pickedFile in pickedFiles) {
+        var fi = await pickedFile.file;
         OborudovanieFoto f = OborudovanieFoto(
             id:Uuid().v4(),
-            fileLocal: pickedFile.path,
+            fileLocal: fi?.path,
             avtomobil: BelongsTo<AvtomobilRemote>(avto));
         f.saveLocal();
       }
@@ -552,16 +561,21 @@ addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
   }
 }
 
-addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
+addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
   final ImagePicker _picker = ImagePicker();
 
-  var pickedFiles =
-      await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
+  var pickedFiles = 
+  await AssetPicker.pickAssets(
+  context,
+  pickerConfig: const AssetPickerConfig(maxAssets:60, ),
+);
+      //await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
 
-  if (!pickedFiles.isEmpty) {
+  if (!pickedFiles!.isEmpty) {
     for (var pickedFile in pickedFiles) {
+      var fi = await pickedFile.file;
       Foto f = Foto(
-          fileLocal: pickedFile.path,
+          fileLocal: fi!.path,
           avtomobil: BelongsTo<AvtomobilRemote>(avto));
       f.saveLocal();
     }

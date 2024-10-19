@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fluttsec/ofis_screen.dart';
-import 'package:fluttsec/settings_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';

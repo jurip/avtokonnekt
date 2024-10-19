@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_data/flutter_data.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/checki_page.dart';
@@ -28,13 +27,12 @@ import 'package:localstorage/localstorage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:workmanager/workmanager.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
 
-const String site = "http://5.228.73.174:2222/";
-//const String site = "http://89.111.173.110:8080/";
+//const String site = "http://5.228.73.174:2222/";
+const String site = "http://89.111.173.110:8080/";
 //const String site = "http://193.227.240.27:8080/";
 late final ValueNotifier<String> company;
 

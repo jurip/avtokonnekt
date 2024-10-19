@@ -1,7 +1,6 @@
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttsec/login_page.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/calendarEvent.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';

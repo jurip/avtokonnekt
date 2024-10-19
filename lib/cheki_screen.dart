@@ -10,7 +10,6 @@ import 'package:fluttsec/src/models/chek.dart';
 import 'package:fluttsec/src/models/chekFoto.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:uuid/uuid.dart';
 
 class ChekiScreen extends HookConsumerWidget {
@@ -184,8 +183,9 @@ for (var chek in chekState.model.toList(growable: true))
                                 child: Text('Отмена'),
                               ),
                               ElevatedButton(
-                                onPressed: () async {
+                                onPressed: chek.status!="NOVAYA"?null:() async {
                                   if(await checkConnection()){
+                                    Navigator.pop(context);
                                       infoToast("Посылаем");
                                       
                                       chek.status = "TEMP";
@@ -202,12 +202,13 @@ for (var chek in chekState.model.toList(growable: true))
                                         chek.status = "GOTOWAYA";
                                         chek.saveLocal();
                                         infoToast("Готово");
-                                        context.pop();
+                                        
                                       }else{
                                         infoToast("Не удалось отправить");
                                         chek.status = "NOVAYA";
                                       }
                                   }
+                                  
                                 },
                                 child: Text('Отправить'),
                               ),

@@ -51,11 +51,24 @@ android:scheme="com.example.fluttsec">
             <data android:mimeType="text/plain"/>
         </intent>
         <intent>
+        
     <action android:name="android.intent.action.INSERT" />
     <data android:mimeType="vnd.android.cursor.item/event" />
   </intent>
+  <intent>
+        <action android:name="android.speech.RecognitionService" />
+    </intent>
     </queries>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    
+
 </manifest>

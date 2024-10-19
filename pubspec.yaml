@@ -4,7 +4,7 @@ description: "A new Flutter project."
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 1.0.7+1
+version: 1.0.9+1
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
@@ -50,6 +50,7 @@ dependencies:
   firebase_analytics: ^11.3.3
   package_info_plus: ^8.0.3
   speech_to_text: ^7.0.0
+  wechat_assets_picker: ^9.3.2
 
 dev_dependencies:
   flutter_test:
