@@ -51,6 +51,8 @@ dependencies:
   package_info_plus: ^8.0.3
   speech_to_text: ^7.0.0
   wechat_assets_picker: ^9.3.2
+  gal: ^2.3.0
+  flutter_image_compress: ^2.3.0
 
 dev_dependencies:
   flutter_test:

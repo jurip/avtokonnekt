@@ -15,6 +15,7 @@ import 'package:fluttsec/src/models/uslugaSelect.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:fluttsec/src/remote/save_with_photos.dart';
 import 'package:fluttsec/usluga_select_screen.dart';
+import 'package:gal/gal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
@@ -174,7 +175,7 @@ class AvtoWidget extends HookConsumerWidget {
                   borderRadius: BorderRadius.circular(10),
                   color: Colors.blue.shade200,
                 ),
-                child: Row(
+                child: Column( children: [ Row(
                   children: [
                     SizedBox(
                       width: 5,
@@ -185,13 +186,46 @@ class AvtoWidget extends HookConsumerWidget {
                         '${usluga.title}',
                       ),
                     ),
-                    Text(usluga.vsego.toString()),
-                    Icon(Icons.timer),
-Text(usluga.sverh.toString()),
-                   Icon(Icons.timer_outlined),
-                   
+                 
+  
                   ],
                 ),
+              
+                Row(children: [
+               
+                   ElevatedButton(onPressed: () {
+                    usluga.vsego = usluga.vsego +1;
+                    usluga.saveLocal();
+                    avto.saveLocal();
+                    zayavka.saveLocal();
+                  }, child: Text("+")),
+                     Text(usluga.vsego.toString()),
+                    Icon(Icons.timer_outlined),
+                  ElevatedButton(onPressed: () {
+                    usluga.vsego = usluga.vsego -1;
+                    usluga.saveLocal();
+                    avto.saveLocal();
+                    zayavka.saveLocal();
+                  }, child: Text("-"))
+                ],),
+                  Row(children: [
+                  ElevatedButton(onPressed: () {
+                    usluga.sverh = usluga.sverh +1;
+                    usluga.saveLocal();
+                    avto.saveLocal();
+                    zayavka.saveLocal();
+                  }, child: Text("+")),
+                     Text(usluga.sverh.toString()),
+                    Icon(Icons.timer),
+                  ElevatedButton(onPressed: () {
+                    usluga.sverh = usluga.sverh -1;
+                    usluga.saveLocal();
+                    avto.saveLocal();
+                    zayavka.saveLocal();
+                  }, child: Text("-")),
+                
+                ],),
+                ]),
               ),
             ),
           Text(
@@ -318,15 +352,23 @@ Text(usluga.sverh.toString()),
               onPressed: notNew
                   ? null
                   : () {
+            if(_speechToText.value.isNotListening){
+
+
                _speechToText.value.listen(onResult: (result) {
                   avto.comment = result.recognizedWords;
                   avto.saveLocal();
                 zayavka.saveLocal();
+                
                 //infoToast("речь сохранена");
                },);
-               
+            }else{
+              _speechToText.value.stop();
+            }
               },
-              child: Text("записать речь")),
+              child: Icon(_speechToText.value.isNotListening ? Icons.mic_off : Icons.mic),
+          ),
+              
           ElevatedButton(
               onPressed: notNew
                   ? null
@@ -484,6 +526,7 @@ Text(usluga.sverh.toString()),
     if (!pickedFiles!.isEmpty) {
       for (var pickedFile in pickedFiles) {
         var fi = await pickedFile.file;
+       
         OborudovanieFoto f = OborudovanieFoto(
             id:Uuid().v4(),
             fileLocal: fi?.path,
@@ -504,6 +547,7 @@ Text(usluga.sverh.toString()),
 
     var pickedFile = await _picker.pickImage(
         source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+    if(pickedFile!=null)Gal.putImage(pickedFile.path);
 
     if (pickedFile != null) {
       OborudovanieFoto f = OborudovanieFoto(
@@ -560,6 +604,8 @@ addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
 
   var pickedFile = await _picker.pickImage(
       source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+       if(pickedFile!=null)Gal.putImage(pickedFile.path);
+
 
   if (pickedFile != null) {
     Foto f = Foto(
