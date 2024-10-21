@@ -113,7 +113,11 @@ class UslugaSelectScreen extends HookConsumerWidget {
                             zayavka.saveLocal();
                             
                           }),
+
+                          
+                          
                       title: Text('${u.title}',style: TextStyle(fontSize: 23)),
+                      
                     ),
                 ],
               )));

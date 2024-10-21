@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fluttsec/image_screen.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
@@ -52,6 +53,11 @@ class AvtoWidget extends HookConsumerWidget {
             child: Text(
                 '${avto.nomer}\n${avto.marka}${(avto.nomerAG == null || avto.nomerAG == "null"|| avto.nomerAG == "") ? '' : '\nАГ:' + avto.nomerAG!}'),
           ),
+          if(avto.status=="TEMP")
+          ElevatedButton(
+              onPressed:  () => {avto.status = "NOVAYA",
+              avto.saveLocal()},
+              child: const Icon(Icons.refresh)),
           ElevatedButton(
               onPressed: notNew
                   ? null
@@ -102,10 +108,22 @@ class AvtoWidget extends HookConsumerWidget {
                     Stack(children: <Widget>[
                       ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Image(
+                          child:
+                           GestureDetector(
+                            onTap: () {
+                                 Navigator.push<Widget>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ImageScreen(foto.fileLocal!),
+                            ),
+                          );
+                            },
+                            child: 
+                           Image(
                             image: FileImage(File(foto.fileLocal!)),
                             height: 180,
                           )),
+                      ),
                       Positioned(
                           right: -2,
                           top: -9,
@@ -167,19 +185,11 @@ class AvtoWidget extends HookConsumerWidget {
                         '${usluga.title}',
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: notNew
-                          ? null
-                          : () {
-                              usluga.dop = usluga.dop == "Y" ? "N" : "Y";
-                              usluga.saveLocal();
-                              avto.saveLocal();
-                              zayavka.saveLocal();
-                            },
-                      child: usluga.dop == "Y"
-                          ? Icon(Icons.timer)
-                          : Icon(Icons.timer_outlined),
-                    ),
+                    Text(usluga.vsego.toString()),
+                    Icon(Icons.timer),
+Text(usluga.sverh.toString()),
+                   Icon(Icons.timer_outlined),
+                   
                   ],
                 ),
               ),
@@ -334,39 +344,44 @@ class AvtoWidget extends HookConsumerWidget {
               onPressed: notNew
                   ? null
                   : () async {
-                      showDialog(
-                        context: context,
-                        builder: (_) {
-                          return AlertDialog(
-                            title: Text('Отправка отчета'),
-                            content: ListView(
-                              shrinkWrap: true,
-                              children: [
-                                Text('Уверены что хотите отправить отчет?')
-                              ],
-                            ),
-                            actions: [
-                              ElevatedButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text('Отмена'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  if(await checkConnection())
-                                  infoToast("Отппраявляем");
-                                  sendAvtoOtchet();
-                                  //ref.avtomobilRemotes.save(avto);
-                                  Navigator.pop(context);
-                                },
-                                child: Text('Отправить'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                      showSendAvtoDialog(context);
                     },
               child: const Text("готово")),
         ]);
+  }
+
+  Future<dynamic> showSendAvtoDialog(BuildContext context) {
+    return showDialog(
+                      context: context,
+                      builder: (_) {
+                        return AlertDialog(
+                          title: Text('Отправка отчета'),
+                          content: ListView(
+                            shrinkWrap: true,
+                            children: [
+                              Text('Уверены что хотите отправить отчет?')
+                            ],
+                          ),
+                          actions: [
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text('Отмена'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if(await checkConnection()){
+                                infoToast("Отппраявляем");
+                                sendAvtoOtchet();
+                                //ref.avtomobilRemotes.save(avto);
+                                Navigator.pop(context);
+                                }
+                              },
+                              child: Text('Отправить'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
   }
 
   bool get notNew => avto.status!="NOVAYA";
