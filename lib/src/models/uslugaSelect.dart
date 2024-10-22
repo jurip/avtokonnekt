@@ -15,8 +15,6 @@ class UslugaSelect extends DataModel<UslugaSelect> {
   final String? title;
   final String? code;
   final String? prioritet;
-  int vsego =1;
-  int sverh =0;
   UslugaSelect({this.id, required this.title, required this.code, required this.prioritet});
  
 

@@ -3,7 +3,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttsec/avto_widget.dart';
+import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/avtomobilLocal.dart';
+import 'package:gal/gal.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:uuid/uuid.dart';
 import 'package:device_calendar/device_calendar.dart';
@@ -306,6 +309,18 @@ class TasksScreen extends HookConsumerWidget {
                 controller: markaController,
                 decoration: InputDecoration(hintText: 'марка'),
               ),
+              ElevatedButton(onPressed: () {
+                 var uuid = Uuid();
+                AvtomobilRemote a = AvtomobilRemote(
+                    id: uuid.v4(),
+                    zayavka: BelongsTo<ZayavkaRemote>(zayavka),
+                    nomer: "ТС1",
+                    marka: "",
+                    status: "NOVAYA");
+                a.saveLocal();
+                addFoto(zayavka,a);
+                Navigator.pop(context);
+              }, child: Text("фото"))
             ],
           ),
           actions: [
@@ -344,6 +359,29 @@ class TasksScreen extends HookConsumerWidget {
       },
     );
   }
+
+  addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
+  final ImagePicker _picker = ImagePicker();
+
+  var pickedFile = await _picker.pickImage(
+      source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+       if(pickedFile!=null)Gal.putImage(pickedFile.path);
+
+
+  if (pickedFile != null) {
+    AvtoFoto f = AvtoFoto(
+        fileLocal: pickedFile.path,
+        avtomobil: BelongsTo<AvtomobilRemote>(avto));
+    f.saveLocal();
+
+    avto.saveLocal();
+    zayavka.saveLocal();
+  } else {
+    final snackBar = SnackBar(
+      content: const Text('фото не добавлено'),
+    );
+  }
+}
 
   void showBarcode(context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
     showDialog(

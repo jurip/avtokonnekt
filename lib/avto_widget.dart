@@ -517,15 +517,16 @@ class AvtoWidget extends HookConsumerWidget {
   addOborudovanieFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
     final ImagePicker _picker = ImagePicker();
 
-    var pickedFiles = await AssetPicker.pickAssets(
-  context,
-  pickerConfig: const AssetPickerConfig(maxAssets:60, ),
-);
-       // await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
+    var pickedFiles = 
+    //await AssetPicker.pickAssets(
+  //context,
+  //pickerConfig: const AssetPickerConfig(maxAssets:60, ),
+//);
+        await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
 
     if (!pickedFiles!.isEmpty) {
       for (var pickedFile in pickedFiles) {
-        var fi = await pickedFile.file;
+        var fi = await pickedFile;
        
         OborudovanieFoto f = OborudovanieFoto(
             id:Uuid().v4(),
@@ -626,15 +627,15 @@ addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
   final ImagePicker _picker = ImagePicker();
 
   var pickedFiles = 
-  await AssetPicker.pickAssets(
-  context,
-  pickerConfig: const AssetPickerConfig(maxAssets:60, ),
-);
-      //await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
+  //await AssetPicker.pickAssets(
+  //context,
+ // pickerConfig: const AssetPickerConfig(maxAssets:60, ),
+//);
+      await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
 
   if (!pickedFiles!.isEmpty) {
     for (var pickedFile in pickedFiles) {
-      var fi = await pickedFile.file;
+      var fi = await pickedFile;
       Foto f = Foto(
           fileLocal: fi!.path,
           avtomobil: BelongsTo<AvtomobilRemote>(avto));

@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/main.dart';
+import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/foto.dart';
 import 'package:fluttsec/src/models/oborudovanie.dart';
 import 'package:fluttsec/src/models/oborudovanieFoto.dart';
@@ -24,6 +25,7 @@ class AvtomobilRemote extends DataModel<AvtomobilRemote> {
   final BelongsTo<ZayavkaRemote>? zayavka;
 
    String? status = "NOVAYA";
+  final HasMany<AvtoFoto> avtoFoto = HasMany<AvtoFoto>();
   final HasMany<Foto> fotos = HasMany<Foto>();
   final HasMany<Usluga> performance_service = HasMany<Usluga>();
   final HasMany<Oborudovanie> barcode = HasMany<Oborudovanie>();
