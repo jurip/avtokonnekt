@@ -34,7 +34,7 @@ class AvtomobilRemote extends DataModel<AvtomobilRemote> {
     zayavka = zayavka ?? BelongsTo();
 
   bool isOpen(){
-     return status != "GOTOWAYA";
+     return status != "VYPOLNENA";
   }
 }
 

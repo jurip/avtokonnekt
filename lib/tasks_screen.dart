@@ -1,8 +1,7 @@
-
-
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttsec/avto_widget.dart';
+import 'package:fluttsec/new_avto_screen.dart';
 import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/avtomobilLocal.dart';
 import 'package:gal/gal.dart';
@@ -23,36 +22,28 @@ import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:fluttsec/src/remote/update_zayavka.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 class TasksScreen extends HookConsumerWidget {
   TasksScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-     
-    
-    useOnAppLifecycleStateChange(
-      (previous, current) async {
-        String s = current.name;
-        if(s=='resumed'){
-         if(await loadZayavkaFromPrefs(ref)){
-         }
-        }
+    useOnAppLifecycleStateChange((previous, current) async {
+      String s = current.name;
+      if (s == 'resumed') {
+        if (await loadZayavkaFromPrefs(ref)) {}
       }
-    );
-  
-   
-     
+    });
 
- useEffect(() {
+    useEffect(() {
       loadZayavkaFromPrefs(ref);
       return () => {};
     }, []);
-   
+
     return ref.watch(repositoryInitializerProvider).when(
         error: (error, _) => Text(error.toString()),
         loading: () => const CircularProgressIndicator(),
         data: (_) {
-          
           final stateLocal =
               ref.zayavkaRemotes.watchAll(remote: false // HTTP param
                   );
@@ -87,10 +78,20 @@ class TasksScreen extends HookConsumerWidget {
                         icon: Icon(Icons.settings)),
                   ),
                   for (final u in stateCurrentUser.model)
-                    Text(
-                      '${u.firstName} ${u.lastName} ',
-                      style: TextStyle(fontSize: 25),
-                    ),
+                  Center(child: 
+                    Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          border: Border.all(
+                          
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        margin: EdgeInsets.all(10),
+                        child: Text(
+                          '${u.firstName} ${u.lastName} ',
+                          style: TextStyle(fontSize: 25),
+                        ))),
                   for (final duty in stateDuty.model)
                     Text(
                       '${duty.status}',
@@ -110,13 +111,11 @@ class TasksScreen extends HookConsumerWidget {
         });
   }
 
-  
   void sendToCalendar(WidgetRef ref) {
     ref.zayavkaRemotes.findAll().asStream().forEach(
       (element) {
         for (var z in element) {
           sendZayavkaToCalendar(ref, z, getLocation('UTC'), myCal);
-          
         }
       },
     );
@@ -141,12 +140,12 @@ class TasksScreen extends HookConsumerWidget {
                     Text('${zayavka.client}', style: TextStyle(fontSize: 18)),
               ),
               Column(children: [
-                if(zayavka.nachalo!=null)
-                Text('${DateFormat('dd.MM.yyyy').format(zayavka.nachalo!)}',
-                    style: TextStyle(fontSize: 15)),
-                    if(zayavka.nachalo!=null)
-                Text('${DateFormat('kk:mm').format(zayavka.nachalo!)}',
-                    style: TextStyle(fontSize: 15)),
+                if (zayavka.nachalo != null)
+                  Text('${DateFormat('dd.MM.yyyy').format(zayavka.nachalo!)}',
+                      style: TextStyle(fontSize: 15)),
+                if (zayavka.nachalo != null)
+                  Text('${DateFormat('kk:mm').format(zayavka.nachalo!)}',
+                      style: TextStyle(fontSize: 15)),
               ]),
             ],
           ),
@@ -266,6 +265,12 @@ class TasksScreen extends HookConsumerWidget {
                                   child: const Icon(Icons.car_repair),
                                   onPressed: () {
                                     novoeAvto(context, zayavka);
+                                    //  Navigator.push<Widget>(
+                                    //context,
+                                    //MaterialPageRoute(
+                                    //   builder: (context) => NewAvtoScreen(zayavka),
+                                    //  ),
+                                    // );
                                   },
                                 ),
                                 const SizedBox(width: 8),
@@ -293,9 +298,8 @@ class TasksScreen extends HookConsumerWidget {
 
         var markaController = TextEditingController();
 
-        return AlertDialog(
-          title: Text('авто'),
-          content: ListView(
+        return Dialog(
+          child: ListView(
             shrinkWrap: true,
             children: [
               TextFormField(
@@ -309,79 +313,81 @@ class TasksScreen extends HookConsumerWidget {
                 controller: markaController,
                 decoration: InputDecoration(hintText: 'марка'),
               ),
-              ElevatedButton(onPressed: () {
-                 var uuid = Uuid();
-                AvtomobilRemote a = AvtomobilRemote(
-                    id: uuid.v4(),
-                    zayavka: BelongsTo<ZayavkaRemote>(zayavka),
-                    nomer: "ТС1",
-                    marka: "",
-                    status: "NOVAYA");
-                a.saveLocal();
-                addFoto(zayavka,a);
-                Navigator.pop(context);
-              }, child: Text("фото"))
+              ElevatedButton(
+                  onPressed: () {
+                    var uuid = Uuid();
+
+                    var n = zayavka.avtomobili?.length ?? 0;
+
+                    AvtomobilRemote a = AvtomobilRemote(
+                        id: uuid.v4(),
+                        zayavka: BelongsTo<ZayavkaRemote>(zayavka),
+                        nomer: "ТС" + (n + 1).toString(),
+                        marka: "",
+                        status: "NOVAYA");
+                    a.saveLocal();
+                    addFoto(zayavka, a);
+                    Navigator.pop(context);
+                  },
+                  child: Text("фото")),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Отмена'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // Send them to your email maybe?
+                  var nomer = nomerController.text;
+                  var marka = markaController.text;
+                  var uuid = Uuid();
+                  AvtomobilRemote a = AvtomobilRemote(
+                      id: uuid.v4(),
+                      zayavka: BelongsTo<ZayavkaRemote>(zayavka),
+                      nomer: nomer,
+                      marka: marka,
+                      status: "NOVAYA");
+                  a.saveLocal();
+
+                  AvtomobilLocal al = AvtomobilLocal(
+                      id: uuid.v4(),
+                      zayavka: BelongsTo<ZayavkaRemote>(zayavka),
+                      nomer: nomer,
+                      marka: marka,
+                      status: "NOVAYA");
+                  al.saveLocal();
+                  zayavka.saveLocal();
+                  Navigator.pop(context);
+                },
+                child: Text('Сохранить'),
+              ),
             ],
           ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Отмена'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Send them to your email maybe?
-                var nomer = nomerController.text;
-                var marka = markaController.text;
-                var uuid = Uuid();
-                AvtomobilRemote a = AvtomobilRemote(
-                    id: uuid.v4(),
-                    zayavka: BelongsTo<ZayavkaRemote>(zayavka),
-                    nomer: nomer,
-                    marka: marka,
-                    status: "NOVAYA");
-                a.saveLocal();
-
-                AvtomobilLocal al = AvtomobilLocal(
-                    id: uuid.v4(),
-                    zayavka: BelongsTo<ZayavkaRemote>(zayavka),
-                    nomer: nomer,
-                    marka: marka,
-                    status: "NOVAYA");
-                al.saveLocal();
-                zayavka.saveLocal();
-                Navigator.pop(context);
-              },
-              child: Text('Сохранить'),
-            ),
-          ],
         );
       },
     );
   }
 
   addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
-  final ImagePicker _picker = ImagePicker();
+    final ImagePicker _picker = ImagePicker();
 
-  var pickedFile = await _picker.pickImage(
-      source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
-       if(pickedFile!=null)Gal.putImage(pickedFile.path);
+    var pickedFile = await _picker.pickImage(
+        source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+    if (pickedFile != null) Gal.putImage(pickedFile.path);
 
+    if (pickedFile != null) {
+      AvtoFoto f = AvtoFoto(
+          fileLocal: pickedFile.path,
+          avtomobil: BelongsTo<AvtomobilRemote>(avto));
+      f.saveLocal();
 
-  if (pickedFile != null) {
-    AvtoFoto f = AvtoFoto(
-        fileLocal: pickedFile.path,
-        avtomobil: BelongsTo<AvtomobilRemote>(avto));
-    f.saveLocal();
-
-    avto.saveLocal();
-    zayavka.saveLocal();
-  } else {
-    final snackBar = SnackBar(
-      content: const Text('фото не добавлено'),
-    );
+      avto.saveLocal();
+      zayavka.saveLocal();
+    } else {
+      final snackBar = SnackBar(
+        content: const Text('фото не добавлено'),
+      );
+    }
   }
-}
 
   void showBarcode(context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
     showDialog(
@@ -389,37 +395,34 @@ class TasksScreen extends HookConsumerWidget {
       builder: (_) {
         var codeController = TextEditingController();
 
-        return AlertDialog(
-          title: Text('Добавить авто'),
-          content: ListView(
+        return Dialog(
+          child: ListView(
             shrinkWrap: true,
             children: [
               TextFormField(
                 controller: codeController,
                 decoration: InputDecoration(hintText: 'штрихкод'),
               ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Отмена'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // Send them to your email maybe?
+                  var kod = codeController.text;
+
+                  Oborudovanie o = Oborudovanie(
+                      avtomobil: BelongsTo<AvtomobilRemote>(avto), code: kod);
+                  o.saveLocal();
+                  avto.saveLocal();
+                  zayavka.saveLocal();
+                  Navigator.pop(context);
+                },
+                child: Text('Готово'),
+              ),
             ],
           ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Отмена'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Send them to your email maybe?
-                var kod = codeController.text;
-
-                Oborudovanie o = Oborudovanie(
-                    avtomobil: BelongsTo<AvtomobilRemote>(avto), code: kod);
-                o.saveLocal();
-                avto.saveLocal();
-                zayavka.saveLocal();
-                Navigator.pop(context);
-              },
-              child: Text('Готово'),
-            ),
-          ],
         );
       },
     );
@@ -430,63 +433,67 @@ class TasksScreen extends HookConsumerWidget {
       context: context,
       builder: (_) {
         var codeController = TextEditingController();
-        var hasnoopendAvtos = zayavka.avtomobili?.where((p0) => p0.isOpen()).isEmpty;
+        var hasnoopendAvtos =
+            zayavka.avtomobili?.where((p0) => p0.isOpen()).isEmpty;
 
-        var text = hasnoopendAvtos==false?"У вас остались незакрытые отчеты":'Уверены что хотите закрыть заявку?';
+        var text = hasnoopendAvtos == false
+            ? "У вас остались незакрытые отчеты"
+            : 'Уверены что хотите закрыть заявку?';
 
-        return AlertDialog(
-          title: Text('Закрытие заявки'),
-          content: ListView(
+        return Dialog(
+          child: ListView(
             shrinkWrap: true,
-            children: [Text(text)],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Отмена'),
-            ),
-            ElevatedButton(
-              onPressed: hasnoopendAvtos==true? () async {
-                if (await updateZayavka(zayavka, token.value, "VYPOLNENA"))
-                  zayavka.status = "VYPOLNENA";
-                zayavka.saveLocal();
+            children: [
+              Text(text),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Отмена'),
+              ),
+              ElevatedButton(
+                onPressed: hasnoopendAvtos == true
+                    ? () async {
+                        if (await updateZayavka(
+                            zayavka, token.value, "VYPOLNENA"))
+                          zayavka.status = "VYPOLNENA";
+                        zayavka.saveLocal();
 
-                Navigator.pop(context);
-              }:null,
-              child: Text('Готово'),
-            ),
-          ],
+                        Navigator.pop(context);
+                      }
+                    : null,
+                child: Text('Готово'),
+              ),
+            ],
+          ),
         );
       },
     );
   }
-   void showCancelAlert(context, ZayavkaRemote zayavka) {
+
+  void showCancelAlert(context, ZayavkaRemote zayavka) {
     showDialog(
       context: context,
       builder: (_) {
-       
-        return AlertDialog(
-          title: Text('Отмена заявки'),
-          content: ListView(
+        return Dialog(
+          child: ListView(
             shrinkWrap: true,
-            children: [Text('Уверены что хотите отменить заявку?')],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Отмена'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (await updateZayavka(zayavka, token.value, "OTMENA"))
-                  zayavka.status = "OTMENA";
-                zayavka.saveLocal();
+            children: [
+              Text('Уверены что хотите отменить заявку?'),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Отмена'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (await updateZayavka(zayavka, token.value, "OTMENA"))
+                    zayavka.status = "OTMENA";
+                  zayavka.saveLocal();
 
-                Navigator.pop(context);
-              },
-              child: Text('Готово'),
-            ),
-          ],
+                  Navigator.pop(context);
+                },
+                child: Text('Готово'),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -516,7 +523,6 @@ class TasksScreen extends HookConsumerWidget {
       GlobalKey<RefreshIndicatorState>();
 }
 
-
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -527,5 +533,3 @@ class UpperCaseTextFormatter extends TextInputFormatter {
     );
   }
 }
-
-

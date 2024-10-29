@@ -21,19 +21,15 @@ class OborudovanieScreen extends HookConsumerWidget {
       context: context,
       builder: (_) {
         var nomerController = TextEditingController();
-        return AlertDialog(
-          title: Text('Оборудование'),
-          content: ListView(
+        return Dialog(
+         child: ListView(
             shrinkWrap: true,
             children: [
               TextFormField(
                 controller: nomerController,
                 decoration: InputDecoration(hintText: 'комментарий'),
               ),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
+              ElevatedButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Отмена'),
             ),
@@ -51,7 +47,9 @@ class OborudovanieScreen extends HookConsumerWidget {
               },
               child: Text('Сохранить'),
             ),
-          ],
+            ],
+          ),
+       
         );
       },
     );
@@ -240,16 +238,12 @@ for (var chek in chekState.model.toList(growable: true))
                       showDialog(
                         context: context,
                         builder: (_) {
-                          return AlertDialog(
-                            title: Text('Отправка отчета'),
-                            content: ListView(
+                          return Dialog(
+                          child: ListView(
                               shrinkWrap: true,
                               children: [
-                                Text('Уверены что хотите отправить отчет?')
-                              ],
-                            ),
-                            actions: [
-                              ElevatedButton(
+                                Text('Уверены что хотите отправить отчет?'),
+                                 ElevatedButton(
                                 onPressed: () => Navigator.pop(context),
                                 child: Text('Отмена'),
                               ),
@@ -283,7 +277,9 @@ for (var chek in chekState.model.toList(growable: true))
                                 },
                                 child: Text('Отправить'),
                               ),
-                            ],
+                              ],
+                            ),
+                           
                           );
                         },
                       );
@@ -394,13 +390,10 @@ void showDeleteAlertAvto(context, PeremesheniyeOborudovaniya avto) {
   showDialog(
     context: context,
     builder: (_) {
-      return AlertDialog(
-        title: Text('Удаление перемещения'),
-        content: ListView(
+      return Dialog(
+       child: ListView(
           shrinkWrap: true,
-          children: [Text('Уверены что хотите удалить перемещение?')],
-        ),
-        actions: [
+          children: [Text('Уверены что хотите удалить перемещение?'),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Отмена'),
@@ -413,7 +406,9 @@ void showDeleteAlertAvto(context, PeremesheniyeOborudovaniya avto) {
             },
             child: Text('Удалить'),
           ),
-        ],
+          ],
+        ),
+       
       );
     },
   );

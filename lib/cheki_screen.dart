@@ -18,19 +18,16 @@ class ChekiScreen extends HookConsumerWidget {
       context: context,
       builder: (_) {
         var nomerController = TextEditingController();
-        return AlertDialog(
-          title: Text('Чеки'),
-          content: ListView(
+        return Dialog(
+         
+          child: ListView(
             shrinkWrap: true,
             children: [
               TextFormField(
                 controller: nomerController,
                 decoration: InputDecoration(hintText: 'комментарий'),
               ),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
+              ElevatedButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Отмена'),
             ),
@@ -48,7 +45,9 @@ class ChekiScreen extends HookConsumerWidget {
               },
               child: Text('Сохранить'),
             ),
-          ],
+            ],
+          ),
+        
         );
       },
     );
@@ -169,16 +168,12 @@ for (var chek in chekState.model.toList(growable: true))
                       showDialog(
                         context: context,
                         builder: (_) {
-                          return AlertDialog(
-                            title: Text('Отправка чека'),
-                            content: ListView(
+                          return Dialog(
+                           child: ListView(
                               shrinkWrap: true,
                               children: [
-                                Text('Уверены что хотите отправить чек?')
-                              ],
-                            ),
-                            actions: [
-                              ElevatedButton(
+                                Text('Уверены что хотите отправить чек?'),
+                                 ElevatedButton(
                                 onPressed: () => Navigator.pop(context),
                                 child: Text('Отмена'),
                               ),
@@ -212,7 +207,9 @@ for (var chek in chekState.model.toList(growable: true))
                                 },
                                 child: Text('Отправить'),
                               ),
-                            ],
+                              ],
+                            ),
+                          
                           );
                         },
                       );
@@ -245,13 +242,10 @@ void showDeleteAlertAvto(context, Chek avto) {
   showDialog(
     context: context,
     builder: (_) {
-      return AlertDialog(
-        title: Text('Удаление чека'),
-        content: ListView(
+      return Dialog(
+       child: ListView(
           shrinkWrap: true,
-          children: [Text('Уверены что хотите удалить чек?')],
-        ),
-        actions: [
+          children: [Text('Уверены что хотите удалить чек?'),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Отмена'),
@@ -264,7 +258,9 @@ void showDeleteAlertAvto(context, Chek avto) {
             },
             child: Text('Удалить'),
           ),
-        ],
+          ],
+        ),
+       
       );
     },
   );

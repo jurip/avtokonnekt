@@ -41,6 +41,7 @@ class AvtoWidget extends HookConsumerWidget {
     var _speechToText = useState(SpeechToText());
     useEffect(() {
       _speechToText.value.initialize();
+      return null;
     
     },);
 
@@ -49,11 +50,24 @@ class AvtoWidget extends HookConsumerWidget {
         collapsedShape: const ContinuousRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(20))),
         title: Row(children: [
+          for(var image in avto.avtoFoto.toList())
+           GestureDetector(
+                            onTap: () {
+                                 Navigator.push<Widget>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ImageScreen(image.fileLocal!),
+                            ),
+                          );
+                            },
+                            child: 
+          Image(image: FileImage(File(image.fileLocal!), ),height: 50,)),
           Expanded(
             flex: 2,
             child: Text(
                 '${avto.nomer}\n${avto.marka}${(avto.nomerAG == null || avto.nomerAG == "null"|| avto.nomerAG == "") ? '' : '\nАГ:' + avto.nomerAG!}'),
           ),
+          
           if(avto.status=="TEMP")
           ElevatedButton(
               onPressed:  () => {avto.status = "NOVAYA",
@@ -193,23 +207,29 @@ class AvtoWidget extends HookConsumerWidget {
               
                 Row(children: [
                
-                   ElevatedButton(onPressed: () {
-                    usluga.vsego = usluga.vsego +1;
+                   ElevatedButton(onPressed: notNew
+                ? null
+                :() {
+                    usluga.kolichestvo = usluga.kolichestvo +1;
                     usluga.saveLocal();
                     avto.saveLocal();
                     zayavka.saveLocal();
                   }, child: Text("+")),
-                     Text(usluga.vsego.toString()),
+                     Text(usluga.kolichestvo.toString()),
                     Icon(Icons.timer_outlined),
-                  ElevatedButton(onPressed: () {
-                    usluga.vsego = usluga.vsego -1;
+                  ElevatedButton(onPressed: notNew
+                ? null
+                : () {
+                    usluga.kolichestvo = usluga.kolichestvo -1;
                     usluga.saveLocal();
                     avto.saveLocal();
                     zayavka.saveLocal();
                   }, child: Text("-"))
                 ],),
                   Row(children: [
-                  ElevatedButton(onPressed: () {
+                  ElevatedButton(onPressed: notNew
+                ? null
+                :() {
                     usluga.sverh = usluga.sverh +1;
                     usluga.saveLocal();
                     avto.saveLocal();
@@ -217,7 +237,9 @@ class AvtoWidget extends HookConsumerWidget {
                   }, child: Text("+")),
                      Text(usluga.sverh.toString()),
                     Icon(Icons.timer),
-                  ElevatedButton(onPressed: () {
+                  ElevatedButton(onPressed: notNew
+                ? null
+                :() {
                     usluga.sverh = usluga.sverh -1;
                     usluga.saveLocal();
                     avto.saveLocal();
@@ -396,23 +418,20 @@ class AvtoWidget extends HookConsumerWidget {
     return showDialog(
                       context: context,
                       builder: (_) {
-                        return AlertDialog(
-                          title: Text('Отправка отчета'),
-                          content: ListView(
+                        return Dialog(
+                          
+                          child: ListView(
                             shrinkWrap: true,
                             children: [
-                              Text('Уверены что хотите отправить отчет?')
-                            ],
-                          ),
-                          actions: [
-                            ElevatedButton(
+                              Text('Уверены что хотите отправить отчет?'),
+                              ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               child: Text('Отмена'),
                             ),
                             ElevatedButton(
                               onPressed: () async {
                                 if(await checkConnection()){
-                                infoToast("Отппраявляем");
+                                infoToast("Отправляем");
                                 sendAvtoOtchet();
                                 //ref.avtomobilRemotes.save(avto);
                                 Navigator.pop(context);
@@ -420,7 +439,9 @@ class AvtoWidget extends HookConsumerWidget {
                               },
                               child: Text('Отправить'),
                             ),
-                          ],
+                            ],
+                          ),
+                         
                         );
                       },
                     );
@@ -502,10 +523,10 @@ class AvtoWidget extends HookConsumerWidget {
     }
 
     if (r) {
-      avto.status = "GOTOWAYA";
+      avto.status = "VYPOLNENA";
       avto.saveLocal();
       zayavka.saveLocal();
-      infoToast("Сохранено в системе");
+      infoToast("отправлено на проверку");
     }else{
       infoToast("Не удалось отправить, попробуйте еще");
       avto.status = "NOVAYA";
@@ -524,13 +545,13 @@ class AvtoWidget extends HookConsumerWidget {
 //);
         await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
 
-    if (!pickedFiles!.isEmpty) {
+    if (!pickedFiles.isEmpty) {
       for (var pickedFile in pickedFiles) {
         var fi = await pickedFile;
        
         OborudovanieFoto f = OborudovanieFoto(
             id:Uuid().v4(),
-            fileLocal: fi?.path,
+            fileLocal: fi.path,
             avtomobil: BelongsTo<AvtomobilRemote>(avto));
         f.saveLocal();
       }
@@ -574,14 +595,11 @@ void showDeleteAlertAvto(context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
   showDialog(
     context: context,
     builder: (_) {
-      return AlertDialog(
-        title: Text('Удаление автомобиля'),
-        content: ListView(
+      return Dialog(
+       child: ListView(
           shrinkWrap: true,
-          children: [Text('Уверены что хотите удалить авто?')],
-        ),
-        actions: [
-          ElevatedButton(
+          children: [Text('Уверены что хотите удалить авто?'),
+           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Отмена'),
           ),
@@ -593,7 +611,11 @@ void showDeleteAlertAvto(context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
             },
             child: Text('Удалить'),
           ),
-        ],
+          
+          ],
+          
+        ),
+        
       );
     },
   );
@@ -633,11 +655,11 @@ addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
 //);
       await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
 
-  if (!pickedFiles!.isEmpty) {
+  if (!pickedFiles.isEmpty) {
     for (var pickedFile in pickedFiles) {
       var fi = await pickedFile;
       Foto f = Foto(
-          fileLocal: fi!.path,
+          fileLocal: fi.path,
           avtomobil: BelongsTo<AvtomobilRemote>(avto));
       f.saveLocal();
     }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:fluttsec/main.dart';
+import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/foto.dart';
 import 'package:fluttsec/src/models/oborudovanie.dart';
@@ -23,7 +24,11 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
   var status = "VYPOLNENA";
   var zayavkaId = a.zayavka!.value?.id;
   var fotos = [];
+  var avtofotos = [];
   var oborudovanieFotos = [];
+   for (AvtoFoto af in a.avtoFoto.toList()) {
+    if (af.file != null) avtofotos.add({"file": af.file});
+  }
   for (Foto f in a.fotos.toList()) {
     if (f.file != null) fotos.add({"file": f.file});
   }
@@ -32,7 +37,7 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
   }
   var performance_service = [];
   for (Usluga f in a.performance_service.toList()) {
-    performance_service.add({"title": f.code, "dop": f.dop});
+    performance_service.add({"title": f.code, "kolichestvo": f.kolichestvo, "sverh":f.sverh});
   }
   var barcode = [];
   for (Oborudovanie f in a.barcode.toList()) {
@@ -49,6 +54,7 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
       "comment": "$comment",
       "date": "$date",
       "fotos": fotos,
+      "avtoFotos":avtofotos,
       "oborudovanieFotos": oborudovanieFotos,
       "barcode": barcode,
       "performance_service": performance_service,

@@ -13,8 +13,7 @@ class Usluga extends DataModel<Usluga> {
   final String? id;
   String? title;
   String? code;
-  String? dop = "N";
-  int vsego = 1;
+  int kolichestvo = 1;
   int sverh = 0;
 
   final BelongsTo<AvtomobilRemote> avtomobil;

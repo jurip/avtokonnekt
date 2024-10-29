@@ -65,8 +65,10 @@ class UslugaSelectScreen extends HookConsumerWidget {
                 children: [
                   TextFormField(
                     controller: searchController,
-                    decoration: InputDecoration(hintText: 'фильтр'),
+                    decoration: InputDecoration(hintText: 'поиск'),
+                   
                   ),
+                   const Icon( Icons.search),
                   for (UslugaSelect u in filteredUslugas.value)
                     ListTile(
                       leading: Checkbox(
