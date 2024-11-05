@@ -10,10 +10,13 @@ import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/foto.dart';
 import 'package:fluttsec/src/models/oborudovanie.dart';
 import 'package:fluttsec/src/models/oborudovanieFoto.dart';
+import 'package:fluttsec/src/models/user.dart';
+import 'package:fluttsec/src/models/userSelect.dart';
 import 'package:fluttsec/src/models/usluga.dart';
 import 'package:fluttsec/src/models/uslugaSelect.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:fluttsec/src/remote/save_with_photos.dart';
+import 'package:fluttsec/user_select_screen.dart';
 import 'package:fluttsec/usluga_select_screen.dart';
 import 'package:gal/gal.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -37,51 +40,52 @@ class AvtoWidget extends HookConsumerWidget {
     zayavka = ref.zayavkaRemotes.watch(zayavka);
     var commentController = TextEditingController(text: avto.comment);
 
-   
     var _speechToText = useState(SpeechToText());
-    useEffect(() {
-      _speechToText.value.initialize();
-      return null;
-    
-    },);
+    useEffect(
+      () {
+        _speechToText.value.initialize();
+        return null;
+      },
+    );
 
     return ExpansionTile(
         trailing: SizedBox.shrink(),
         collapsedShape: const ContinuousRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(20))),
         title: Row(children: [
-          for(var image in avto.avtoFoto.toList())
-           GestureDetector(
-                            onTap: () {
-                                 Navigator.push<Widget>(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ImageScreen(image.fileLocal!),
-                            ),
-                          );
-                            },
-                            child: 
-          Image(image: FileImage(File(image.fileLocal!), ),height: 50,)),
+          for (var image in avto.avtoFoto.toList())
+            GestureDetector(
+                onTap: () {
+                  Navigator.push<Widget>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ImageScreen(image.fileLocal!),
+                    ),
+                  );
+                },
+                child: Image(
+                  image: FileImage(
+                    File(image.fileLocal!),
+                  ),
+                  height: 50,
+                )),
           Expanded(
             flex: 2,
             child: Text(
-                '${avto.nomer}\n${avto.marka}${(avto.nomerAG == null || avto.nomerAG == "null"|| avto.nomerAG == "") ? '' : '\nАГ:' + avto.nomerAG!}'),
+                '${avto.nomer}\n${avto.marka}${(avto.nomerAG == null || avto.nomerAG == "null" || avto.nomerAG == "") ? '' : '\nАГ:' + avto.nomerAG!}'),
           ),
-          
-          if(avto.status=="TEMP")
-          ElevatedButton(
-              onPressed:  () => {avto.status = "NOVAYA",
-              avto.saveLocal()},
-              child: const Icon(Icons.refresh)),
+          if (avto.status == "TEMP")
+            ElevatedButton(
+                onPressed: () => {avto.status = "NOVAYA", avto.saveLocal()},
+                child: const Icon(Icons.refresh)),
           ElevatedButton(
               onPressed: notNew
                   ? null
                   : () => showDeleteAlertAvto(context, zayavka, avto),
               child: const Icon(Icons.cancel)),
         ]),
-        collapsedBackgroundColor: notNew
-            ? Colors.grey.shade200
-            : Color.fromARGB(255, 247, 130, 139),
+        collapsedBackgroundColor:
+            notNew ? Colors.grey.shade200 : Color.fromARGB(255, 247, 130, 139),
         children: <Widget>[
           const SizedBox(width: 8),
           const SizedBox(width: 8),
@@ -122,22 +126,21 @@ class AvtoWidget extends HookConsumerWidget {
                   for (Foto foto in avto.fotos.toList())
                     Stack(children: <Widget>[
                       ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child:
-                           GestureDetector(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: GestureDetector(
                             onTap: () {
-                                 Navigator.push<Widget>(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ImageScreen(foto.fileLocal!),
-                            ),
-                          );
+                              Navigator.push<Widget>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ImageScreen(foto.fileLocal!),
+                                ),
+                              );
                             },
-                            child: 
-                           Image(
-                            image: FileImage(File(foto.fileLocal!)),
-                            height: 180,
-                          )),
+                            child: Image(
+                              image: FileImage(File(foto.fileLocal!)),
+                              height: 180,
+                            )),
                       ),
                       Positioned(
                           right: -2,
@@ -175,7 +178,8 @@ class AvtoWidget extends HookConsumerWidget {
                       context,
                       // Create the SelectionScreen in the next step.
                       MaterialPageRoute(
-                          builder: (context) => UslugaSelectScreen(avto: avto, zayavka: zayavka)),
+                          builder: (context) =>
+                              UslugaSelectScreen(avto: avto, zayavka: zayavka)),
                     );
                     zayavka.saveLocal();
                   },
@@ -189,64 +193,72 @@ class AvtoWidget extends HookConsumerWidget {
                   borderRadius: BorderRadius.circular(10),
                   color: Colors.blue.shade200,
                 ),
-                child: Column( children: [ Row(
-                  children: [
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Expanded(
-                      child: Text(
-                        style: TextStyle(fontSize: 17),
-                        '${usluga.title}',
+                child: Column(children: [
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 5,
                       ),
-                    ),
-                 
-  
-                  ],
-                ),
-              
-                Row(children: [
-               
-                   ElevatedButton(onPressed: notNew
-                ? null
-                :() {
-                    usluga.kolichestvo = usluga.kolichestvo +1;
-                    usluga.saveLocal();
-                    avto.saveLocal();
-                    zayavka.saveLocal();
-                  }, child: Text("+")),
-                     Text(usluga.kolichestvo.toString()),
-                    Icon(Icons.timer_outlined),
-                  ElevatedButton(onPressed: notNew
-                ? null
-                : () {
-                    usluga.kolichestvo = usluga.kolichestvo -1;
-                    usluga.saveLocal();
-                    avto.saveLocal();
-                    zayavka.saveLocal();
-                  }, child: Text("-"))
-                ],),
-                  Row(children: [
-                  ElevatedButton(onPressed: notNew
-                ? null
-                :() {
-                    usluga.sverh = usluga.sverh +1;
-                    usluga.saveLocal();
-                    avto.saveLocal();
-                    zayavka.saveLocal();
-                  }, child: Text("+")),
-                     Text(usluga.sverh.toString()),
-                    Icon(Icons.timer),
-                  ElevatedButton(onPressed: notNew
-                ? null
-                :() {
-                    usluga.sverh = usluga.sverh -1;
-                    usluga.saveLocal();
-                    avto.saveLocal();
-                    zayavka.saveLocal();
-                  }, child: Text("-")),
-                
-                ],),
+                      Expanded(
+                        child: Text(
+                          style: TextStyle(fontSize: 17),
+                          '${usluga.title}',
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                          onPressed: notNew
+                              ? null
+                              : () {
+                                  usluga.kolichestvo = usluga.kolichestvo + 1;
+                                  usluga.saveLocal();
+                                  avto.saveLocal();
+                                  zayavka.saveLocal();
+                                },
+                          child: Text("+")),
+                      Text(usluga.kolichestvo.toString()),
+                      Icon(Icons.timer_outlined),
+                      ElevatedButton(
+                          onPressed: notNew
+                              ? null
+                              : () {
+                                  usluga.kolichestvo = usluga.kolichestvo - 1;
+                                  usluga.saveLocal();
+                                  avto.saveLocal();
+                                  zayavka.saveLocal();
+                                },
+                          child: Text("-"))
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                          onPressed: notNew
+                              ? null
+                              : () {
+                                  usluga.sverh = usluga.sverh + 1;
+                                  usluga.saveLocal();
+                                  avto.saveLocal();
+                                  zayavka.saveLocal();
+                                },
+                          child: Text("+")),
+                      Text(usluga.sverh.toString()),
+                      Icon(Icons.timer),
+                      ElevatedButton(
+                          onPressed: notNew
+                              ? null
+                              : () {
+                                  usluga.sverh = usluga.sverh - 1;
+                                  usluga.saveLocal();
+                                  avto.saveLocal();
+                                  zayavka.saveLocal();
+                                },
+                          child: Text("-")),
+                    ],
+                  ),
                 ]),
               ),
             ),
@@ -371,39 +383,89 @@ class AvtoWidget extends HookConsumerWidget {
             decoration: InputDecoration(hintText: 'коммментарий'),
           ),
           ElevatedButton(
-              onPressed: notNew
-                  ? null
-                  : () {
-            if(_speechToText.value.isNotListening){
+            onPressed: notNew
+                ? null
+                : () {
+                    if (_speechToText.value.isNotListening) {
+                      _speechToText.value.listen(
+                        onResult: (result) {
+                          avto.comment = result.recognizedWords;
+                          avto.saveLocal();
+                          zayavka.saveLocal();
 
-
-               _speechToText.value.listen(onResult: (result) {
-                  avto.comment = result.recognizedWords;
-                  avto.saveLocal();
-                zayavka.saveLocal();
-                
-                //infoToast("речь сохранена");
-               },);
-            }else{
-              _speechToText.value.stop();
-            }
-              },
-              child: Icon(_speechToText.value.isNotListening ? Icons.mic_off : Icons.mic),
+                          //infoToast("речь сохранена");
+                        },
+                      );
+                    } else {
+                      _speechToText.value.stop();
+                    }
+                  },
+            child: Icon(
+                _speechToText.value.isNotListening ? Icons.mic_off : Icons.mic),
           ),
-              
           ElevatedButton(
               onPressed: notNew
                   ? null
-                  :() {
-                if (commentController.text.length > 199)
-                  commentController.text =
-                      commentController.text.substring(0, 199);
-                avto.comment = commentController.text;
-                avto.saveLocal();
-                zayavka.saveLocal();
-                infoToast("комментарий сохранен");
-              },
+                  : () {
+                      if (commentController.text.length > 199)
+                        commentController.text =
+                            commentController.text.substring(0, 199);
+                      avto.comment = commentController.text;
+                      avto.saveLocal();
+                      zayavka.saveLocal();
+                      infoToast("комментарий сохранен");
+                    },
               child: Text("сохранить комментарий")),
+          Text(
+            'Соисполнители:',
+            style: TextStyle(fontSize: 20),
+          ),
+          ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all<Color>(
+                  Colors.blue.shade100), // Change button color
+            ),
+            child: const Icon(Icons.supervised_user_circle_outlined),
+            onPressed: notNew
+                ? null
+                : () async {
+                    UserSelect? result = await Navigator.push(
+                      context,
+                      // Create the SelectionScreen in the next step.
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              UserSelectScreen(avto: avto, zayavka: zayavka)),
+                    );
+                    zayavka.saveLocal();
+                  },
+          ),
+          for (User usluga in avto.users.toList())
+            Container(
+              padding: EdgeInsets.all(0),
+              child: Container(
+                margin: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.blue.shade200,
+                ),
+                child: Column(children: [
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Expanded(
+                        child: Text(
+                          style: TextStyle(fontSize: 17),
+                          '${usluga.username}',
+                        ),
+                      ),
+                    ],
+                  ),
+                 
+                ]),
+              ),
+            ),
           ElevatedButton(
               onPressed: notNew
                   ? null
@@ -416,38 +478,41 @@ class AvtoWidget extends HookConsumerWidget {
 
   Future<dynamic> showSendAvtoDialog(BuildContext context) {
     return showDialog(
-                      context: context,
-                      builder: (_) {
-                        return Dialog(
-                          
-                          child: ListView(
-                            shrinkWrap: true,
-                            children: [
-                              Text('Уверены что хотите отправить отчет?'),
-                              ElevatedButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: Text('Отмена'),
-                            ),
-                            ElevatedButton(
-                              onPressed: () async {
-                                if(await checkConnection()){
-                                infoToast("Отправляем");
-                                sendAvtoOtchet();
-                                //ref.avtomobilRemotes.save(avto);
-                                Navigator.pop(context);
-                                }
-                              },
-                              child: Text('Отправить'),
-                            ),
-                            ],
-                          ),
-                         
-                        );
-                      },
-                    );
+      context: context,
+      builder: (_) {
+        return Dialog(
+          child: 
+          Container(
+            padding: EdgeInsets.all(10),
+            child: 
+          ListView(
+            shrinkWrap: true,
+            children: [
+              Text('Уверены что хотите отправить отчет?'),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Отмена'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (await checkConnection()) {
+                    infoToast("Отправляем");
+                    sendAvtoOtchet();
+                    //ref.avtomobilRemotes.save(avto);
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text('Отправить'),
+              ),
+            ],
+          ),
+          ),
+        );
+      },
+    );
   }
 
-  bool get notNew => avto.status!="NOVAYA";
+  bool get notNew => avto.status != "NOVAYA";
 
   Future<void> sendAvtoOtchet() async {
     avto.status = 'TEMP';
@@ -456,9 +521,8 @@ class AvtoWidget extends HookConsumerWidget {
     bool r = false;
     try {
       r = await sendAvto(avto, token.value);
-      
-    }  catch (e) {
-      infoToast("Ошибка при отправке\n"+e.toString());
+    } catch (e) {
+      infoToast("Ошибка при отправке\n" + e.toString());
       /*
       avto.status = "PENDING";
       avto.saveLocal();
@@ -519,7 +583,6 @@ class AvtoWidget extends HookConsumerWidget {
       );
 
       */
-     
     }
 
     if (r) {
@@ -527,7 +590,7 @@ class AvtoWidget extends HookConsumerWidget {
       avto.saveLocal();
       zayavka.saveLocal();
       infoToast("отправлено на проверку");
-    }else{
+    } else {
       infoToast("Не удалось отправить, попробуйте еще");
       avto.status = "NOVAYA";
       avto.saveLocal();
@@ -535,22 +598,23 @@ class AvtoWidget extends HookConsumerWidget {
     }
   }
 
-  addOborudovanieFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
+  addOborudovanieFotos(
+      ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
     final ImagePicker _picker = ImagePicker();
 
-    var pickedFiles = 
-    //await AssetPicker.pickAssets(
-  //context,
-  //pickerConfig: const AssetPickerConfig(maxAssets:60, ),
+    var pickedFiles =
+        //await AssetPicker.pickAssets(
+        //context,
+        //pickerConfig: const AssetPickerConfig(maxAssets:60, ),
 //);
         await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
 
     if (!pickedFiles.isEmpty) {
       for (var pickedFile in pickedFiles) {
         var fi = await pickedFile;
-       
+
         OborudovanieFoto f = OborudovanieFoto(
-            id:Uuid().v4(),
+            id: Uuid().v4(),
             fileLocal: fi.path,
             avtomobil: BelongsTo<AvtomobilRemote>(avto));
         f.saveLocal();
@@ -569,7 +633,7 @@ class AvtoWidget extends HookConsumerWidget {
 
     var pickedFile = await _picker.pickImage(
         source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
-    if(pickedFile!=null)Gal.putImage(pickedFile.path);
+    if (pickedFile != null) Gal.putImage(pickedFile.path);
 
     if (pickedFile != null) {
       OborudovanieFoto f = OborudovanieFoto(
@@ -596,26 +660,29 @@ void showDeleteAlertAvto(context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
     context: context,
     builder: (_) {
       return Dialog(
-       child: ListView(
+        child: 
+        Container(
+          padding: EdgeInsets.all(10),
+          child: 
+        ListView(
           shrinkWrap: true,
-          children: [Text('Уверены что хотите удалить авто?'),
-           ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Отмена'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              avto.deleteLocal();
-              zayavka.saveLocal();
-              Navigator.pop(context);
-            },
-            child: Text('Удалить'),
-          ),
-          
+          children: [
+            Text('Уверены что хотите удалить авто?'),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                avto.deleteLocal();
+                zayavka.saveLocal();
+                Navigator.pop(context);
+              },
+              child: Text('Удалить'),
+            ),
           ],
-          
         ),
-        
+        )
       );
     },
   );
@@ -627,8 +694,7 @@ addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
 
   var pickedFile = await _picker.pickImage(
       source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
-       if(pickedFile!=null)Gal.putImage(pickedFile.path);
-
+  if (pickedFile != null) Gal.putImage(pickedFile.path);
 
   if (pickedFile != null) {
     Foto f = Foto(
@@ -648,19 +714,18 @@ addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
 addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
   final ImagePicker _picker = ImagePicker();
 
-  var pickedFiles = 
-  //await AssetPicker.pickAssets(
-  //context,
- // pickerConfig: const AssetPickerConfig(maxAssets:60, ),
+  var pickedFiles =
+      //await AssetPicker.pickAssets(
+      //context,
+      // pickerConfig: const AssetPickerConfig(maxAssets:60, ),
 //);
       await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
 
   if (!pickedFiles.isEmpty) {
     for (var pickedFile in pickedFiles) {
       var fi = await pickedFile;
-      Foto f = Foto(
-          fileLocal: fi.path,
-          avtomobil: BelongsTo<AvtomobilRemote>(avto));
+      Foto f =
+          Foto(fileLocal: fi.path, avtomobil: BelongsTo<AvtomobilRemote>(avto));
       f.saveLocal();
     }
     avto.saveLocal();

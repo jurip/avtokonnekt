@@ -60,8 +60,8 @@ extension CurrentUserRelationshipGraphNodeX
 
 CurrentUser _$CurrentUserFromJson(Map<String, dynamic> json) => CurrentUser(
       id: json['id'] as String?,
-      firstName: json['firstName'] as String,
-      lastName: json['lastName'] as String,
+      firstName: json['firstName'] as String?,
+      lastName: json['lastName'] as String?,
     );
 
 Map<String, dynamic> _$CurrentUserToJson(CurrentUser instance) =>

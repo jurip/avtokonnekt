@@ -39,6 +39,13 @@ mixin $AvtomobilRemoteLocalAdapter on LocalAdapter<AvtomobilRemote> {
       kind: 'HasMany',
       instance: (_) => (_ as AvtomobilRemote).performance_service,
     ),
+    'users': RelationshipMeta<User>(
+      name: 'users',
+      inverseName: 'avtomobil',
+      type: 'users',
+      kind: 'HasMany',
+      instance: (_) => (_ as AvtomobilRemote).users,
+    ),
     'barcode': RelationshipMeta<Oborudovanie>(
       name: 'barcode',
       inverseName: 'avtomobil',
@@ -124,6 +131,13 @@ extension AvtomobilRemoteRelationshipGraphNodeX
     final meta = $AvtomobilRemoteLocalAdapter
             ._kAvtomobilRemoteRelationshipMetas['performance_service']
         as RelationshipMeta<Usluga>;
+    return meta.clone(
+        parent: this is RelationshipMeta ? this as RelationshipMeta : null);
+  }
+
+  RelationshipGraphNode<User> get users {
+    final meta = $AvtomobilRemoteLocalAdapter
+        ._kAvtomobilRemoteRelationshipMetas['users'] as RelationshipMeta<User>;
     return meta.clone(
         parent: this is RelationshipMeta ? this as RelationshipMeta : null);
   }

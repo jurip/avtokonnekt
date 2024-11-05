@@ -7,6 +7,7 @@ import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/foto.dart';
 import 'package:fluttsec/src/models/oborudovanie.dart';
 import 'package:fluttsec/src/models/oborudovanieFoto.dart';
+import 'package:fluttsec/src/models/user.dart';
 import 'package:fluttsec/src/models/usluga.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -28,6 +29,7 @@ class AvtomobilRemote extends DataModel<AvtomobilRemote> {
   final HasMany<AvtoFoto> avtoFoto = HasMany<AvtoFoto>();
   final HasMany<Foto> fotos = HasMany<Foto>();
   final HasMany<Usluga> performance_service = HasMany<Usluga>();
+  final HasMany<User> users = HasMany<User>();
   final HasMany<Oborudovanie> barcode = HasMany<Oborudovanie>();
   final HasMany<OborudovanieFoto> oborudovanieFotos = HasMany<OborudovanieFoto>();
   AvtomobilRemote( {this.id, required this.nomer, this.marka,this.nomerAG,this.comment, this.status, this.date, BelongsTo<ZayavkaRemote>? zayavka}) :

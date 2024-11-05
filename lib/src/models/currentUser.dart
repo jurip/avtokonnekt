@@ -12,8 +12,8 @@ part 'currentUser.g.dart';
 class CurrentUser extends DataModel<CurrentUser> {
   @override
   final String? id;
-  final String firstName;
-   final String lastName;
+  final String? firstName;
+   final String? lastName;
 
   CurrentUser({this.id,required this.firstName,required this.lastName});
 

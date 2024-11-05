@@ -6,6 +6,7 @@ import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/foto.dart';
 import 'package:fluttsec/src/models/oborudovanie.dart';
 import 'package:fluttsec/src/models/oborudovanieFoto.dart';
+import 'package:fluttsec/src/models/user.dart';
 import 'package:fluttsec/src/models/usluga.dart';
 
 Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
@@ -43,6 +44,10 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
   for (Oborudovanie f in a.barcode.toList()) {
     barcode.add({"code": f.code});
   }
+  var soispolniteli = [];
+  for(User u in a.users.toList()){
+    soispolniteli.add({"username":u.username});
+  }
 
   var data = json.encode({
     "avto": {
@@ -58,9 +63,11 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
       "oborudovanieFotos": oborudovanieFotos,
       "barcode": barcode,
       "performance_service": performance_service,
+       "soispolniteli":soispolniteli,
       "status": status,
       "username": company.value+"|"+user.value,
-      "tenantAttribute":company.value
+      "tenantAttribute":company.value,
+     
     }
   });
   var dio = Dio();

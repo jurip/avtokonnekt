@@ -302,17 +302,20 @@ class TasksScreen extends HookConsumerWidget {
           child: ListView(
             shrinkWrap: true,
             children: [
+               Container(padding: EdgeInsets.all(10),
+                child: 
               TextFormField(
                 inputFormatters: [
                   UpperCaseTextFormatter(),
                 ],
                 controller: nomerController,
                 decoration: InputDecoration(hintText: 'номер'),
-              ),
-              TextFormField(
+              ),),
+              Container(padding: EdgeInsets.all(10),
+                child:  TextFormField(
                 controller: markaController,
                 decoration: InputDecoration(hintText: 'марка'),
-              ),
+              ),),
               ElevatedButton(
                   onPressed: () {
                     var uuid = Uuid();
@@ -441,7 +444,11 @@ class TasksScreen extends HookConsumerWidget {
             : 'Уверены что хотите закрыть заявку?';
 
         return Dialog(
-          child: ListView(
+          child: 
+          Container(
+            padding: EdgeInsets.all(10),
+            child: 
+          ListView(
             shrinkWrap: true,
             children: [
               Text(text),
@@ -463,6 +470,7 @@ class TasksScreen extends HookConsumerWidget {
                 child: Text('Готово'),
               ),
             ],
+          ),
           ),
         );
       },

@@ -115,6 +115,8 @@ class LoginPage extends HookConsumerWidget {
                 ref.currentUsers.findAll();
                 ref.uslugaSelects.clear();
                 ref.uslugaSelects.findAll();
+                ref.userSelects.clear();
+                ref.userSelects.findAll();
                 ref.zayavkaRemotes.clear();
                 var l =  await ref.zayavkaRemotes.findAll();
                 
