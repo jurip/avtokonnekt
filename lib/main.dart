@@ -31,7 +31,7 @@ import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
 
-//onst String site = "http://5.228.73.174:2222/";
+//const String site = "http://5.228.73.174:2222/";
 const String site = "http://89.111.173.110:8080/";
 //const String site = "http://193.227.240.27:8080/";
 //const String site = "http://10.0.2.2:8080/";

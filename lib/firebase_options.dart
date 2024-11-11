@@ -57,7 +57,7 @@ class DefaultFirebaseOptions {
     appId: '1:858003379593:android:6991ac0534bf53188f7d58',
     messagingSenderId: '858003379593',
     projectId: 'avtokonnekt-ba725',
-    storageBucket: 'avtokonnekt-ba725.appspot.com',
+    storageBucket: 'avtokonnekt-ba725.firebasestorage.app',
   );
 
 }

@@ -28,7 +28,7 @@ class UserSelectScreen extends HookConsumerWidget {
           final stateUsers = ref.userSelects.watchAll(remote: false);
 
           List<UserSelect> ff = List.from(stateUsers.model);
-          ff.sort((a, b) => a.lastName!.compareTo(b.lastName!));
+
           final filteredUsers = useState(ff);
           final selectedUsers = useState(avto.users.toList());
 
@@ -38,23 +38,28 @@ class UserSelectScreen extends HookConsumerWidget {
               filteredUsers.value = stateUsers.model
                   .where(
                     (UserSelect element) {
-                      String t = element.lastName!;
-                      List<String> s = searchController.value.text.toLowerCase().split(' ');
+
+
+                     
+                      String s = searchController.value.text.toLowerCase();
+
                       
-                      bool r = s.every((element) => t.contains(element));
-                        return r;
+                      bool? r = element.lastName?.toLowerCase().contains(s);
+                      bool? r2 = element.firstName?.toLowerCase().contains(s);
+                      bool? r3 = element.username?.contains(s);
+                     
+                        return (r??false)||(r2??false)||(r3??false) ;
                     }
                   )
                   .toList();
-                  print('|'+searchController.value.text+'|');
-                  print(filteredUsers.value);
+                 
             },
           );
           // TODO: implement build
           return Scaffold(
               appBar: AppBar(
                 title: Row(children: [ 
-                  Text('Выберите сопользователя'),
+                  Text('Сотрудник'),
                   Spacer(),
                   IconButton(onPressed: () => context.pop(),
                    icon: Icon(Icons.check))
@@ -121,7 +126,7 @@ class UserSelectScreen extends HookConsumerWidget {
 
                           
                           
-                      title: Text('${u.lastName} ${u.firstName}(${u.username}) ',style: TextStyle(fontSize: 23)),
+                      title: Text('${u.lastName} ${u.firstName}(${u.username!.split("|")[1]}) ',style: TextStyle(fontSize: 23)),
                       
                     ),
                 ],

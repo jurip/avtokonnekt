@@ -3,7 +3,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttsec/image_screen.dart';
+import 'package:fluttsec/login_page.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
@@ -19,8 +21,10 @@ import 'package:fluttsec/src/remote/save_with_photos.dart';
 import 'package:fluttsec/user_select_screen.dart';
 import 'package:fluttsec/usluga_select_screen.dart';
 import 'package:gal/gal.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:uuid/uuid.dart';
@@ -497,7 +501,7 @@ class AvtoWidget extends HookConsumerWidget {
                 onPressed: () async {
                   if (await checkConnection()) {
                     infoToast("Отправляем");
-                    sendAvtoOtchet();
+                    sendAvtoOtchet( context);
                     //ref.avtomobilRemotes.save(avto);
                     Navigator.pop(context);
                   }
@@ -514,15 +518,21 @@ class AvtoWidget extends HookConsumerWidget {
 
   bool get notNew => avto.status != "NOVAYA";
 
-  Future<void> sendAvtoOtchet() async {
+  Future<void> sendAvtoOtchet(BuildContext context) async {
     avto.status = 'TEMP';
     avto.saveLocal();
     zayavka.saveLocal();
     bool r = false;
     try {
       r = await sendAvto(avto, token.value);
-    } catch (e) {
+    }  catch ( e) {
       infoToast("Ошибка при отправке\n" + e.toString());
+      if(e.toString().contains("401")){
+        user.value = '';
+        token.value = '';
+        context.go('/login');
+        
+      }
       /*
       avto.status = "PENDING";
       avto.saveLocal();
@@ -600,14 +610,12 @@ class AvtoWidget extends HookConsumerWidget {
 
   addOborudovanieFotos(
       ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
-    final ImagePicker _picker = ImagePicker();
-
     var pickedFiles =
         //await AssetPicker.pickAssets(
         //context,
         //pickerConfig: const AssetPickerConfig(maxAssets:60, ),
 //);
-        await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
+      await pickMulti(context);
 
     if (!pickedFiles.isEmpty) {
       for (var pickedFile in pickedFiles) {
@@ -712,14 +720,15 @@ addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
 }
 
 addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
-  final ImagePicker _picker = ImagePicker();
+  //final ImagePicker _picker = ImagePicker();
 
   var pickedFiles =
       //await AssetPicker.pickAssets(
       //context,
       // pickerConfig: const AssetPickerConfig(maxAssets:60, ),
-//);
-      await _picker.pickMultiImage(imageQuality: 30, maxHeight: 2000);
+//);  
+     await pickMulti(context);
+     
 
   if (!pickedFiles.isEmpty) {
     for (var pickedFile in pickedFiles) {
@@ -735,4 +744,47 @@ addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
       content: const Text('файлы не добавлены'),
     );
   }
+}
+
+ Future<List<XFile>> pickMulti(context) async {
+  final ImagePicker _picker = ImagePicker();
+  List<XFile> images =   await _picker.pickMultiImage(imageQuality: 30,maxHeight: 1500, maxWidth: 2000);
+  return images;
+
+/*
+  List<AssetEntity>? pickedFiles =
+      await AssetPicker.pickAssets(
+      context,
+       pickerConfig: const AssetPickerConfig(maxAssets:60, ),
+);  
+
+ List<XFile> r = [];
+ for(AssetEntity f in pickedFiles!){
+    File? fa = await f.file;
+    var paf = fa!.path;
+
+     final lastIndex = paf.lastIndexOf(RegExp(r'.jp'));
+      final splitted =  paf.substring(0, (lastIndex));
+
+var dir = await getTemporaryDirectory();
+var targetPath = dir.absolute.path + "/temp"+ Uuid().v4() +".jpg";
+
+      final outPath = '${dir.absolute.path}${splitted}_out${ paf.substring(lastIndex)}';
+
+    XFile? result = await FlutterImageCompress.compressAndGetFile(
+      paf, targetPath,
+       minWidth: 2300,
+       minHeight: 1500,
+        quality: 30,
+        
+      );
+      if(result!=null)
+      r.add(result);
+ }
+
+  
+
+  return r;
+  
+*/
 }
