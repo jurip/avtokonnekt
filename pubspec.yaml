@@ -1,5 +1,5 @@
 name: fluttsec
-description: "A new Flutter project."
+description: "Эвоконнект"
 
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
@@ -53,6 +53,7 @@ dependencies:
   wechat_assets_picker: ^9.3.2
   gal: ^2.3.0
   flutter_image_compress: ^2.3.0
+  ota_update: ^6.0.0
 
 dev_dependencies:
   flutter_test:

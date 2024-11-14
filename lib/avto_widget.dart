@@ -747,11 +747,11 @@ addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
 }
 
  Future<List<XFile>> pickMulti(context) async {
-  final ImagePicker _picker = ImagePicker();
-  List<XFile> images =   await _picker.pickMultiImage(imageQuality: 30,maxHeight: 1500, maxWidth: 2000);
-  return images;
+  //final ImagePicker _picker = ImagePicker();
+  //List<XFile> images =   await _picker.pickMultiImage(imageQuality: 30,maxHeight: 1500, maxWidth: 2000);
+  //return images;
 
-/*
+
   List<AssetEntity>? pickedFiles =
       await AssetPicker.pickAssets(
       context,
@@ -786,5 +786,5 @@ var targetPath = dir.absolute.path + "/temp"+ Uuid().v4() +".jpg";
 
   return r;
   
-*/
+
 }

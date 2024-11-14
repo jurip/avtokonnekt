@@ -10,8 +10,10 @@ import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/pFoto.dart';
 import 'package:fluttsec/src/models/pOborudovanie.dart';
 import 'package:fluttsec/src/models/peremeshenieOborudovaniya.dart';
+import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:uuid/uuid.dart';
 
@@ -193,7 +195,7 @@ for (var chek in chekState.model.toList(growable: true))
               onPressed: chek.status != "NOVAYA"
                   ? null
                   : () {
-                      addChekLocalFiles(chek);
+                      addChekFoto(chek);
                     },
             ),
           ]),
@@ -366,7 +368,26 @@ Future<bool> saveChek(PeremesheniyeOborudovaniya a, mytoken) async {
   return true;
 }
 
+ addChekFoto(PeremesheniyeOborudovaniya chek) async {
+    final ImagePicker _picker = ImagePicker();
 
+    var pickedFile = await _picker.pickImage(
+        source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+    if (pickedFile != null) Gal.putImage(pickedFile.path);
+
+    if (pickedFile != null) {
+      PFoto f = PFoto(
+          fileLocal: pickedFile.path,
+          peremeshenie: BelongsTo<PeremesheniyeOborudovaniya>(chek));
+      f.saveLocal();
+      chek.saveLocal();
+     
+    } else {
+      final snackBar = SnackBar(
+        content: const Text('фото не добавлено'),
+      );
+    }
+  }
   addChekLocalFiles(PeremesheniyeOborudovaniya chek) async {
   var result = await FilePicker.platform.pickFiles(allowMultiple: true);
 

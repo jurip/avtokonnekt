@@ -1,8 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-android:scheme="com.example.fluttsec">
+android:scheme="com.itevolution.evomontazh">
     <application
         android:label="ЭвоМонтаж"
         android:name="${applicationName}"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -39,6 +40,17 @@ android:scheme="com.example.fluttsec">
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+            <provider
+    android:name="sk.fourq.otaupdate.OtaUpdateFileProvider"
+    android:authorities="${applicationId}.ota_update_provider"
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/filepaths" />
+</provider>
+ 
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
@@ -69,6 +81,8 @@ android:scheme="com.example.fluttsec">
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
     
 
 </manifest>

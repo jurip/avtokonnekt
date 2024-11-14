@@ -30,9 +30,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:ota_update/ota_update.dart';
 
-//const String site = "http://5.228.73.174:2222/";
-const String site = "http://89.111.173.110:8080/";
+const String site = "http://5.228.73.174:2222/";
+//const String site = "http://89.111.173.110:8080/";
 //const String site = "http://193.227.240.27:8080/";
 //const String site = "http://10.0.2.2:8080/";
 
@@ -43,6 +44,9 @@ late final ValueNotifier<String> password;
 late final ValueNotifier<String> token;
 
 void main() async {
+
+
+
   WidgetsFlutterBinding.ensureInitialized();
   await initLocalStorage();
 
@@ -242,6 +246,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   String _lastMessage = "";
 
   _MyHomePageState() {
+/*
+ 
+*/
+
     _messageStreamController.listen((message) {
       setState(() {
         if (message.notification != null) {
@@ -293,6 +301,25 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     // as initState() must not be async
     setupInteractedMessage();
     WidgetsBinding.instance.addObserver(this);
+    /*
+        try {
+      
+      OtaUpdate()
+          .execute(
+        'https://disk.yandex.ru/d/j5GhirMiy5py1A/app-release.apk',
+        // OPTIONAL
+        //destinationFilename: 'flutter_hello_world.apk',
+        //OPTIONAL, ANDROID ONLY - ABILITY TO VALIDATE CHECKSUM OF FILE:
+        //sha256checksum: "d6da28451a1e15cf7a75f2c3f151befad3b80ad0bb232ab15c20897e54f21478",
+      ).listen(
+        (OtaEvent event) {
+          setState(() => currentEvent = event);
+        },
+      );
+  } catch (e) {
+      print('Failed to make OTA update. Details: $e');
+  }
+  */
   }
 
   @override
@@ -303,6 +330,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   late AppLifecycleState _lastState;
+  
+  OtaEvent? currentEvent;
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);

@@ -8,8 +8,10 @@ import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/remote/save_chek_with_photos.dart';
 import 'package:fluttsec/src/models/chek.dart';
 import 'package:fluttsec/src/models/chekFoto.dart';
+import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 class ChekiScreen extends HookConsumerWidget {
@@ -123,7 +125,7 @@ for (var chek in chekState.model.toList(growable: true))
               onPressed: chek.status != "NOVAYA"
                   ? null
                   : () {
-                      addChekLocalFiles(chek);
+                      addChekFoto(chek);
                     },
             ),
           ]),
@@ -220,6 +222,26 @@ for (var chek in chekState.model.toList(growable: true))
             ],
           );
         });
+  }
+   addChekFoto(Chek chek) async {
+    final ImagePicker _picker = ImagePicker();
+
+    var pickedFile = await _picker.pickImage(
+        source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+    if (pickedFile != null) Gal.putImage(pickedFile.path);
+
+    if (pickedFile != null) {
+      ChekFoto f = ChekFoto(
+          fileLocal: pickedFile.path,
+          chek: BelongsTo<Chek>(chek));
+      f.saveLocal();
+      chek.saveLocal();
+     
+    } else {
+      final snackBar = SnackBar(
+        content: const Text('фото не добавлено'),
+      );
+    }
   }
   addChekLocalFiles(Chek chek) async {
   var result = await FilePicker.platform.pickFiles(allowMultiple: true);
