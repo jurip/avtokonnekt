@@ -67,6 +67,10 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
       "status": status,
       "username": company.value+"|"+user.value,
       "tenantAttribute":company.value,
+      "lat":a.lat,
+      "lng":a.lng
+      //,
+      //"nachaloRabot":a.nachaloRabot!.toIso8601String()
      
     }
   });

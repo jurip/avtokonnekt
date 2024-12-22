@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_data/flutter_data.dart';
+import 'package:fluttsec/avto_widget.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/remote/save_chek_with_photos.dart';
@@ -113,7 +114,7 @@ for (var chek in chekState.model.toList(growable: true))
               onPressed: chek.status != "NOVAYA"
                   ? null
                   : () {
-                      addChekLocalFiles(chek);
+                      addChekLocalFiles(chek, context);
                     },
             ),
             ElevatedButton(
@@ -128,37 +129,30 @@ for (var chek in chekState.model.toList(growable: true))
                       addChekFoto(chek);
                     },
             ),
+              ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all<Color>(
+                    Colors.blue.shade100), // Change button color
+              ),
+              child: const Icon(Icons.file_download),
+              onPressed: chek.status != "NOVAYA"
+                  ? null
+                  : () {
+                    addFiles(chek, context);
+                    },
+            ),
           ]),
           if (!chek.fotos.isEmpty)
             CarouselSlider(
                 options: CarouselOptions(autoPlay: true, height: 150.0),
                 items: [
                   for (ChekFoto foto in chek.fotos.toList())
-                    Stack(children: <Widget>[
-                      ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image(
-                            image: FileImage(File(foto.fileLocal!)),
-                            height: 180,
-                          )),
-                      Positioned(
-                          right: -2,
-                          top: -9,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.cancel,
-                              color: Colors.black.withOpacity(0.5),
-                              size: 50,
-                            ),
-                            onPressed: chek.status != "NOVAYA"
-                                ? null
-                                : () {
+                    carouselItem(foto.fileLocal, context,  () {
                                     foto.deleteLocal();
                                     chek.saveLocal();
                                    
-                                  },
-                          ))
-                    ])
+                                  }, chek.status != "NOVAYA")
+                   
                 ]),
           
          
@@ -243,13 +237,15 @@ for (var chek in chekState.model.toList(growable: true))
       );
     }
   }
-  addChekLocalFiles(Chek chek) async {
-  var result = await FilePicker.platform.pickFiles(allowMultiple: true);
+  addChekLocalFiles(Chek chek, context) async {
+   var files = await pickMulti(context);
+  //var result = await FilePicker.platform.pickFiles(allowMultiple: true);
 
-  if (result != null) {
-    List<String?> files = result.paths.map((path) => path!).toList();
+  if (!files.isEmpty) {
+    //List<String?> files = result.paths.map((path) => path!).toList();
     for (var file in files) {
-      ChekFoto f = ChekFoto(fileLocal: file, chek: BelongsTo(chek));
+      var fl = await file;
+      ChekFoto f = ChekFoto(fileLocal: fl.path, chek: BelongsTo(chek));
       f.saveLocal();
     }
     chek.saveLocal();
@@ -287,4 +283,29 @@ void showDeleteAlertAvto(context, Chek avto) {
     },
   );
 }
+
+  void addFiles(Chek chek, BuildContext context) async{
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+
+if (result == null) 
+return;
+  List<File> files = result.paths.map((path) => File(path!)).toList();
+
+
+ if (!files.isEmpty) {
+    for (var pickedFile in files) {
+      var fi = await pickedFile;
+      ChekFoto f =
+          ChekFoto(fileLocal: fi.path, chek: BelongsTo<Chek>(chek));
+      f.saveLocal();
+    }
+    chek.saveLocal();
+    
+  } else {
+    final snackBar = SnackBar(
+      content: const Text('файлы не добавлены'),
+    );
+  }
+  }
 }

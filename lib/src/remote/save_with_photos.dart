@@ -48,10 +48,12 @@ Future<bool> sendAvto(
       'Authorization': 'Bearer $mytoken'
     };
     var data = File(avtoFoto.fileLocal!).readAsBytesSync();
+    var n = avtoFoto.fileLocal!.lastIndexOf("/");
+    var name = avtoFoto.fileLocal!.substring(n+1);
 
     var dio = Dio();
     var response = await dio.request(
-      '${site}rest/files?name=avtofoto.jpg',
+      '${site}rest/files?name='+name,
       options: Options(
         method: 'POST',
         headers: headers,

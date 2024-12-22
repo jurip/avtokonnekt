@@ -13,10 +13,12 @@ Future<bool> saveChekWithPhotos(Chek chek, WidgetRef ref, mytoken) async {
       'Authorization': 'Bearer $mytoken'
     };
     var data = File(foto.fileLocal!).readAsBytesSync();
+     var n = foto.fileLocal!.lastIndexOf("/");
+    var name = foto.fileLocal!.substring(n+1);
 
     var dio = Dio();
     var response = await dio.request(
-      '${site}rest/files?name=chek.jpg',
+      '${site}rest/files?name='+name,
       options: Options(
         method: 'POST',
         headers: headers,

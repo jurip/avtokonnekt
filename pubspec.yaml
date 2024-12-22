@@ -4,7 +4,7 @@ description: "Эвоконнект"
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 1.0.12+1
+version: 1.0.15+2
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
@@ -54,6 +54,8 @@ dependencies:
   gal: ^2.3.0
   flutter_image_compress: ^2.3.0
   ota_update: ^6.0.0
+  geolocator: ^13.0.2
+  open_file_manager: ^1.0.3
 
 dev_dependencies:
   flutter_test:

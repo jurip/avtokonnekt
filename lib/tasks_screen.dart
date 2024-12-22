@@ -37,6 +37,7 @@ class TasksScreen extends HookConsumerWidget {
 
     useEffect(() {
       loadZayavkaFromPrefs(ref);
+      
       return () => {};
     }, []);
 
@@ -53,7 +54,10 @@ class TasksScreen extends HookConsumerWidget {
                 (element) => element.status == 'NOVAYA',
               )
               .toList();
-          zFiltered.sort((a, b) => b.nachalo!.compareTo(a.nachalo!));
+          zFiltered.sort((a, b) 
+          
+          { if(a.nachalo!=null && b.nachalo!=null) return b.nachalo!.compareTo(a.nachalo!);else return 0;});
+          ref.duties.findAll();
           final stateDuty = ref.duties.watchAll();
           final stateCurrentUser = ref.currentUsers.watchAll();
 
@@ -65,6 +69,7 @@ class TasksScreen extends HookConsumerWidget {
               key: _refreshIndicatorKey,
               onRefresh: () async {
                 await ref.duties.findAll();
+                ref.zayavkaRemotes.findAll();
 
                 // sendToCalendar(ref);
               },
@@ -82,10 +87,8 @@ class TasksScreen extends HookConsumerWidget {
                     Container(
                         decoration: BoxDecoration(
                           color: Colors.grey.shade200,
-                          border: Border.all(
-                          
-                          ),
-                          borderRadius: BorderRadius.circular(20),
+                         
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         margin: EdgeInsets.all(10),
                         child: Text(
@@ -93,10 +96,19 @@ class TasksScreen extends HookConsumerWidget {
                           style: TextStyle(fontSize: 25),
                         ))),
                   for (final duty in stateDuty.model)
-                    Text(
-                      '${duty.status}',
-                      style: TextStyle(fontSize: 25),
-                    ),
+                  Center(child: 
+                    Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                         
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        margin: EdgeInsets.all(10),
+                        child: Text(
+                          '${duty.status}',
+                          style: TextStyle(fontSize: 25, color: Colors.red),
+                        ))),
+                   
                   SizedBox(height: 10),
                   Center(
                     child: Text(
@@ -144,7 +156,7 @@ class TasksScreen extends HookConsumerWidget {
                   Text('${DateFormat('dd.MM.yyyy').format(zayavka.nachalo!)}',
                       style: TextStyle(fontSize: 15)),
                 if (zayavka.nachalo != null)
-                  Text('${DateFormat('kk:mm').format(zayavka.nachalo!)}',
+                  Text('${DateFormat('HH:mm').format(zayavka.nachalo!)}',
                       style: TextStyle(fontSize: 15)),
               ]),
             ],
@@ -176,7 +188,7 @@ class TasksScreen extends HookConsumerWidget {
                               children: [
                                 if (zayavka.nachalo != null)
                                   Text(
-                                      '${DateFormat('dd.MM.yy kk:mm').format(zayavka.nachalo!)}',
+                                      '${DateFormat('dd.MM.yy HH:mm').format(zayavka.nachalo!)}',
                                       style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold)),

@@ -21,6 +21,7 @@ class LoginPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     var isError = useState(false);
+    var isLoading = useState(false);
     return Scaffold(
         body: Container(
           alignment: Alignment.bottomCenter,
@@ -38,7 +39,7 @@ class LoginPage extends HookConsumerWidget {
       padding: EdgeInsets.all(15),
       shrinkWrap: true,
       children: [
-        Center(child:Text('ЭвоМонтаж',style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),),),
+        Center(child:Text('ЭвоМонтаж',style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),),),
         SizedBox(height: 100,),
         if (isError.value) Text('     ОШИБКА АВТОРИЗАЦИИ. Укажите верный логин/пароль', style: TextStyle(fontSize: 20),), 
         TextFormField(
@@ -47,20 +48,21 @@ class LoginPage extends HookConsumerWidget {
           controller: companyController,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.grey.shade200,
-              contentPadding: const EdgeInsets.all(8.0),
-              border: OutlineInputBorder(
+            //fillColor: Colors.grey.shade200,
+            contentPadding: const EdgeInsets.all(8.0),
+            border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30.0),
               ),
               hintText: 'Компания'),
         ),
+        SizedBox(height: 10,),
         TextFormField(
           
           textAlign: TextAlign.center,
           controller: loginController,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.grey.shade200,
+            //fillColor: Colors.grey.shade200,
               contentPadding: const EdgeInsets.all(8.0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30.0),
@@ -75,7 +77,7 @@ class LoginPage extends HookConsumerWidget {
           controller: passwordController,
           decoration:  InputDecoration(
             filled: true,
-            fillColor: Colors.grey.shade200,
+            //fillColor: Colors.grey.shade200,
                      contentPadding: const EdgeInsets.all(8.0),
                      
     border: OutlineInputBorder(
@@ -85,14 +87,15 @@ class LoginPage extends HookConsumerWidget {
         ),
         SizedBox(height: 5,),
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 100),
+          //margin: EdgeInsets.symmetric(horizontal: 100),
           child: 
-        ElevatedButton(
+        ElevatedButton.icon(
           onPressed: () async {
             if (!await checkConnection()){ 
               
               return;
             }
+            isLoading.value = true;
 
             try{
               token.value = await getTokenFromServer();
@@ -106,6 +109,7 @@ class LoginPage extends HookConsumerWidget {
             if (t != "") {
               bool ok = await login(companyController.text+"|"+ t, passwordController.text, mytoken);
               if (ok) {
+                isLoading.value = false;
                 company.value = companyController.text;
                 user.value = t;
                 password.value = passwordController.text;
@@ -130,6 +134,7 @@ class LoginPage extends HookConsumerWidget {
                 context.go(MyZayavkiPage.routeName);
               } else {
                 isError.value = true;
+                isLoading.value = false;
                 Fluttertoast.showToast(
                     msg: "Не правильный логин/пароль",
                     toastLength: Toast.LENGTH_SHORT,
@@ -140,6 +145,7 @@ class LoginPage extends HookConsumerWidget {
                     fontSize: 16.0);
               }
             } else {
+              isLoading.value = false;
               Fluttertoast.showToast(
                   msg: "Введите логин/пароль логин/пароль",
                   toastLength: Toast.LENGTH_SHORT,
@@ -150,7 +156,18 @@ class LoginPage extends HookConsumerWidget {
                   fontSize: 16.0);
             }
           },
-          child: const Text('Войти'),
+          icon: isLoading.value
+          ? Container(
+              width: 34,
+              height: 34,
+              padding: const EdgeInsets.all(2.0),
+              child: const CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 3,
+              ),
+            )
+          : null,
+          label: const Text('Войти'),
         )
            ),
            SizedBox(height: 140,),

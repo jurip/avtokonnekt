@@ -32,10 +32,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:ota_update/ota_update.dart';
 
-const String site = "http://5.228.73.174:2222/";
+const String site = "http://178.140.233.205:2222/";
 //const String site = "http://89.111.173.110:8080/";
 //const String site = "http://193.227.240.27:8080/";
 //const String site = "http://10.0.2.2:8080/";
+//const String site = "http://80.78.242.102:8080/";
+
 
 late final ValueNotifier<String> company;
 
@@ -522,7 +524,7 @@ Future<ZayavkaRemote> newZayavkaFromMessage( Map data,WidgetRef ref) async {
   var mes = data["message"];
   var adres = data["adres"];
   var nachalo = data["nachalo"];
-  var format = new DateFormat("yyyy-MM-dd hh:mm:ss");
+  var format = new DateFormat("yyyy-MM-dd HH:mm:ss");
 
   DateTime nachalo_date =  nachalo==null?DateTime.now():format.parse(nachalo);
   DateTime end_date_time = format.parse(data["end_date_time"]);
@@ -589,7 +591,7 @@ Future<ZayavkaRemote> newZayavkaFromMessageZ( Map data) async {
   var mes = data["message"];
   var adres = data["adres"];
   var nachalo = data["nachalo"];
-  var format = new DateFormat("yyyy-MM-dd hh:mm:ss");
+  var format = new DateFormat("yyyy-MM-dd HH:mm:ss");
 
   DateTime nachalo_date =  nachalo==null?DateTime.now():format.parse(nachalo);
   DateTime end_date_time = format.parse(data["end_date_time"]);

@@ -1,13 +1,17 @@
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttsec/image_screen.dart';
 import 'package:fluttsec/login_page.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:open_file_manager/open_file_manager.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
+import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/foto.dart';
 import 'package:fluttsec/src/models/oborudovanie.dart';
@@ -32,6 +36,7 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class AvtoWidget extends HookConsumerWidget {
   AvtomobilRemote avto;
+  Position? position;
 
   ZayavkaRemote zayavka;
 
@@ -48,6 +53,7 @@ class AvtoWidget extends HookConsumerWidget {
     useEffect(
       () {
         _speechToText.value.initialize();
+        
         return null;
       },
     );
@@ -68,11 +74,17 @@ class AvtoWidget extends HookConsumerWidget {
                   );
                 },
                 child: Image(
-                  image: FileImage(
+                  image: 
+                  FileImage(
                     File(image.fileLocal!),
                   ),
+
+
+
+
                   height: 50,
                 )),
+               
           Expanded(
             flex: 2,
             child: Text(
@@ -93,8 +105,20 @@ class AvtoWidget extends HookConsumerWidget {
         children: <Widget>[
           const SizedBox(width: 8),
           const SizedBox(width: 8),
+            ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all<Color>(
+                    Colors.blue.shade100), // Change button color
+              ),
+              child: const Icon(Icons.add_a_photo),
+              onPressed: notNew
+                  ? null
+                  : () {
+                      addAvtoFoto(zayavka, avto);
+                    },
+            ),
           Text(
-            'Фотоотчет:',
+            'Oтчет:',
             style: TextStyle(fontSize: 20),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -122,48 +146,29 @@ class AvtoWidget extends HookConsumerWidget {
                       addFoto(zayavka, avto);
                     },
             ),
+              ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all<Color>(
+                    Colors.blue.shade100), // Change button color
+              ),
+              child: const Icon(Icons.file_download),
+              onPressed: notNew
+                  ? null
+                  : () {
+                    addFiles(zayavka, avto, context);
+                    },
+            ),
           ]),
           if (!avto.fotos.isEmpty)
             CarouselSlider(
                 options: CarouselOptions(autoPlay: true, height: 150.0),
                 items: [
                   for (Foto foto in avto.fotos.toList())
-                    Stack(children: <Widget>[
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: GestureDetector(
-                            onTap: () {
-                              Navigator.push<Widget>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      ImageScreen(foto.fileLocal!),
-                                ),
-                              );
-                            },
-                            child: Image(
-                              image: FileImage(File(foto.fileLocal!)),
-                              height: 180,
-                            )),
-                      ),
-                      Positioned(
-                          right: -2,
-                          top: -9,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.cancel,
-                              color: Colors.black.withOpacity(0.5),
-                              size: 50,
-                            ),
-                            onPressed: notNew
-                                ? null
-                                : () {
-                                    foto.deleteLocal();
-                                    avto.saveLocal();
-                                    zayavka.saveLocal();
-                                  },
-                          ))
-                    ])
+                    carouselItem(foto.fileLocal, context, () {
+                                  foto.deleteLocal();
+                                  avto.saveLocal();
+                                  zayavka.saveLocal();
+                                }, notNew)
                 ]),
           Text(
             'Услуги:',
@@ -358,29 +363,12 @@ class AvtoWidget extends HookConsumerWidget {
           if (!avto.oborudovanieFotos.isEmpty)
             CarouselSlider(options: CarouselOptions(height: 150.0), items: [
               for (OborudovanieFoto foto in avto.oborudovanieFotos.toList())
-                Stack(children: <Widget>[
-                  ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Image(
-                        image: FileImage(File(foto.fileLocal!)),
-                        height: 180,
-                      )),
-                  Positioned(
-                      right: -2,
-                      top: -9,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.cancel,
-                          color: Colors.black.withOpacity(0.5),
-                          size: 50,
-                        ),
-                        onPressed: () {
+               carouselItem(foto.fileLocal, context, () {
                           foto.deleteLocal();
                           avto.saveLocal();
                           zayavka.saveLocal();
-                        },
-                      ))
-                ])
+                        }, notNew)
+               
             ]),
           TextFormField(
             controller: commentController,
@@ -480,6 +468,8 @@ class AvtoWidget extends HookConsumerWidget {
         ]);
   }
 
+  
+  
   Future<dynamic> showSendAvtoDialog(BuildContext context) {
     return showDialog(
       context: context,
@@ -515,6 +505,32 @@ class AvtoWidget extends HookConsumerWidget {
       },
     );
   }
+  addFiles(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async{
+    
+
+FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+
+if (result == null) 
+return;
+  List<File> files = result.paths.map((path) => File(path!)).toList();
+
+
+ if (!files.isEmpty) {
+    for (var pickedFile in files) {
+      var fi = await pickedFile;
+      Foto f =
+          Foto(fileLocal: fi.path, avtomobil: BelongsTo<AvtomobilRemote>(avto));
+      f.saveLocal();
+    }
+    avto.saveLocal();
+    zayavka.saveLocal();
+  } else {
+    final snackBar = SnackBar(
+      content: const Text('файлы не добавлены'),
+    );
+  }
+  }
+ 
 
   bool get notNew => avto.status != "NOVAYA";
 
@@ -607,6 +623,27 @@ class AvtoWidget extends HookConsumerWidget {
       zayavka.saveLocal();
     }
   }
+  addAvtoFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
+    final ImagePicker _picker = ImagePicker();
+
+    var pickedFile = await _picker.pickImage(
+        source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+    if (pickedFile != null) Gal.putImage(pickedFile.path);
+
+    if (pickedFile != null) {
+      AvtoFoto f = AvtoFoto(
+          fileLocal: pickedFile.path,
+          avtomobil: BelongsTo<AvtomobilRemote>(avto));
+      f.saveLocal();
+
+      avto.saveLocal();
+      zayavka.saveLocal();
+    } else {
+      final snackBar = SnackBar(
+        content: const Text('фото не добавлено'),
+      );
+    }
+  }
 
   addOborudovanieFotos(
       ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
@@ -695,9 +732,20 @@ void showDeleteAlertAvto(context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
     },
   );
 }
-
-void addOborudovanieFotos(ZayavkaRemote zayavka, AvtomobilRemote avto) {}
+initPosition(AvtomobilRemote avto){
+ if(avto.nachaloRabot==null){
+  avto.nachaloRabot = DateTime.now();
+ }
+ if(avto.lat=="0")
+  _determinePosition().then((value) {
+    Position p = value ;
+  avto.lat = p.latitude.toString();
+  avto.lng = p.longitude.toString();
+  },);
+}
 addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
+  initPosition(avto);
+  
   final ImagePicker _picker = ImagePicker();
 
   var pickedFile = await _picker.pickImage(
@@ -720,12 +768,13 @@ addFoto(ZayavkaRemote zayavka, AvtomobilRemote avto) async {
 }
 
 addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
+ initPosition(avto);
   //final ImagePicker _picker = ImagePicker();
 
   var pickedFiles =
       //await AssetPicker.pickAssets(
       //context,
-      // pickerConfig: const AssetPickerConfig(maxAssets:60, ),
+      // pikerConfig: const AssetPickerConfig(maxAssets:60, ),
 //);  
      await pickMulti(context);
      
@@ -763,13 +812,11 @@ addFotos(ZayavkaRemote zayavka, AvtomobilRemote avto, context) async {
     File? fa = await f.file;
     var paf = fa!.path;
 
-     final lastIndex = paf.lastIndexOf(RegExp(r'.jp'));
-      final splitted =  paf.substring(0, (lastIndex));
+     final lastIndex = paf.lastIndexOf(RegExp(r'/'));
+      final end = paf.substring(lastIndex+1, paf.length);
 
 var dir = await getTemporaryDirectory();
-var targetPath = dir.absolute.path + "/temp"+ Uuid().v4() +".jpg";
-
-      final outPath = '${dir.absolute.path}${splitted}_out${ paf.substring(lastIndex)}';
+var targetPath = dir.absolute.path + "/temp"+ Uuid().v4() +end;
 
     XFile? result = await FlutterImageCompress.compressAndGetFile(
       paf, targetPath,
@@ -788,3 +835,102 @@ var targetPath = dir.absolute.path + "/temp"+ Uuid().v4() +".jpg";
   
 
 }
+
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the 
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale 
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      return Future.error('Location permissions are denied');
+    }
+  }
+  
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately. 
+    return Future.error(
+      'Location permissions are permanently denied, we cannot request permissions.');
+  } 
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition();
+}
+Stack carouselItem(file, BuildContext context, delete, notNew) {
+    return Stack(children: <Widget>[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child:
+                      
+                       filePicture(file!, context)
+                          
+                          ,
+                    ),
+                    Positioned(
+                        right: -2,
+                        top: -9,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.cancel,
+                            color: Colors.black.withOpacity(0.5),
+                            size: 50,
+                          ),
+                          onPressed: notNew
+                              ? null
+                              : delete,
+                        ))
+                  ]);
+  }
+GestureDetector filePicture(String file, BuildContext context) {
+    return file.endsWith(".jpg")||file.endsWith(".jpeg")||file.endsWith(".png")?
+                       GestureDetector(
+                          onTap: () {
+                            Navigator.push<Widget>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ImageScreen(file),
+                              ),
+                            );
+                          },
+                          child: Image(
+                            image: FileImage(
+                              
+                              File(
+                           file)),
+                            height: 180,
+                          ))
+                          
+                          :
+                          
+                          GestureDetector(
+                          onTap: () {
+                           //Navigator.push<Widget>(
+                          //   context,
+                           //   MaterialPageRoute(
+                           //     builder: (context) =>
+                           //         ImageScreen(foto.fileLocal!),
+                           //   ),
+                          //  );
+                          },
+                          child: Image(
+                            image: AssetImage("assets/images/file.png"),
+                            height: 180,
+                          ));
+  }

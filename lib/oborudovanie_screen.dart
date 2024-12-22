@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_data/flutter_data.dart';
+import 'package:fluttsec/avto_widget.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/pFoto.dart';
@@ -198,37 +199,30 @@ for (var chek in chekState.model.toList(growable: true))
                       addChekFoto(chek);
                     },
             ),
+             ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all<Color>(
+                    Colors.blue.shade100), // Change button color
+              ),
+              child: const Icon(Icons.file_download),
+              onPressed: chek.status != "NOVAYA"
+                  ? null
+                  : () {
+                    addFiles(chek, context);
+                    },
+            ),
           ]),
           if (!chek.fotos.isEmpty)
             CarouselSlider(
                 options: CarouselOptions(autoPlay: true, height: 150.0),
                 items: [
                   for (PFoto foto in chek.fotos.toList())
-                    Stack(children: <Widget>[
-                      ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image(
-                            image: FileImage(File(foto.fileLocal!)),
-                            height: 180,
-                          )),
-                      Positioned(
-                          right: -2,
-                          top: -9,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.cancel,
-                              color: Colors.black.withOpacity(0.5),
-                              size: 50,
-                            ),
-                            onPressed: chek.status != "NOVAYA"
-                                ? null
-                                : () {
+                    carouselItem(foto.fileLocal, context,  () {
                                     foto.deleteLocal();
                                     chek.saveLocal();
                                    
-                                  },
-                          ))
-                    ])
+                                  }, chek.status != "NOVAYA")
+                   
                 ]),
           
          
@@ -302,8 +296,10 @@ for (var chek in chekState.model.toList(growable: true))
     var data = File(foto.fileLocal!).readAsBytesSync();
 
     var dio = Dio();
+     var n = foto.fileLocal!.lastIndexOf("/");
+    var name = foto.fileLocal!.substring(n+1);
     var response = await dio.request(
-      '${site}rest/files?name=peremeshenie.jpg',
+      '${site}rest/files?name='+name,
       options: Options(
         method: 'POST',
         headers: headers,
@@ -320,6 +316,32 @@ for (var chek in chekState.model.toList(growable: true))
     }
   }
   return saveChek(chek, mytoken);
+}
+
+void addFiles(PeremesheniyeOborudovaniya chek, BuildContext context) async{
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+
+if (result == null) 
+return;
+  List<File> files = result.paths.map((path) => File(path!)).toList();
+
+
+ if (!files.isEmpty) {
+    for (var pickedFile in files) {
+      var fi = await pickedFile;
+      PFoto f =
+          PFoto(fileLocal: fi.path, peremeshenie: BelongsTo<PeremesheniyeOborudovaniya>(chek));
+      f.saveLocal();
+    }
+    chek.saveLocal();
+    
+  } else {
+    final snackBar = SnackBar(
+      content: const Text('файлы не добавлены'),
+    );
+  }
+  }
 }
 Future<bool> saveChek(PeremesheniyeOborudovaniya a, mytoken) async {
   var headers = {
@@ -406,7 +428,7 @@ Future<bool> saveChek(PeremesheniyeOborudovaniya a, mytoken) async {
     );
   }
 }
-}
+
 void showDeleteAlertAvto(context, PeremesheniyeOborudovaniya avto) {
   showDialog(
     context: context,
