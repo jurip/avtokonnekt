@@ -187,16 +187,25 @@ for (var chek in chekState.model.toList(growable: true))
                                       await saveChekWithPhotos(
                                           chek, ref, token.value);
                                       }catch(e){
-                                            infoToast("Ошибка при отправке\n"+e.toString());
+                                            
+                                            if (e
+                                                              .toString()
+                                                              .contains(
+                                                                  "401")) {
+                                                            user.value = '';
+                                                            token.value = '';
+                                                            chek.status =
+                                                                "NOVAYA";
+                                                            chek.saveLocal();
+                                                            context
+                                                                .go('/login');
+                                                          }
                                       }
                                       if (ok) {
                                         chek.status = "GOTOWAYA";
                                         chek.saveLocal();
                                         infoToast("Готово");
                                         
-                                      }else{
-                                        infoToast("Не удалось отправить");
-                                        chek.status = "NOVAYA";
                                       }
                                   }
                                   

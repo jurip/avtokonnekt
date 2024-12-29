@@ -10,6 +10,7 @@ import 'package:fluttsec/my_zayavki_page.dart';
 import 'package:fluttsec/src/remote/update_user.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class LoginPage extends HookConsumerWidget {
   static final routeName = "/login";
@@ -171,7 +172,17 @@ class LoginPage extends HookConsumerWidget {
         )
            ),
            SizedBox(height: 140,),
+           GestureDetector(child: 
         Image(height: 70, image: AssetImage("assets/images/logoblack.png"),),
+        onTap: () {
+          launchUrlString("https://itevolut.ru/");
+        },
+           ),
+           GestureDetector(onTap: () {
+             launchUrlString("https://t.me/+SQjp7ZUZ9hcxNWFi");
+           },
+           child: Center(child:Text("регистрация")),)
+           
      
       ],
     ))));

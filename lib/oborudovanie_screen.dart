@@ -25,7 +25,7 @@ class OborudovanieScreen extends HookConsumerWidget {
       builder: (_) {
         var nomerController = TextEditingController();
         return Dialog(
-         child: ListView(
+          child: ListView(
             shrinkWrap: true,
             children: [
               TextFormField(
@@ -33,26 +33,25 @@ class OborudovanieScreen extends HookConsumerWidget {
                 decoration: InputDecoration(hintText: 'комментарий'),
               ),
               ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Отмена'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                // Send them to your email maybe?
-                var nomer = nomerController.text;
-                PeremesheniyeOborudovaniya a = PeremesheniyeOborudovaniya(id: Uuid().v4(),
-                    comment: nomer,
-                    status: "NOVAYA",
-                    
-                    date: DateTime.now());
-                a.saveLocal();
-                Navigator.pop(context);
-              },
-              child: Text('Сохранить'),
-            ),
+                onPressed: () => Navigator.pop(context),
+                child: Text('Отмена'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  // Send them to your email maybe?
+                  var nomer = nomerController.text;
+                  PeremesheniyeOborudovaniya a = PeremesheniyeOborudovaniya(
+                      id: Uuid().v4(),
+                      comment: nomer,
+                      status: "NOVAYA",
+                      date: DateTime.now());
+                  a.saveLocal();
+                  Navigator.pop(context);
+                },
+                child: Text('Сохранить'),
+              ),
             ],
           ),
-       
         );
       },
     );
@@ -60,289 +59,303 @@ class OborudovanieScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-     
-
-
     return ref.watch(repositoryInitializerProvider).when(
         error: (error, _) => Text(error.toString()),
         loading: () => const CircularProgressIndicator(),
         data: (_) {
-          var chekState = ref.peremesheniyeOborudovaniyas.watchAll(remote: false);
+          var chekState =
+              ref.peremesheniyeOborudovaniyas.watchAll(remote: false);
 
           return ListView(
             children: [
-               Align(
-  alignment: Alignment.topRight,
-  child: IconButton(onPressed: () => context.go('/settings'), icon: Icon(Icons.settings)),
-                 
-),
-ElevatedButton(onPressed: () => showChekDialog(context, ref), child: Text("Добавить перемещение"))
-
-,
-for (var chek in chekState.model.toList(growable: true))
-             ExpansionTile(
-        trailing: SizedBox.shrink(),
-        collapsedShape: const ContinuousRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20))),
-        title: Row(children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-                '${chek.comment}'),
-          ),
-          ElevatedButton(
-              onPressed: chek.status != "NOVAYA"
-                  ? null
-                  : () => showDeleteAlertAvto(context, chek),
-              child: const Icon(Icons.cancel)),
-        ]),
-        collapsedBackgroundColor: chek.status != "NOVAYA"
-            ? Colors.grey.shade200
-            : Color.fromARGB(255, 247, 130, 139),
-        children: <Widget>[
-          const SizedBox(width: 8),
-          const SizedBox(width: 8),
-
-
-        Text(
-            'Оборудование:',
-            style: TextStyle(fontSize: 20),
-          ),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(
-                  Colors.blue.shade100), // Change button color
-            ),
-            child: const Icon(Icons.barcode_reader),
-            onPressed: chek.status != "NOVAYA"
-                ? null
-                : () async {
-                    var res = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const SimpleBarcodeScannerPage(),
-                        ));
-                    if (res is String && res != '-1') {
-                      POborudovanie o = POborudovanie(
-                          peremeshenie: BelongsTo<PeremesheniyeOborudovaniya>(chek),
-                          code: res);
-
-                      o.saveLocal();
-                      chek.saveLocal();
-                      
-                    }
-                  },
-          ),
-          for (POborudovanie oborudovanie in chek.barcode.toList())
-            Container(
-              padding: EdgeInsets.all(0),
-              child: Container(
-                margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.blue.shade200,
-                ),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Expanded(
-                      child: Text(
-                        style: TextStyle(fontSize: 17),
-                        '${oborudovanie.code}',
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false,
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                    onPressed: () => context.go('/settings'),
+                    icon: Icon(Icons.settings)),
+              ),
+              ElevatedButton(
+                  onPressed: () => showChekDialog(context, ref),
+                  child: Text("Добавить перемещение")),
+              for (var chek in chekState.model.toList(growable: true))
+                ExpansionTile(
+                    trailing: SizedBox.shrink(),
+                    collapsedShape: const ContinuousRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    title: Row(children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text('${chek.comment}'),
                       ),
-                    ),
-                    ElevatedButton(
+                      ElevatedButton(
+                          onPressed: chek.status != "NOVAYA"
+                              ? null
+                              : () => showDeleteAlertAvto(context, chek),
+                          child: const Icon(Icons.cancel)),
+                    ]),
+                    collapsedBackgroundColor: chek.status != "NOVAYA"
+                        ? Colors.grey.shade200
+                        : Color.fromARGB(255, 247, 130, 139),
+                    children: <Widget>[
+                      const SizedBox(width: 8),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Оборудование:',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all<Color>(
+                              Colors.blue.shade100), // Change button color
+                        ),
+                        child: const Icon(Icons.barcode_reader),
                         onPressed: chek.status != "NOVAYA"
-                ? null
-                :() {
-                          oborudovanie.deleteLocal();
-                          chek.saveLocal();
-                          
-                        },
-                        child: Icon(Icons.cancel))
-                  ],
-                ),
-              ),
-            ),
+                            ? null
+                            : () async {
+                                var res = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const SimpleBarcodeScannerPage(),
+                                    ));
+                                if (res is String && res != '-1') {
+                                  POborudovanie o = POborudovanie(
+                                      peremeshenie:
+                                          BelongsTo<PeremesheniyeOborudovaniya>(
+                                              chek),
+                                      code: res);
 
-          Text(
-            'Фотоотчет:',
-            style: TextStyle(fontSize: 20),
-          ),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
-              ),
-              child: const Icon(Icons.attach_file_rounded),
-              onPressed: chek.status != "NOVAYA"
-                  ? null
-                  : () {
-                      addChekLocalFiles(chek);
-                    },
-            ),
-            ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
-              ),
-              child: const Icon(Icons.add_a_photo),
-              onPressed: chek.status != "NOVAYA"
-                  ? null
-                  : () {
-                      addChekFoto(chek);
-                    },
-            ),
-             ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
-              ),
-              child: const Icon(Icons.file_download),
-              onPressed: chek.status != "NOVAYA"
-                  ? null
-                  : () {
-                    addFiles(chek, context);
-                    },
-            ),
-          ]),
-          if (!chek.fotos.isEmpty)
-            CarouselSlider(
-                options: CarouselOptions(autoPlay: true, height: 150.0),
-                items: [
-                  for (PFoto foto in chek.fotos.toList())
-                    carouselItem(foto.fileLocal, context,  () {
-                                    foto.deleteLocal();
-                                    chek.saveLocal();
-                                   
-                                  }, chek.status != "NOVAYA")
-                   
-                ]),
-          
-         
-          
-          ElevatedButton(
-              onPressed: chek.status != "NOVAYA"
-                  ? null
-                  : () async {
-                      showDialog(
-                        context: context,
-                        builder: (_) {
-                          return Dialog(
-                          child: ListView(
-                              shrinkWrap: true,
-                              children: [
-                                Text('Уверены что хотите отправить отчет?'),
-                                 ElevatedButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: Text('Отмена'),
-                              ),
-                              ElevatedButton(
-                                onPressed: chek.status!="NOVAYA"?null:() async {
-                                  Navigator.pop(context);
-                                  if(await checkConnection()){
-                                      
-                                    infoToast("Посылаем");
-                                    chek.saveLocal();
-                                    chek.status = "TEMP";
-                                    bool ok = false;
-                                    try{
-                                       ok = await saveOborudovanie(
-                                          chek, ref, token.value);
-                                    }catch(e){
-                                      infoToast("Ошибка при отправке\n"+e.toString());
-                                    }
-                                      if (ok) {
-                                        chek.status = "GOTOWAYA";
-                                        chek.saveLocal();
-                                        infoToast("Готово");
-                                        
-                                      }else{
-                                        infoToast("Не удалось послать");
-                                        chek.status="NOVAYA";
-                                        chek.saveLocal();
-                                      }
+                                  o.saveLocal();
+                                  chek.saveLocal();
                                 }
-                                
-                                },
-                                child: Text('Отправить'),
-                              ),
+                              },
+                      ),
+                      for (POborudovanie oborudovanie in chek.barcode.toList())
+                        Container(
+                          padding: EdgeInsets.all(0),
+                          child: Container(
+                            margin: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.blue.shade200,
+                            ),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    style: TextStyle(fontSize: 17),
+                                    '${oborudovanie.code}',
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: false,
+                                  ),
+                                ),
+                                ElevatedButton(
+                                    onPressed: chek.status != "NOVAYA"
+                                        ? null
+                                        : () {
+                                            oborudovanie.deleteLocal();
+                                            chek.saveLocal();
+                                          },
+                                    child: Icon(Icons.cancel))
                               ],
                             ),
-                           
-                          );
-                        },
-                      );
-                    },
-              child: const Text("готово")),
-        ]),
-              
+                          ),
+                        ),
+                      Text(
+                        'Фотоотчет:',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(
+                                    Colors
+                                        .blue.shade100), // Change button color
+                              ),
+                              child: const Icon(Icons.attach_file_rounded),
+                              onPressed: chek.status != "NOVAYA"
+                                  ? null
+                                  : () {
+                                      addChekLocalFiles(chek);
+                                    },
+                            ),
+                            ElevatedButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(
+                                    Colors
+                                        .blue.shade100), // Change button color
+                              ),
+                              child: const Icon(Icons.add_a_photo),
+                              onPressed: chek.status != "NOVAYA"
+                                  ? null
+                                  : () {
+                                      addChekFoto(chek);
+                                    },
+                            ),
+                            ElevatedButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(
+                                    Colors
+                                        .blue.shade100), // Change button color
+                              ),
+                              child: const Icon(Icons.file_download),
+                              onPressed: chek.status != "NOVAYA"
+                                  ? null
+                                  : () {
+                                      addFiles(chek, context);
+                                    },
+                            ),
+                          ]),
+                      if (!chek.fotos.isEmpty)
+                        CarouselSlider(
+                            options:
+                                CarouselOptions(autoPlay: true, height: 150.0),
+                            items: [
+                              for (PFoto foto in chek.fotos.toList())
+                                carouselItem(foto.fileLocal, context, () {
+                                  foto.deleteLocal();
+                                  chek.saveLocal();
+                                }, chek.status != "NOVAYA")
+                            ]),
+                      ElevatedButton(
+                          onPressed: chek.status != "NOVAYA"
+                              ? null
+                              : () async {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) {
+                                      return Dialog(
+                                        child: ListView(
+                                          shrinkWrap: true,
+                                          children: [
+                                            Text(
+                                                'Уверены что хотите отправить отчет?'),
+                                            ElevatedButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: Text('Отмена'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: chek.status != "NOVAYA"
+                                                  ? null
+                                                  : () async {
+                                                      Navigator.pop(context);
+                                                      if (await checkConnection()) {
+                                                        infoToast("Посылаем");
+                                                        chek.saveLocal();
+                                                        chek.status = "TEMP";
+                                                        bool ok = false;
+                                                        try {
+                                                          ok =
+                                                              await saveOborudovanie(
+                                                                  chek,
+                                                                  ref,
+                                                                  token.value);
+                                                        } catch (e) {
+                                                        
+                                                          if (e
+                                                              .toString()
+                                                              .contains(
+                                                                  "401")) {
+                                                            user.value = '';
+                                                            token.value = '';
+                                                            chek.status =
+                                                                "NOVAYA";
+                                                            chek.saveLocal();
+                                                            context
+                                                                .go('/login');
+                                                          }
+                                                        }
+                                                        if (ok) {
+                                                          chek.status =
+                                                              "GOTOWAYA";
+                                                          chek.saveLocal();
+                                                          infoToast("Готово");
+                                                        } else {
+                                                          infoToast(
+                                                              "Не удалось послать");
+                                                          chek.status =
+                                                              "NOVAYA";
+                                                          chek.saveLocal();
+                                                        }
+                                                      }
+                                                    },
+                                              child: Text('Отправить'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                          child: const Text("готово")),
+                    ]),
             ],
           );
         });
   }
-  Future<bool> saveOborudovanie(PeremesheniyeOborudovaniya chek, WidgetRef ref, mytoken) async {
-  for (PFoto foto in chek.fotos.toList()) {
-    var headers = {
-      'Content-Type': 'image/jpeg',
-      'Authorization': 'Bearer $mytoken'
-    };
-    var data = File(foto.fileLocal!).readAsBytesSync();
 
-    var dio = Dio();
-     var n = foto.fileLocal!.lastIndexOf("/");
-    var name = foto.fileLocal!.substring(n+1);
-    var response = await dio.request(
-      '${site}rest/files?name='+name,
-      options: Options(
-        method: 'POST',
-        headers: headers,
-      ),
-      data: data,
-    );
+  Future<bool> saveOborudovanie(
+      PeremesheniyeOborudovaniya chek, WidgetRef ref, mytoken) async {
+    for (PFoto foto in chek.fotos.toList()) {
+      var headers = {
+        'Content-Type': 'image/jpeg',
+        'Authorization': 'Bearer $mytoken'
+      };
+      var data = File(foto.fileLocal!).readAsBytesSync();
 
-    if (response.statusCode == 201) {
-      print(response.data);
-      String f = response.data['fileRef'];
-      foto.file = f;
+      var dio = Dio();
+      var n = foto.fileLocal!.lastIndexOf("/");
+      var name = foto.fileLocal!.substring(n + 1);
+      var response = await dio.request(
+        '${site}rest/files?name=' + name,
+        options: Options(
+          method: 'POST',
+          headers: headers,
+        ),
+        data: data,
+      );
+
+      if (response.statusCode == 201) {
+        print(response.data);
+        String f = response.data['fileRef'];
+        foto.file = f;
+      } else {
+        return false;
+      }
+    }
+    return saveChek(chek, mytoken);
+  }
+
+  void addFiles(PeremesheniyeOborudovaniya chek, BuildContext context) async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(allowMultiple: true);
+
+    if (result == null) return;
+    List<File> files = result.paths.map((path) => File(path!)).toList();
+
+    if (!files.isEmpty) {
+      for (var pickedFile in files) {
+        var fi = await pickedFile;
+        PFoto f = PFoto(
+            fileLocal: fi.path,
+            peremeshenie: BelongsTo<PeremesheniyeOborudovaniya>(chek));
+        f.saveLocal();
+      }
+      chek.saveLocal();
     } else {
-      return false;
+      final snackBar = SnackBar(
+        content: const Text('файлы не добавлены'),
+      );
     }
   }
-  return saveChek(chek, mytoken);
 }
 
-void addFiles(PeremesheniyeOborudovaniya chek, BuildContext context) async{
-
-    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
-
-if (result == null) 
-return;
-  List<File> files = result.paths.map((path) => File(path!)).toList();
-
-
- if (!files.isEmpty) {
-    for (var pickedFile in files) {
-      var fi = await pickedFile;
-      PFoto f =
-          PFoto(fileLocal: fi.path, peremeshenie: BelongsTo<PeremesheniyeOborudovaniya>(chek));
-      f.saveLocal();
-    }
-    chek.saveLocal();
-    
-  } else {
-    final snackBar = SnackBar(
-      content: const Text('файлы не добавлены'),
-    );
-  }
-  }
-}
 Future<bool> saveChek(PeremesheniyeOborudovaniya a, mytoken) async {
   var headers = {
     'Content-Type': 'application/json',
@@ -357,7 +370,7 @@ Future<bool> saveChek(PeremesheniyeOborudovaniya a, mytoken) async {
     if (f.file != null) fotos.add({"file": f.file});
   }
   var ob = [];
-   for (POborudovanie f in a.barcode.toList()) {
+  for (POborudovanie f in a.barcode.toList()) {
     ob.add({"code": f.code});
   }
 
@@ -365,11 +378,10 @@ Future<bool> saveChek(PeremesheniyeOborudovaniya a, mytoken) async {
     "peremeshenie": {
       "date": "$date",
       "fotos": fotos,
-      "barcode":ob,
+      "barcode": ob,
       "comment": a.comment,
-      "username": company.value+"|"+user.value,
-      "tenantAttribute":company.value
-
+      "username": company.value + "|" + user.value,
+      "tenantAttribute": company.value
     }
   });
   var dio = Dio();
@@ -390,34 +402,34 @@ Future<bool> saveChek(PeremesheniyeOborudovaniya a, mytoken) async {
   return true;
 }
 
- addChekFoto(PeremesheniyeOborudovaniya chek) async {
-    final ImagePicker _picker = ImagePicker();
+addChekFoto(PeremesheniyeOborudovaniya chek) async {
+  final ImagePicker _picker = ImagePicker();
 
-    var pickedFile = await _picker.pickImage(
-        source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
-    if (pickedFile != null) Gal.putImage(pickedFile.path);
+  var pickedFile = await _picker.pickImage(
+      source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+  if (pickedFile != null) Gal.putImage(pickedFile.path);
 
-    if (pickedFile != null) {
-      PFoto f = PFoto(
-          fileLocal: pickedFile.path,
-          peremeshenie: BelongsTo<PeremesheniyeOborudovaniya>(chek));
-      f.saveLocal();
-      chek.saveLocal();
-     
-    } else {
-      final snackBar = SnackBar(
-        content: const Text('фото не добавлено'),
-      );
-    }
+  if (pickedFile != null) {
+    PFoto f = PFoto(
+        fileLocal: pickedFile.path,
+        peremeshenie: BelongsTo<PeremesheniyeOborudovaniya>(chek));
+    f.saveLocal();
+    chek.saveLocal();
+  } else {
+    final snackBar = SnackBar(
+      content: const Text('фото не добавлено'),
+    );
   }
-  addChekLocalFiles(PeremesheniyeOborudovaniya chek) async {
+}
+
+addChekLocalFiles(PeremesheniyeOborudovaniya chek) async {
   var result = await FilePicker.platform.pickFiles(allowMultiple: true);
 
   if (result != null) {
     List<String?> files = result.paths.map((path) => path!).toList();
     for (var file in files) {
       PFoto f = PFoto(fileLocal: file, peremeshenie: BelongsTo(chek));
-      
+
       f.saveLocal();
       chek.saveLocal();
     }
@@ -434,24 +446,24 @@ void showDeleteAlertAvto(context, PeremesheniyeOborudovaniya avto) {
     context: context,
     builder: (_) {
       return Dialog(
-       child: ListView(
+        child: ListView(
           shrinkWrap: true,
-          children: [Text('Уверены что хотите удалить перемещение?'),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Отмена'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              avto.deleteLocal();
-              
-              Navigator.pop(context);
-            },
-            child: Text('Удалить'),
-          ),
+          children: [
+            Text('Уверены что хотите удалить перемещение?'),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                avto.deleteLocal();
+
+                Navigator.pop(context);
+              },
+              child: Text('Удалить'),
+            ),
           ],
         ),
-       
       );
     },
   );

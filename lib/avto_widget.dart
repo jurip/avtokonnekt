@@ -202,7 +202,10 @@ class AvtoWidget extends HookConsumerWidget {
                   borderRadius: BorderRadius.circular(10),
                   color: Colors.blue.shade200,
                 ),
-                child: Column(children: [
+                child:
+                
+                (company.value=="avtokonnekt")?
+                 Column(children: [
                   Row(
                     children: [
                       SizedBox(
@@ -268,7 +271,26 @@ class AvtoWidget extends HookConsumerWidget {
                           child: Text("-")),
                     ],
                   ),
-                ]),
+                ])
+                : 
+                
+                   Column(children: [
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Expanded(
+                        child: Text(
+                          style: TextStyle(fontSize: 17),
+                          '${usluga.title}',
+                        ),
+                      ),
+                    ],
+                  ),
+                    
+                ])
+                ,
               ),
             ),
           Text(
