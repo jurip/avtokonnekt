@@ -45,7 +45,7 @@ var avtos = useState([]);
               ref.zayavkaRemotes.watchAll(remote: false
                   );
            List<ZayavkaRemote> zFiltered = List.from(stateLocal.model);
-          zFiltered = zFiltered.where((element) => element.status=='VYPOLNENA',).toList();
+          zFiltered = zFiltered.where((element) => element.status!='NOVAYA',).toList();
           zFiltered.sort((a, b) => b.nachalo!.compareTo(a.nachalo!));
          
           return 

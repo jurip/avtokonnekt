@@ -3,13 +3,18 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_data/flutter_data.dart';
+import 'package:fluttsec/avto_widget.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/remote/save_chek_with_photos.dart';
 import 'package:fluttsec/src/models/chek.dart';
 import 'package:fluttsec/src/models/chekFoto.dart';
+import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:uuid/uuid.dart';
 
 class ChekiScreen extends HookConsumerWidget {
@@ -23,10 +28,11 @@ class ChekiScreen extends HookConsumerWidget {
           child: ListView(
             shrinkWrap: true,
             children: [
-              TextFormField(
+              Container(padding: EdgeInsets.all(10),
+                child:  TextFormField(
                 controller: nomerController,
                 decoration: InputDecoration(hintText: 'комментарий'),
-              ),
+              )),
               ElevatedButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Отмена'),
@@ -85,10 +91,15 @@ for (var chek in chekState.model.toList(growable: true))
             child: Text(
                 '${chek.comment}'),
           ),
+          Expanded(
+            flex: 2,
+            child: Text(
+                '${DateFormat('yyyy.MM.dd kk:mm').format(chek.date!)}'),
+          ),
           ElevatedButton(
               onPressed: chek.status != "NOVAYA"
                   ? null
-                  : () => showDeleteAlertAvto(context, chek), //showDeleteAlertAvto(context, zayavka, avto),
+                  : () => showDeleteAlertAvto(context, chek), //showDeleteAlertAvto(context, ayavka, avto),
               child: const Icon(Icons.cancel)),
         ]),
         collapsedBackgroundColor: chek.status != "NOVAYA"
@@ -111,7 +122,7 @@ for (var chek in chekState.model.toList(growable: true))
               onPressed: chek.status != "NOVAYA"
                   ? null
                   : () {
-                      addChekLocalFiles(chek);
+                      addChekLocalFiles(chek, context);
                     },
             ),
             ElevatedButton(
@@ -123,40 +134,55 @@ for (var chek in chekState.model.toList(growable: true))
               onPressed: chek.status != "NOVAYA"
                   ? null
                   : () {
-                      addChekLocalFiles(chek);
+                      addChekFoto(chek);
                     },
             ),
+              ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all<Color>(
+                    Colors.blue.shade100), // Change button color
+              ),
+              child: const Icon(Icons.file_download),
+              onPressed: chek.status != "NOVAYA"
+                  ? null
+                  : () {
+                    addFiles(chek, context);
+                    },
+            ),
+             ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all<Color>(
+                  Colors.blue.shade100), // Change button color
+            ),
+            child: const Icon(Icons.barcode_reader),
+            onPressed: chek.status != "NOVAYA"
+                  ? null
+                : () async {
+                    var res = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const SimpleBarcodeScannerPage(),
+                        ));
+                    if (res is String && res != '-1') {
+                     chek.qr = res;
+                    }
+                  },
+          ),
           ]),
+          (chek.qr!=null)?
+          Text(chek.qr!):Text(""),
           if (!chek.fotos.isEmpty)
             CarouselSlider(
                 options: CarouselOptions(autoPlay: true, height: 150.0),
                 items: [
                   for (ChekFoto foto in chek.fotos.toList())
-                    Stack(children: <Widget>[
-                      ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image(
-                            image: FileImage(File(foto.fileLocal!)),
-                            height: 180,
-                          )),
-                      Positioned(
-                          right: -2,
-                          top: -9,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.cancel,
-                              color: Colors.black.withOpacity(0.5),
-                              size: 50,
-                            ),
-                            onPressed: chek.status != "NOVAYA"
-                                ? null
-                                : () {
+                    carouselItem(foto.fileLocal, context,  () {
                                     foto.deleteLocal();
                                     chek.saveLocal();
                                    
-                                  },
-                          ))
-                    ])
+                                  }, chek.status != "NOVAYA")
+                   
                 ]),
           
          
@@ -184,6 +210,7 @@ for (var chek in chekState.model.toList(growable: true))
                                       infoToast("Посылаем");
                                       
                                       chek.status = "TEMP";
+                                      
                                       chek.saveLocal();
                                       bool ok = false;
                                       try{
@@ -191,16 +218,25 @@ for (var chek in chekState.model.toList(growable: true))
                                       await saveChekWithPhotos(
                                           chek, ref, token.value);
                                       }catch(e){
-                                            infoToast("Ошибка при отправке\n"+e.toString());
+                                            
+                                            if (e
+                                                              .toString()
+                                                              .contains(
+                                                                  "401")) {
+                                                            user.value = '';
+                                                            token.value = '';
+                                                            chek.status =
+                                                                "NOVAYA";
+                                                            chek.saveLocal();
+                                                            context
+                                                                .go('/login');
+                                                          }
                                       }
                                       if (ok) {
                                         chek.status = "GOTOWAYA";
                                         chek.saveLocal();
                                         infoToast("Готово");
                                         
-                                      }else{
-                                        infoToast("Не удалось отправить");
-                                        chek.status = "NOVAYA";
                                       }
                                   }
                                   
@@ -221,13 +257,35 @@ for (var chek in chekState.model.toList(growable: true))
           );
         });
   }
-  addChekLocalFiles(Chek chek) async {
-  var result = await FilePicker.platform.pickFiles(allowMultiple: true);
+   addChekFoto(Chek chek) async {
+    final ImagePicker _picker = ImagePicker();
 
-  if (result != null) {
-    List<String?> files = result.paths.map((path) => path!).toList();
+    var pickedFile = await _picker.pickImage(
+        source: ImageSource.camera, imageQuality: 30, maxHeight: 2000);
+    if (pickedFile != null) Gal.putImage(pickedFile.path);
+
+    if (pickedFile != null) {
+      ChekFoto f = ChekFoto(
+          fileLocal: pickedFile.path,
+          chek: BelongsTo<Chek>(chek));
+      f.saveLocal();
+      chek.saveLocal();
+     
+    } else {
+      final snackBar = SnackBar(
+        content: const Text('фото не добавлено'),
+      );
+    }
+  }
+  addChekLocalFiles(Chek chek, context) async {
+   var files = await pickMulti(context);
+  //var result = await FilePicker.platform.pickFiles(allowMultiple: true);
+
+  if (!files.isEmpty) {
+    //List<String?> files = result.paths.map((path) => path!).toList();
     for (var file in files) {
-      ChekFoto f = ChekFoto(fileLocal: file, chek: BelongsTo(chek));
+      var fl = await file;
+      ChekFoto f = ChekFoto(fileLocal: fl.path, chek: BelongsTo(chek));
       f.saveLocal();
     }
     chek.saveLocal();
@@ -265,4 +323,29 @@ void showDeleteAlertAvto(context, Chek avto) {
     },
   );
 }
+
+  void addFiles(Chek chek, BuildContext context) async{
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+
+if (result == null) 
+return;
+  List<File> files = result.paths.map((path) => File(path!)).toList();
+
+
+ if (!files.isEmpty) {
+    for (var pickedFile in files) {
+      var fi = await pickedFile;
+      ChekFoto f =
+          ChekFoto(fileLocal: fi.path, chek: BelongsTo<Chek>(chek));
+      f.saveLocal();
+    }
+    chek.saveLocal();
+    
+  } else {
+    final snackBar = SnackBar(
+      content: const Text('файлы не добавлены'),
+    );
+  }
+  }
 }

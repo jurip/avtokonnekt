@@ -22,7 +22,10 @@ class AvtomobilRemote extends DataModel<AvtomobilRemote> {
   final String? marka;
   final String? nomerAG;
   final DateTime? date;
+  DateTime? nachaloRabot;
    String? comment;
+   String? lat ="0";
+   String? lng = "0";
   final BelongsTo<ZayavkaRemote>? zayavka;
 
    String? status = "NOVAYA";

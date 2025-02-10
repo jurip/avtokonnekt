@@ -15,6 +15,7 @@ class Chek extends DataModel<Chek> {
   final String? comment;
   final DateTime? date;
   String? status;
+  String? qr;
   final HasMany<ChekFoto> fotos = HasMany<ChekFoto>();
 
   Chek({this.id, this.comment,this.date, this.username, this.status="NOVAYA"});

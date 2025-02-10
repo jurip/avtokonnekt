@@ -14,6 +14,7 @@ class CurrentUser extends DataModel<CurrentUser> {
   final String? id;
   final String? firstName;
    final String? lastName;
+   String? mode = "light"; 
 
   CurrentUser({this.id,required this.firstName,required this.lastName});
 

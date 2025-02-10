@@ -29,14 +29,6 @@ class SettingsScreen extends HookConsumerWidget {
                     },
                   ),
                  
-
-                   ElevatedButton(
-                    child: const Text('Загрузить заявки с сервера(неотправленные отчеты будут потеряны)'),
-                    onPressed: () {
-                      ref.zayavkaRemotes.findAll();
-                      
-                    },
-                  ),
                     ElevatedButton(
                     child: const Text('Закрытые заявки'),
                     onPressed: () {
@@ -44,6 +36,27 @@ class SettingsScreen extends HookConsumerWidget {
                       
                     },
                   ),
+                   Text(
+              'Выбор темы:',
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                /// //////////////////////////////////////////////////////
+                /// Change theme & rebuild to show it using these buttons 
+                ElevatedButton(
+                    onPressed: () async {
+                    MyHomePage.of(context).changeTheme(ThemeMode.light);
+                    },
+                    child: Text('Светлый')),
+                ElevatedButton(
+                     onPressed: () async {
+                    MyHomePage.of(context).changeTheme(ThemeMode.dark);
+                    },
+                    child: Text('Темный')),
+                /// //////////////////////////////////////////////////////
+              ],
+            ),
                 
                   SizedBox(height: 300,),
                   Image(image: AssetImage("assets/images/logoblack.png")),

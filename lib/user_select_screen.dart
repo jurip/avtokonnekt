@@ -6,8 +6,6 @@ import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/user.dart';
 import 'package:fluttsec/src/models/userSelect.dart';
-import 'package:fluttsec/src/models/usluga.dart';
-import 'package:fluttsec/src/models/uslugaSelect.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -126,7 +124,7 @@ class UserSelectScreen extends HookConsumerWidget {
 
                           
                           
-                      title: Text('${u.lastName} ${u.firstName}(${u.username!.split("|")[1]}) ',style: TextStyle(fontSize: 23)),
+                      title: Text('${u.lastName} ${u.firstName}(${u.username}) ',style: TextStyle(fontSize: 23)),
                       
                     ),
                 ],

@@ -7,6 +7,7 @@ class MyUser extends DataModel<MyUser> {
   @override
   final String? id;
   final String username;
+  String? mode = "light"; 
   MyUser(this.id,{required this.username});
 
   checkIfAuthenticated() {

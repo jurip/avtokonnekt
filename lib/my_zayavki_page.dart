@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:fluttsec/tasks_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -18,16 +19,18 @@ Future<void> _launchUrl() async {
 }
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    var brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
+bool isDarkMode = brightness == Brightness.dark;
     return Scaffold(
       body: 
       Container(
         child: Center(child: TasksScreen()),
-        decoration: BoxDecoration(
+        decoration:!isDarkMode? BoxDecoration(
           image: DecorationImage(
             image: AssetImage("assets/images/11.jpg"),
             fit: BoxFit.fill,
           ),
-        ),
+        ):null,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,

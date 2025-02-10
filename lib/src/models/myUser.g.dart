@@ -54,9 +54,10 @@ extension MyUserRelationshipGraphNodeX on RelationshipGraphNode<MyUser> {}
 MyUser _$MyUserFromJson(Map<String, dynamic> json) => MyUser(
       json['id'] as String?,
       username: json['username'] as String,
-    );
+    )..mode = json['mode'] as String?;
 
 Map<String, dynamic> _$MyUserToJson(MyUser instance) => <String, dynamic>{
       'id': instance.id,
       'username': instance.username,
+      'mode': instance.mode,
     };

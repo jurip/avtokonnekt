@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -31,10 +32,14 @@ import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
 
-//const String site = "http://5.228.73.174:2222/";
-const String site = "http://89.111.173.110:8080/";
+//const String site = "http://178.140.233.205:2222/";
+
+const String site = "http://80.78.242.170:8080/";
+//onst String site = "http://89.111.173.110:8080/";
 //const String site = "http://193.227.240.27:8080/";
 //const String site = "http://10.0.2.2:8080/";
+//const String site = "http://80.78.242.102:8080/";
+
 
 late final ValueNotifier<String> company;
 
@@ -43,6 +48,9 @@ late final ValueNotifier<String> password;
 late final ValueNotifier<String> token;
 
 void main() async {
+
+
+
   WidgetsFlutterBinding.ensureInitialized();
   await initLocalStorage();
 
@@ -240,8 +248,19 @@ late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   String _lastMessage = "";
-
+   ThemeMode _themeMode = ThemeMode.light;
+    void changeTheme(ThemeMode themeMode) {
+    setState(() {
+      _themeMode = themeMode;
+    });
+  }
+  
+   
   _MyHomePageState() {
+/*
+ 
+*/
+
     _messageStreamController.listen((message) {
       setState(() {
         if (message.notification != null) {
@@ -291,6 +310,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
     // Run code required to handle interacted messages in an async function
     // as initState() must not be async
+
     setupInteractedMessage();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -303,6 +323,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   late AppLifecycleState _lastState;
+
+  
+  
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -314,12 +337,56 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     _lastState =
         state; //register the last state. When you get "paused" it means the app went to the background.
   }
-
+ 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {   
+
     return MaterialApp.router(
       routerConfig: __router,
-      theme: ThemeData(fontFamily: 'Roboto'),
+      themeMode:  _themeMode,
+      
+      theme: //ThemeData(fontFamily: 'Roboto'),
+
+       ThemeData(
+          fontFamily: GoogleFonts.rubik().fontFamily,
+          useMaterial3: true,
+          colorScheme: const ColorScheme(
+            brightness: Brightness.light,
+            primary: Colors.black,
+            onPrimary: Colors.white,
+            secondary: Colors.black,
+            onSecondary: Colors.white,
+            primaryContainer: Colors.white,
+            error: Colors.black,
+            onError: Colors.white,
+            surface: Colors.white,
+            onSurface: Colors.black,
+          ),
+        ),
+       darkTheme: ThemeData(
+          useMaterial3: true,
+          colorScheme: const ColorScheme(
+            brightness: Brightness.dark,
+            primary: Colors.grey,
+            onPrimary: Colors.black,
+            secondary: Colors.grey,
+            onSecondary: Colors.black,
+            primaryContainer: Colors.black,
+            error: Colors.black,
+            onError: Colors.grey,
+            surface: Colors.black,
+            onSurface: Colors.grey,
+            inversePrimary: Colors.black,
+            inverseSurface: Colors.black,
+            onInverseSurface: Colors.black,
+            errorContainer: Colors.black,
+            onTertiaryContainer: Colors.black,
+            secondaryContainer: Colors.black
+            
+            
+          ),
+        ), // standard dark theme
+      
     );
   }
 }
@@ -327,6 +394,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 class MyHomePage extends StatefulWidget {
   final WidgetRef ref;
   const MyHomePage ({ Key? key, required this.ref }): super(key: key);
+   static _MyHomePageState of(BuildContext context) => 
+      context.findAncestorStateOfType<_MyHomePageState>()!;
 
   @override
   State<StatefulWidget> createState() => _MyHomePageState();
@@ -493,7 +562,7 @@ Future<ZayavkaRemote> newZayavkaFromMessage( Map data,WidgetRef ref) async {
   var mes = data["message"];
   var adres = data["adres"];
   var nachalo = data["nachalo"];
-  var format = new DateFormat("yyyy-MM-dd hh:mm:ss");
+  var format = new DateFormat("yyyy-MM-dd HH:mm:ss");
 
   DateTime nachalo_date =  nachalo==null?DateTime.now():format.parse(nachalo);
   DateTime end_date_time = format.parse(data["end_date_time"]);
@@ -560,7 +629,7 @@ Future<ZayavkaRemote> newZayavkaFromMessageZ( Map data) async {
   var mes = data["message"];
   var adres = data["adres"];
   var nachalo = data["nachalo"];
-  var format = new DateFormat("yyyy-MM-dd hh:mm:ss");
+  var format = new DateFormat("yyyy-MM-dd HH:mm:ss");
 
   DateTime nachalo_date =  nachalo==null?DateTime.now():format.parse(nachalo);
   DateTime end_date_time = format.parse(data["end_date_time"]);

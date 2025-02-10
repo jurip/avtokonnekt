@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/main.data.dart';
@@ -10,6 +11,7 @@ import 'package:fluttsec/my_zayavki_page.dart';
 import 'package:fluttsec/src/remote/update_user.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class LoginPage extends HookConsumerWidget {
   static final routeName = "/login";
@@ -21,7 +23,11 @@ class LoginPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     var isError = useState(false);
-    return Scaffold(
+    var isLoading = useState(false);
+    return  PopScope(
+      canPop: false,
+      onPopInvokedWithResult:(didPop, result) => SystemNavigator.pop(),
+      child: Scaffold(
         body: Container(
           alignment: Alignment.bottomCenter,
           decoration: BoxDecoration(
@@ -38,7 +44,7 @@ class LoginPage extends HookConsumerWidget {
       padding: EdgeInsets.all(15),
       shrinkWrap: true,
       children: [
-        Center(child:Text('ЭвоМонтаж',style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),),),
+        Center(child:Text('ЭвоМонтаж',style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),),),
         SizedBox(height: 100,),
         if (isError.value) Text('     ОШИБКА АВТОРИЗАЦИИ. Укажите верный логин/пароль', style: TextStyle(fontSize: 20),), 
         TextFormField(
@@ -47,20 +53,21 @@ class LoginPage extends HookConsumerWidget {
           controller: companyController,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.grey.shade200,
-              contentPadding: const EdgeInsets.all(8.0),
-              border: OutlineInputBorder(
+            //fillColor: Colors.grey.shade200,
+            contentPadding: const EdgeInsets.all(8.0),
+            border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30.0),
               ),
               hintText: 'Компания'),
         ),
+        SizedBox(height: 10,),
         TextFormField(
           
           textAlign: TextAlign.center,
           controller: loginController,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.grey.shade200,
+            //fillColor: Colors.grey.shade200,
               contentPadding: const EdgeInsets.all(8.0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30.0),
@@ -75,7 +82,7 @@ class LoginPage extends HookConsumerWidget {
           controller: passwordController,
           decoration:  InputDecoration(
             filled: true,
-            fillColor: Colors.grey.shade200,
+            //fillColor: Colors.grey.shade200,
                      contentPadding: const EdgeInsets.all(8.0),
                      
     border: OutlineInputBorder(
@@ -85,14 +92,22 @@ class LoginPage extends HookConsumerWidget {
         ),
         SizedBox(height: 5,),
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 100),
+          decoration: BoxDecoration(
+
+            border: Border()
+        
+    ),
+         
+          
+          //margin: EdgeInsets.symmetric(horizontal: 100),
           child: 
-        ElevatedButton(
+        ElevatedButton.icon(
           onPressed: () async {
             if (!await checkConnection()){ 
               
               return;
             }
+            isLoading.value = true;
 
             try{
               token.value = await getTokenFromServer();
@@ -106,6 +121,7 @@ class LoginPage extends HookConsumerWidget {
             if (t != "") {
               bool ok = await login(companyController.text+"|"+ t, passwordController.text, mytoken);
               if (ok) {
+                isLoading.value = false;
                 company.value = companyController.text;
                 user.value = t;
                 password.value = passwordController.text;
@@ -130,6 +146,7 @@ class LoginPage extends HookConsumerWidget {
                 context.go(MyZayavkiPage.routeName);
               } else {
                 isError.value = true;
+                isLoading.value = false;
                 Fluttertoast.showToast(
                     msg: "Не правильный логин/пароль",
                     toastLength: Toast.LENGTH_SHORT,
@@ -140,6 +157,7 @@ class LoginPage extends HookConsumerWidget {
                     fontSize: 16.0);
               }
             } else {
+              isLoading.value = false;
               Fluttertoast.showToast(
                   msg: "Введите логин/пароль логин/пароль",
                   toastLength: Toast.LENGTH_SHORT,
@@ -150,13 +168,36 @@ class LoginPage extends HookConsumerWidget {
                   fontSize: 16.0);
             }
           },
-          child: const Text('Войти'),
+          icon: isLoading.value
+          ? Container(
+              width: 34,
+              height: 34,
+              padding: const EdgeInsets.all(2.0),
+              child: const CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 3,
+              ),
+            )
+          : null,
+          label: const Text('Войти', style: TextStyle(fontSize: 25),),
         )
            ),
            SizedBox(height: 140,),
+           GestureDetector(child: 
         Image(height: 70, image: AssetImage("assets/images/logoblack.png"),),
+        onTap: () {
+          launchUrlString("https://itevolut.ru/");
+        },
+           ),
+          Center(child:
+           
+           ElevatedButton(onPressed: () {
+             launchUrlString("https://t.me/+SQjp7ZUZ9hcxNWFi");
+           }, child:
+           Text("регистрация")),)
+           
      
       ],
-    ))));
+    )))));
   }
 }
