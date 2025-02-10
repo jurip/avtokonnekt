@@ -13,6 +13,8 @@ import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:uuid/uuid.dart';
 
 class ChekiScreen extends HookConsumerWidget {
@@ -26,10 +28,11 @@ class ChekiScreen extends HookConsumerWidget {
           child: ListView(
             shrinkWrap: true,
             children: [
-              TextFormField(
+              Container(padding: EdgeInsets.all(10),
+                child:  TextFormField(
                 controller: nomerController,
                 decoration: InputDecoration(hintText: 'комментарий'),
-              ),
+              )),
               ElevatedButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Отмена'),
@@ -88,10 +91,15 @@ for (var chek in chekState.model.toList(growable: true))
             child: Text(
                 '${chek.comment}'),
           ),
+          Expanded(
+            flex: 2,
+            child: Text(
+                '${DateFormat('yyyy.MM.dd kk:mm').format(chek.date!)}'),
+          ),
           ElevatedButton(
               onPressed: chek.status != "NOVAYA"
                   ? null
-                  : () => showDeleteAlertAvto(context, chek), //showDeleteAlertAvto(context, zayavka, avto),
+                  : () => showDeleteAlertAvto(context, chek), //showDeleteAlertAvto(context, ayavka, avto),
               child: const Icon(Icons.cancel)),
         ]),
         collapsedBackgroundColor: chek.status != "NOVAYA"
@@ -141,7 +149,29 @@ for (var chek in chekState.model.toList(growable: true))
                     addFiles(chek, context);
                     },
             ),
+             ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all<Color>(
+                  Colors.blue.shade100), // Change button color
+            ),
+            child: const Icon(Icons.barcode_reader),
+            onPressed: chek.status != "NOVAYA"
+                  ? null
+                : () async {
+                    var res = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const SimpleBarcodeScannerPage(),
+                        ));
+                    if (res is String && res != '-1') {
+                     chek.qr = res;
+                    }
+                  },
+          ),
           ]),
+          (chek.qr!=null)?
+          Text(chek.qr!):Text(""),
           if (!chek.fotos.isEmpty)
             CarouselSlider(
                 options: CarouselOptions(autoPlay: true, height: 150.0),
@@ -180,6 +210,7 @@ for (var chek in chekState.model.toList(growable: true))
                                       infoToast("Посылаем");
                                       
                                       chek.status = "TEMP";
+                                      
                                       chek.saveLocal();
                                       bool ok = false;
                                       try{

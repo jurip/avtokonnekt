@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -30,12 +31,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:ota_update/ota_update.dart';
 
 //const String site = "http://178.140.233.205:2222/";
 
 const String site = "http://80.78.242.170:8080/";
-//const String site = "http://89.111.173.110:8080/";
+//onst String site = "http://89.111.173.110:8080/";
 //const String site = "http://193.227.240.27:8080/";
 //const String site = "http://10.0.2.2:8080/";
 //const String site = "http://80.78.242.102:8080/";
@@ -248,7 +248,14 @@ late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   String _lastMessage = "";
-
+   ThemeMode _themeMode = ThemeMode.light;
+    void changeTheme(ThemeMode themeMode) {
+    setState(() {
+      _themeMode = themeMode;
+    });
+  }
+  
+   
   _MyHomePageState() {
 /*
  
@@ -303,27 +310,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
     // Run code required to handle interacted messages in an async function
     // as initState() must not be async
+
     setupInteractedMessage();
     WidgetsBinding.instance.addObserver(this);
-    /*
-        try {
-      
-      OtaUpdate()
-          .execute(
-        'https://disk.yandex.ru/d/j5GhirMiy5py1A/app-release.apk',
-        // OPTIONAL
-        //destinationFilename: 'flutter_hello_world.apk',
-        //OPTIONAL, ANDROID ONLY - ABILITY TO VALIDATE CHECKSUM OF FILE:
-        //sha256checksum: "d6da28451a1e15cf7a75f2c3f151befad3b80ad0bb232ab15c20897e54f21478",
-      ).listen(
-        (OtaEvent event) {
-          setState(() => currentEvent = event);
-        },
-      );
-  } catch (e) {
-      print('Failed to make OTA update. Details: $e');
-  }
-  */
   }
 
   @override
@@ -334,8 +323,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   late AppLifecycleState _lastState;
+
   
-  OtaEvent? currentEvent;
+  
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -347,12 +337,56 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     _lastState =
         state; //register the last state. When you get "paused" it means the app went to the background.
   }
-
+ 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {   
+
     return MaterialApp.router(
       routerConfig: __router,
-      theme: ThemeData(fontFamily: 'Roboto'),
+      themeMode:  _themeMode,
+      
+      theme: //ThemeData(fontFamily: 'Roboto'),
+
+       ThemeData(
+          fontFamily: GoogleFonts.rubik().fontFamily,
+          useMaterial3: true,
+          colorScheme: const ColorScheme(
+            brightness: Brightness.light,
+            primary: Colors.black,
+            onPrimary: Colors.white,
+            secondary: Colors.black,
+            onSecondary: Colors.white,
+            primaryContainer: Colors.white,
+            error: Colors.black,
+            onError: Colors.white,
+            surface: Colors.white,
+            onSurface: Colors.black,
+          ),
+        ),
+       darkTheme: ThemeData(
+          useMaterial3: true,
+          colorScheme: const ColorScheme(
+            brightness: Brightness.dark,
+            primary: Colors.grey,
+            onPrimary: Colors.black,
+            secondary: Colors.grey,
+            onSecondary: Colors.black,
+            primaryContainer: Colors.black,
+            error: Colors.black,
+            onError: Colors.grey,
+            surface: Colors.black,
+            onSurface: Colors.grey,
+            inversePrimary: Colors.black,
+            inverseSurface: Colors.black,
+            onInverseSurface: Colors.black,
+            errorContainer: Colors.black,
+            onTertiaryContainer: Colors.black,
+            secondaryContainer: Colors.black
+            
+            
+          ),
+        ), // standard dark theme
+      
     );
   }
 }
@@ -360,6 +394,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 class MyHomePage extends StatefulWidget {
   final WidgetRef ref;
   const MyHomePage ({ Key? key, required this.ref }): super(key: key);
+   static _MyHomePageState of(BuildContext context) => 
+      context.findAncestorStateOfType<_MyHomePageState>()!;
 
   @override
   State<StatefulWidget> createState() => _MyHomePageState();

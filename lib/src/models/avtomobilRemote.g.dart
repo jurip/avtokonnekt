@@ -177,7 +177,12 @@ AvtomobilRemote _$AvtomobilRemoteFromJson(Map<String, dynamic> json) =>
           ? null
           : BelongsTo<ZayavkaRemote>.fromJson(
               json['zayavka'] as Map<String, dynamic>),
-    );
+    )
+      ..nachaloRabot = json['nachaloRabot'] == null
+          ? null
+          : DateTime.parse(json['nachaloRabot'] as String)
+      ..lat = json['lat'] as String?
+      ..lng = json['lng'] as String?;
 
 Map<String, dynamic> _$AvtomobilRemoteToJson(AvtomobilRemote instance) =>
     <String, dynamic>{
@@ -186,7 +191,10 @@ Map<String, dynamic> _$AvtomobilRemoteToJson(AvtomobilRemote instance) =>
       'marka': instance.marka,
       'nomerAG': instance.nomerAG,
       'date': instance.date?.toIso8601String(),
+      'nachaloRabot': instance.nachaloRabot?.toIso8601String(),
       'comment': instance.comment,
+      'lat': instance.lat,
+      'lng': instance.lng,
       'zayavka': instance.zayavka,
       'status': instance.status,
     };

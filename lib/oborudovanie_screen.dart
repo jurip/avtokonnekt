@@ -15,6 +15,7 @@ import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:uuid/uuid.dart';
 
@@ -28,10 +29,11 @@ class OborudovanieScreen extends HookConsumerWidget {
           child: ListView(
             shrinkWrap: true,
             children: [
-              TextFormField(
+               Container(padding: EdgeInsets.all(10),
+                child: TextFormField(
                 controller: nomerController,
                 decoration: InputDecoration(hintText: 'комментарий'),
-              ),
+              )),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text('Отмена'),
@@ -86,6 +88,10 @@ class OborudovanieScreen extends HookConsumerWidget {
                       Expanded(
                         flex: 2,
                         child: Text('${chek.comment}'),
+                      ),
+                       Expanded(
+                        flex: 2,
+                        child: Text('${DateFormat('yyyy.MM.dd kk:mm').format(chek.date!)}'),
                       ),
                       ElevatedButton(
                           onPressed: chek.status != "NOVAYA"

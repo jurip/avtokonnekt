@@ -46,7 +46,7 @@ Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
   }
   var soispolniteli = [];
   for(User u in a.users.toList()){
-    soispolniteli.add({"username":u.username!.split("|")[1]});
+    soispolniteli.add({"username":u.username});
   }
 
   var data = json.encode({

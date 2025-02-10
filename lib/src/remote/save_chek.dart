@@ -23,6 +23,7 @@ Future<bool> saveChek(Chek a, mytoken) async {
       "date": "$date",
       "fotos": fotos,
       "comment": a.comment,
+      "qr": a.qr,
       "username": company.value+"|"+user.value,
       "tenantAttribute":company.value
 

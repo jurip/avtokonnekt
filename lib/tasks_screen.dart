@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttsec/avto_widget.dart';
-import 'package:fluttsec/new_avto_screen.dart';
 import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/avtomobilLocal.dart';
 import 'package:gal/gal.dart';
@@ -86,10 +85,16 @@ class TasksScreen extends HookConsumerWidget {
                   Center(child: 
                     Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                         
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  offset: Offset(0, 4),
+                  blurRadius: 8,
+                  spreadRadius: 0)
+              ],
+            ),
                         margin: EdgeInsets.all(10),
                         child: Text(
                           '${u.firstName} ${u.lastName} ',
@@ -99,9 +104,10 @@ class TasksScreen extends HookConsumerWidget {
                   Center(child: 
                     Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
+                          //color: Colors.grey.shade200,
                          
                           borderRadius: BorderRadius.circular(10),
+                          
                         ),
                         margin: EdgeInsets.all(10),
                         child: Text(
@@ -110,14 +116,31 @@ class TasksScreen extends HookConsumerWidget {
                         ))),
                    
                   SizedBox(height: 10),
+
+                  Container(
+                     decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  offset: Offset(0, 4),
+                  blurRadius: 8,
+                  spreadRadius: 0)
+              ],
+            ),
+                    child: Column(
+                      children: [
+
                   Center(
                     child: Text(
-                      'Мои заявки',
+                      'заявки',
                       style: TextStyle(fontSize: 30),
                     ),
                   ),
                   for (final ZayavkaRemote zayavka in zFiltered)
                     zayavkaWidget(zayavka, context),
+                      ]))
                 ],
               ));
         });
@@ -135,11 +158,22 @@ class TasksScreen extends HookConsumerWidget {
 
   Container zayavkaWidget(ZayavkaRemote zayavka, BuildContext context) {
     return Container(
+      decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  offset: Offset(0, 4),
+                  blurRadius: 8,
+                  spreadRadius: 0)
+              ],
+            ),
       margin: EdgeInsets.all(10),
       child: ExpansionTile(
           trailing: SizedBox.shrink(),
           childrenPadding: EdgeInsets.all(5),
-          collapsedBackgroundColor: Colors.grey.shade200,
+          collapsedBackgroundColor: Theme.of(context).colorScheme.primaryContainer,
           collapsedShape: const ContinuousRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(20))),
           title: Row(
@@ -196,7 +230,7 @@ class TasksScreen extends HookConsumerWidget {
                                   '${zayavka.client}',
                                   style: TextStyle(
                                       fontSize: 20,
-                                      fontStyle: FontStyle.italic),
+                                      ),
                                 ),
                                 GestureDetector(
                                   child: Text('${zayavka.adres}',
@@ -531,7 +565,7 @@ class TasksScreen extends HookConsumerWidget {
       r.add(GestureDetector(
         child: Text(
           s.substring(element.start, element.end),
-          style: TextStyle(color: Colors.blue.shade200),
+          //style: TextStyle(color: Colors.blue.shade200),
         ),
       ));
       st = element.end;

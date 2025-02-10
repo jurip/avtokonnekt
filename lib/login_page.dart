@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttsec/main.data.dart';
@@ -23,7 +24,10 @@ class LoginPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var isError = useState(false);
     var isLoading = useState(false);
-    return Scaffold(
+    return  PopScope(
+      canPop: false,
+      onPopInvokedWithResult:(didPop, result) => SystemNavigator.pop(),
+      child: Scaffold(
         body: Container(
           alignment: Alignment.bottomCenter,
           decoration: BoxDecoration(
@@ -88,6 +92,13 @@ class LoginPage extends HookConsumerWidget {
         ),
         SizedBox(height: 5,),
         Container(
+          decoration: BoxDecoration(
+
+            border: Border()
+        
+    ),
+         
+          
           //margin: EdgeInsets.symmetric(horizontal: 100),
           child: 
         ElevatedButton.icon(
@@ -168,7 +179,7 @@ class LoginPage extends HookConsumerWidget {
               ),
             )
           : null,
-          label: const Text('Войти'),
+          label: const Text('Войти', style: TextStyle(fontSize: 25),),
         )
            ),
            SizedBox(height: 140,),
@@ -178,13 +189,15 @@ class LoginPage extends HookConsumerWidget {
           launchUrlString("https://itevolut.ru/");
         },
            ),
-           GestureDetector(onTap: () {
+          Center(child:
+           
+           ElevatedButton(onPressed: () {
              launchUrlString("https://t.me/+SQjp7ZUZ9hcxNWFi");
-           },
-           child: Center(child:Text("регистрация")),)
+           }, child:
+           Text("регистрация")),)
            
      
       ],
-    ))));
+    )))));
   }
 }
