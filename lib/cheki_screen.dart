@@ -219,18 +219,7 @@ for (var chek in chekState.model.toList(growable: true))
                                           chek, ref, token.value);
                                       }catch(e){
                                             
-                                            if (e
-                                                              .toString()
-                                                              .contains(
-                                                                  "401")) {
-                                                            user.value = '';
-                                                            token.value = '';
-                                                            chek.status =
-                                                                "NOVAYA";
-                                                            chek.saveLocal();
-                                                            context
-                                                                .go('/login');
-                                                          }
+                                           
                                       }
                                       if (ok) {
                                         chek.status = "GOTOWAYA";

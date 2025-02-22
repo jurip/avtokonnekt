@@ -116,10 +116,10 @@ class LoginPage extends HookConsumerWidget {
               return;
             }
             
-            var mytoken = token.value;
+            
             String t = loginController.text;
             if (t != "") {
-              bool ok = await login(companyController.text+"|"+ t, passwordController.text, mytoken);
+              bool ok = await login(companyController.text+"|"+ t, passwordController.text);
               if (ok) {
                 isLoading.value = false;
                 company.value = companyController.text;
@@ -139,7 +139,7 @@ class LoginPage extends HookConsumerWidget {
 
                  var fcm  = await FirebaseMessaging.instance.getToken();
                   
-                  bool ok = await updateUser(company.value+"|"+ user.value, fcm!, mytoken);
+                  bool ok = await updateUser(company.value+"|"+ user.value, fcm!, token.value);
                   if(!ok)
                     infoToast("Не удалось подписаться на пуш-уведомления");
                

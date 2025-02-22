@@ -9,13 +9,15 @@ import 'package:fluttsec/src/models/oborudovanieFoto.dart';
 import 'package:fluttsec/src/models/user.dart';
 import 'package:fluttsec/src/models/usluga.dart';
 
-Future<bool> saveAvto(AvtomobilRemote a, mytoken) async {
+Future<bool> saveAvto(AvtomobilRemote a) async {
+
+  
   var headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   };
 
-  headers.addAll({'Authorization': 'Bearer $mytoken'});
+  headers.addAll({'Authorization': 'Bearer ${token.value}'});
   var aid = a.id;
   var marka = a.marka;
   var nomer = a.nomer;

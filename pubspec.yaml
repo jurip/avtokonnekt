@@ -4,8 +4,7 @@ description: "Эвоконнект"
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
 
-version: 1.0.24+11
-
+version: 1.0.26+13
 environment:
   sdk: '>=3.4.3 <4.0.0'
 

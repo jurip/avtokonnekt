@@ -1,19 +1,22 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:fluttsec/main.dart';
+import 'package:fluttsec/src/remote/get_token_from_server.dart';
 
-Future<bool> login(String username, String password, String mytoken) async {
+Future<bool> login(String username, String password) async {
   var headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   };
 
-  headers.addAll({'Authorization': 'Bearer ${mytoken}'});
+  headers.addAll({'Authorization': 'Bearer ${token.value}'});
 
   var data =
       json.encode({"username": "${username}", "password": "${password}"});
   var dio = Dio();
-  var response = await dio.request(
+  var response;
+  try{
+ response = await dio.request(
     '${site}rest/services/flutterService/login',
     options: Options(
       method: 'POST',
@@ -21,14 +24,27 @@ Future<bool> login(String username, String password, String mytoken) async {
     ),
     data: data,
   );
+  }catch(e){
+     if (e.toString().contains("401")) {
+      token.value = await getTokenFromServer();
+headers.addAll({'Authorization': 'Bearer ${token.value}'});
+
+response = await dio.request(
+    '${site}rest/services/flutterService/login',
+    options: Options(
+      method: 'POST',
+      headers: headers,
+    ),
+    data: data,
+  );
+     }
+
+  }
 
   if (response.statusCode == 200) {
     print(json.encode(response.data));
-    if (response.data != "ok") {
-      return false;
-    }
-  } else {
-    return false;
+    return response.data == "ok";
   }
-  return true;
-}
+  
+  return false;
+  }

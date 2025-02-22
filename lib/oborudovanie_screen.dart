@@ -264,18 +264,7 @@ class OborudovanieScreen extends HookConsumerWidget {
                                                                   token.value);
                                                         } catch (e) {
                                                         
-                                                          if (e
-                                                              .toString()
-                                                              .contains(
-                                                                  "401")) {
-                                                            user.value = '';
-                                                            token.value = '';
-                                                            chek.status =
-                                                                "NOVAYA";
-                                                            chek.saveLocal();
-                                                            context
-                                                                .go('/login');
-                                                          }
+                                                         
                                                         }
                                                         if (ok) {
                                                           chek.status =

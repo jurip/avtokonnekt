@@ -348,7 +348,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       theme: //ThemeData(fontFamily: 'Roboto'),
 
        ThemeData(
-          fontFamily: GoogleFonts.rubik().fontFamily,
+          fontFamily: GoogleFonts.libreFranklin().fontFamily,
           useMaterial3: true,
           colorScheme: const ColorScheme(
             brightness: Brightness.light,
@@ -360,7 +360,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             error: Colors.black,
             onError: Colors.white,
             surface: Colors.white,
-            onSurface: Colors.black,
+            onSurface: Color.fromRGBO(0, 0, 0, 1),
           ),
         ),
        darkTheme: ThemeData(

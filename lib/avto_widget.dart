@@ -6,12 +6,10 @@ import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttsec/image_screen.dart';
-import 'package:fluttsec/login_page.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:multiple_image_camera/camera_file.dart';
 import 'package:multiple_image_camera/multiple_image_camera.dart';
-import 'package:open_file_manager/open_file_manager.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/avtoFoto.dart';
@@ -48,8 +46,8 @@ class AvtoWidget extends HookConsumerWidget {
   void _saveComment(String text) {}
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    avto = ref.avtomobilRemotes.watch(avto);
-    zayavka = ref.zayavkaRemotes.watch(zayavka);
+    //avto = ref.avtomobilRemotes.watch(avto);
+    //zayavka = ref.zayavkaRemotes.watch(zayavka);
     var commentController = TextEditingController(text: avto.comment);
 
     var _speechToText = useState(SpeechToText());
@@ -78,12 +76,15 @@ class AvtoWidget extends HookConsumerWidget {
                     ),
                   );
                 },
-                child: Image(
+                child: ClipRRect(
+    borderRadius: BorderRadius.circular(8.0),
+    child: Image(
                   image: FileImage(
                     File(image.fileLocal!),
                   ),
-                  height: 50,
-                )),
+                  height: 70,
+                ))),
+                SizedBox(width: 15,),
           Expanded(
             flex: 2,
             child: Text(
@@ -133,6 +134,7 @@ class AvtoWidget extends HookConsumerWidget {
                       addFotos(zayavka, avto, context);
                     },
             ),
+            SizedBox(width: 5,),
             ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all<Color>(
@@ -145,6 +147,7 @@ class AvtoWidget extends HookConsumerWidget {
                       addFoto(zayavka, avto, context);
                     },
             ),
+            SizedBox(width: 5,),
             ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all<Color>(
@@ -351,6 +354,7 @@ class AvtoWidget extends HookConsumerWidget {
                       addOborudovanieFotos(zayavka, avto, context);
                     },
             ),
+            SizedBox(width: 5,),
             ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all<Color>(
@@ -464,13 +468,13 @@ class AvtoWidget extends HookConsumerWidget {
               onPressed: notNew
                   ? null
                   : () async {
-                      showSendAvtoDialog(context, controller);
+                      showSendAvtoDialog(context, controller, commentController);
                     },
               child: const Text("готово")),
         ]);
   }
 
-  Future<dynamic> showSendAvtoDialog(BuildContext context, controller) {
+  Future<dynamic> showSendAvtoDialog(BuildContext context, controller, TextEditingController commentController) {
     return showDialog(
       context: context,
       builder: (_) {
@@ -489,6 +493,8 @@ class AvtoWidget extends HookConsumerWidget {
                   onPressed: () async {
                     if (await checkConnection()) {
                       infoToast("Отправляем");
+                      avto.comment = commentController.text;
+                      avto.saveLocal();
                       sendAvtoOtchet(context, controller);
                       //ref.avtomobilRemotes.save(avto);
                       Navigator.pop(context);
@@ -535,14 +541,10 @@ class AvtoWidget extends HookConsumerWidget {
     zayavka.saveLocal();
     bool r = false;
     try {
-      r = await sendAvto(avto, token.value);
+      r = await sendAvto(avto);
     } catch (e) {
       infoToast("Ошибка при отправке\n" + e.toString());
-      if (e.toString().contains("401")) {
-        user.value = '';
-        token.value = '';
-        context.go('/login');
-      }
+     
       /*
       avto.status = "PENDING";
       avto.saveLocal();
