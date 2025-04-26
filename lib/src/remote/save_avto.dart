@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
@@ -9,7 +10,7 @@ import 'package:fluttsec/src/models/oborudovanieFoto.dart';
 import 'package:fluttsec/src/models/user.dart';
 import 'package:fluttsec/src/models/usluga.dart';
 
-Future<bool> saveAvto(AvtomobilRemote a) async {
+Future<String> saveAvto(AvtomobilRemote a) async {
 
   
   var headers = {
@@ -88,8 +89,10 @@ Future<bool> saveAvto(AvtomobilRemote a) async {
 
   if (response.statusCode == 200) {
     print(json.encode(response.data));
-    if(response.data == true)
-    return true;
+    
+    return response.data;
   } 
-  return false;
+  a.status = AvtomobilRemote.NOVAYA;
+      a.saveLocal();
+  return response.statusCode.toString();
 }

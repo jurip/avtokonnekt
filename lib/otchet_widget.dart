@@ -9,7 +9,6 @@ import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttsec/image_screen.dart';
-import 'package:fluttsec/src/models/currentUser.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:multiple_image_camera/camera_file.dart';
@@ -39,14 +38,14 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:uuid/uuid.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
-class AvtoWidget extends HookConsumerWidget {
+class OtchetWidget extends HookConsumerWidget {
   AvtomobilRemote avto;
   Position? position;
   
 
   ZayavkaRemote zayavka;
 
-  AvtoWidget(AvtomobilRemote this.avto, ZayavkaRemote this.zayavka,
+  OtchetWidget(AvtomobilRemote this.avto, ZayavkaRemote this.zayavka,
       {super.key});
   void _saveComment(String text) {}
   @override
@@ -97,18 +96,10 @@ class AvtoWidget extends HookConsumerWidget {
                 '${avto.nomer}\n${avto.marka}${(avto.nomerAG == null || avto.nomerAG == "null" || avto.nomerAG == "") ? '' : '\nАГ:' + avto.nomerAG!}'),
           ),
           if (notNew && avto.status != AvtomobilRemote.VYPOLNENA)
-          ValueListenableBuilder(
-              valueListenable: resend,
-              builder: (context, value, child) {
-                return ElevatedButton(
+            ElevatedButton(
                 
-                onPressed:!value?null: () => {
-                  resend.value = false,
-                  resendFromServer(avto.id)},
-                child: const Icon(Icons.refresh,));
-              },
-            ),
-            
+                onPressed:!resend.value?null: () => {resendFromServer(avto.id)},
+                child: const Icon(Icons.refresh,)),
           ElevatedButton(
               onPressed: notNew
                   ? null
@@ -120,7 +111,7 @@ class AvtoWidget extends HookConsumerWidget {
         children: <Widget>[
           const SizedBox(width: 8),
           const SizedBox(width: 8),
-          if (avto.nomerAG==null) ElevatedButton(
+          ElevatedButton(
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.all<Color>(
                   Colors.blue.shade100), // Change button color
@@ -131,9 +122,9 @@ class AvtoWidget extends HookConsumerWidget {
                 : () {
                     addAvtoFoto(zayavka, avto);
                   },
-          )else Text("") ,
+          ),
           Text(
-            'Oтчет:',
+            'Oтчет по работе:',
             style: TextStyle(fontSize: 20),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -524,7 +515,7 @@ class AvtoWidget extends HookConsumerWidget {
                       avto.saveLocal();
                       sendAvtoOtchet(context, controller);
                       Timer(
-        Duration(seconds: 60),
+        Duration(seconds: 300),
             () => resend.value = true);
                       //ref.avtomobilRemotes.save(avto);
                       Navigator.pop(context);
@@ -636,8 +627,8 @@ class AvtoWidget extends HookConsumerWidget {
 
       */
     }
-    avto.status = r;
-    avto.saveLocal();
+    //avto.status = r;
+    //avto.saveLocal();
       zayavka.saveLocal();
       controller.value.collapse();
  if (r==AvtomobilRemote.VYPOLNENA) {
@@ -791,20 +782,6 @@ void showDeleteAlertAvto(context, ZayavkaRemote zayavka, AvtomobilRemote avto) {
       ));
     },
   );
-}
-
-initPosition(AvtomobilRemote avto) {
-  if (avto.nachaloRabot == null) {
-    avto.nachaloRabot = DateTime.now();
-  }
-  
-    _determinePosition().then(
-      (value) {
-        Position p = value;
-        avto.lat = p.latitude.toString();
-        avto.lng = p.longitude.toString();
-      },
-    );
 }
 
 Future<List<XFile>> pickMultiC(context) async {

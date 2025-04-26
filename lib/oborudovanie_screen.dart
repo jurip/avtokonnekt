@@ -11,6 +11,8 @@ import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/pFoto.dart';
 import 'package:fluttsec/src/models/pOborudovanie.dart';
 import 'package:fluttsec/src/models/peremeshenieOborudovaniya.dart';
+import 'package:fluttsec/src/remote/login.dart';
+import 'package:fluttsec/src/remote/save_with_photos.dart';
 import 'package:gal/gal.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -67,6 +69,14 @@ class OborudovanieScreen extends HookConsumerWidget {
         data: (_) {
           var chekState =
               ref.peremesheniyeOborudovaniyas.watchAll(remote: false);
+          var sorted = chekState.model.toList(growable: true);
+          sorted.sort((a, b) {
+            if(a.date==null)
+              return 1;
+            if(b.date==null)
+              return 1;
+            return b.date!.compareTo(a.date!);
+          },);
 
           return ListView(
             children: [
@@ -79,7 +89,7 @@ class OborudovanieScreen extends HookConsumerWidget {
               ElevatedButton(
                   onPressed: () => showChekDialog(context, ref),
                   child: Text("Добавить перемещение")),
-              for (var chek in chekState.model.toList(growable: true))
+              for (var chek in sorted)
                 ExpansionTile(
                     trailing: SizedBox.shrink(),
                     collapsedShape: const ContinuousRectangleBorder(
@@ -91,7 +101,7 @@ class OborudovanieScreen extends HookConsumerWidget {
                       ),
                        Expanded(
                         flex: 2,
-                        child: Text('${DateFormat('yyyy.MM.dd kk:mm').format(chek.date!)}'),
+                        child: Text('${DateFormat('dd.MM.yyyy kk:mm').format(chek.date!)}'),
                       ),
                       ElevatedButton(
                           onPressed: chek.status != "NOVAYA"
@@ -253,8 +263,8 @@ class OborudovanieScreen extends HookConsumerWidget {
                                                       Navigator.pop(context);
                                                       if (await checkConnection()) {
                                                         infoToast("Посылаем");
-                                                        chek.saveLocal();
-                                                        chek.status = "TEMP";
+                                                        //chek.saveLocal();
+                                                        //chek.status = "TEMP";
                                                         bool ok = false;
                                                         try {
                                                           ok =
@@ -297,7 +307,10 @@ class OborudovanieScreen extends HookConsumerWidget {
 
   Future<bool> saveOborudovanie(
       PeremesheniyeOborudovaniya chek, WidgetRef ref, mytoken) async {
+        bool ok = await login(getFullUsername, password.value);
+
     for (PFoto foto in chek.fotos.toList()) {
+      bool ok = await login(getFullUsername, password.value);
       var headers = {
         'Content-Type': 'image/jpeg',
         'Authorization': 'Bearer $mytoken'

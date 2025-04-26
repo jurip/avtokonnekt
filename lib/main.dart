@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:dio/dio.dart';
@@ -32,20 +33,23 @@ import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
 
-//const String site = "http://178.140.233.205:2222/";
-
+//const String site = "http://95.84.224.43:2222/";
+//prod
 const String site = "http://80.78.242.170:8080/";
 //onst String site = "http://89.111.173.110:8080/";
 //const String site = "http://193.227.240.27:8080/";
 //const String site = "http://10.0.2.2:8080/";
 //const String site = "http://80.78.242.102:8080/";
-
+//test
+//const String site = "http://89.111.169.163:8080/";
+//
 
 late final ValueNotifier<String> company;
 
 late final ValueNotifier<String> user;
 late final ValueNotifier<String> password;
 late final ValueNotifier<String> token;
+LocationPermission? permission;
 
 void main() async {
 
@@ -53,7 +57,18 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await initLocalStorage();
-
+    if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      Geolocator.openLocationSettings();
+      return Future.error('Location permissions are denied');
+    }
+  }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -90,7 +105,12 @@ void main() async {
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     //saveToPrefs(message);
+    if(message.data['tip_soobsheniya']=='avto_update'){
+          
+    updateAvtoFromMessageZ(message.data);
+    }else{
     newZayavkaFromMessageZ(message.data);
+    }
     if (kDebugMode) {
       print('Handling a foreground message: ${message.messageId}');
       print('Message data: ${message.data}');
@@ -171,7 +191,7 @@ class AppMy extends HookConsumerWidget {
   }
 }
 
-final _messageStreamController = BehaviorSubject<RemoteMessage>();
+final  _messageStreamController = BehaviorSubject<RemoteMessage>();
 String? myCal;
 
 
@@ -179,11 +199,23 @@ Future<bool> saveToPrefs(RemoteMessage message) async {
   print("\n\n\nobject пытаемся сохранить");
   var sp = await SharedPreferences.getInstance();
   print("\n\n\nobject получили схаред");
-
-  var ok = await sp.setString(
-      "zayavka-" + message.data["id"], json.encode(message.data));
+  String prefix;
+  var ok;
+  if(message.data['tip_soobsheniya']=='avto_update'){
+    prefix = "avtoUpdate-";
+    ok = await sp.setString(
+      prefix + message.data["avtoId"], json.encode(message.data));
       print("\n\n\nobject сохранили");
       print(ok.toString());
+  }else{
+    prefix="zayavka-";
+    ok = await sp.setString(
+      prefix + message.data["id"], json.encode(message.data));
+      print("\n\n\nobject сохранили");
+      print(ok.toString());
+  }
+
+  
   return ok;
 }
 
@@ -263,6 +295,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
     _messageStreamController.listen((message) {
       setState(() {
+         if(message.data['tip_soobsheniya']=='avto_update'){
+            updateAvtoFromMessage(widget.ref, message.data);
+
+          }else{
+             // newZayavkaFromMessageWithCalendar(widget.ref, message.data);
+          }
         if (message.notification != null) {
           _lastMessage = 'Received a notification message:'
               '\nTitle=${message.notification?.title},'
@@ -272,7 +310,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         } else {
           _lastMessage = 'Received a data message: ${message.data}';
           //saveToPrefs(message);
-          newZayavkaFromMessageWithCalendar(widget.ref, message.data);
+         
+          
         }
       });
     });
@@ -547,6 +586,15 @@ Future<void> _launchUrl() async {
     throw Exception('Could not launch $_url');
   }
 }
+Future<AvtomobilRemote?> updateAvtoFromMessage(WidgetRef ref, Map data) async {
+ var a = await ref.avtomobilRemotes.findOne(data['avtoId'], remote: false);
+
+ a?.status = 'VYPOLNENA';
+ a?.save(remote: false);
+ a?.saveLocal();
+ a!.zayavka?.value?.saveLocal();
+ return a;
+}
 Future<ZayavkaRemote> newZayavkaFromMessageWithCalendar(WidgetRef ref, Map data) async {
 
   
@@ -622,8 +670,17 @@ Future<ZayavkaRemote> newZayavkaFromMessage( Map data,WidgetRef ref) async {
 
   return z;
 }
+updateAvtoFromMessageZ( Map data) async {
+ if(data['tip_soobsheniya']=='avto_update'){
+    var avtoId = data['avtoId'];
+    //TODO
+    
+   
+  }
+}
 
 Future<ZayavkaRemote> newZayavkaFromMessageZ( Map data) async {
+ 
   var id = data["id"];
   var nomer = data["nomer"];
   var mes = data["message"];
@@ -690,7 +747,7 @@ Future<ZayavkaRemote> newZayavkaFromMessageZ( Map data) async {
 Future<bool> checkConnection() async {
   return true;
   try {
-    final result = await InternetAddress.lookup(site, type: InternetAddressType.any);
+    final result = await  InternetAddress.lookup("ya.ru", type: InternetAddressType.any);
     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
       print('connected');
       return true;
@@ -920,6 +977,12 @@ Future<bool> loadZayavkaFromPrefs(WidgetRef ref) async {
       var map = jsonDecode(z);
       newZayavkaFromMessageWithCalendar(ref, map);
       return await prefs.remove(key);
+    }else
+    if (key.startsWith("avtoUpdate")) {
+      String z = prefs.getString(key)!;
+      var map = jsonDecode(z);
+      updateAvtoFromMessage(ref, map);
+      return await prefs.remove(key);
     }
   }
   return false;
@@ -933,7 +996,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 
   await saveToPrefs(message);
-  //newZayavkaFromMessage(message.data);
 
   if (kDebugMode) {
     print("Handling a background message: ${message.messageId}");

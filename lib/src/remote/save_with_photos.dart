@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/oborudovanieFoto.dart';
@@ -11,7 +12,7 @@ import 'package:fluttsec/src/models/foto.dart';
 
 
   
-Future<bool> sendAvto(
+Future<String> sendAvto(
     AvtomobilRemote avto) async {
       
   bool ok = await login(getFullUsername, password.value);
@@ -25,7 +26,9 @@ Future<bool> sendAvto(
       String f = response.data['fileRef'];
       avtoFoto.file = f;
     } else {
-      return false;
+      avto.status = AvtomobilRemote.NOVAYA;
+      avto.saveLocal();
+      return "NE_OTVRAVILI_FOTO";
     }
 
   }
@@ -37,7 +40,9 @@ Future<bool> sendAvto(
       String f = response.data['fileRef'];
       avtoFoto.file = f;
     } else {
-      return false;
+      avto.status = AvtomobilRemote.NOVAYA;
+      avto.saveLocal();
+      return "NE_OTPRAWILI_AVTO_FOTO";
     }
 
   }
@@ -52,7 +57,9 @@ Future<bool> sendAvto(
       String f = response.data['fileRef'];
       oborudovanieFoto.file = f;
     } else {
-      return false;
+      avto.status = AvtomobilRemote.NOVAYA;
+      avto.saveLocal();
+      return "NE_OTPRAVILI_OBORUDOVANIE";
     }
   }
 

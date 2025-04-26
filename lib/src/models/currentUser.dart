@@ -14,9 +14,10 @@ class CurrentUser extends DataModel<CurrentUser> {
   final String? id;
   final String? firstName;
    final String? lastName;
+   final String? tip;
    String? mode = "light"; 
 
-  CurrentUser({this.id,required this.firstName,required this.lastName});
+  CurrentUser({this.id,required this.firstName,required this.lastName, required this.tip});
 
 }
 mixin JsonServerAdapter<T extends DataModel<T>> on RemoteAdapter<T> {

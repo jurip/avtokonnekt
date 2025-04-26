@@ -16,30 +16,34 @@ part 'avtomobilRemote.g.dart';
 @JsonSerializable()
 @DataRepository([JsonServerAdapter])
 class AvtomobilRemote extends DataModel<AvtomobilRemote> {
+  static String VYPOLNENA = "VYPOLNENA";
+  static String  POSLANA_V_BIPIUM = "POSLANA_V_BIPIUM";
   @override
   final String? id;
   final String? nomer;
   final String? marka;
   final String? nomerAG;
-  final DateTime? date;
+  DateTime? date = DateTime.now();
   DateTime? nachaloRabot;
    String? comment;
    String? lat ="0";
    String? lng = "0";
   final BelongsTo<ZayavkaRemote>? zayavka;
 
-   String? status = "NOVAYA";
+   String? status = AvtomobilRemote.NOVAYA;
   final HasMany<AvtoFoto> avtoFoto = HasMany<AvtoFoto>();
   final HasMany<Foto> fotos = HasMany<Foto>();
   final HasMany<Usluga> performance_service = HasMany<Usluga>();
   final HasMany<User> users = HasMany<User>();
   final HasMany<Oborudovanie> barcode = HasMany<Oborudovanie>();
   final HasMany<OborudovanieFoto> oborudovanieFotos = HasMany<OborudovanieFoto>();
+  
+  static String NOVAYA = "NOVAYA";
   AvtomobilRemote( {this.id, required this.nomer, this.marka,this.nomerAG,this.comment, this.status, this.date, BelongsTo<ZayavkaRemote>? zayavka}) :
     zayavka = zayavka ?? BelongsTo();
 
   bool isOpen(){
-     return status != "VYPOLNENA";
+     return status != AvtomobilRemote.VYPOLNENA;
   }
 }
 

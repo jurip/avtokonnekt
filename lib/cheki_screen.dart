@@ -69,6 +69,14 @@ class ChekiScreen extends HookConsumerWidget {
         loading: () => const CircularProgressIndicator(),
         data: (_) {
           var chekState = ref.cheks.watchAll(remote: false);
+          var sorted = chekState.model.toList(growable: true);
+          sorted.sort((a, b) {
+            if(a.date==null)
+              return 1;
+            if(b.date==null)
+              return 1;
+            return b.date!.compareTo(a.date!);
+          },);
 
           return ListView(
             children: [
@@ -80,7 +88,7 @@ class ChekiScreen extends HookConsumerWidget {
 ElevatedButton(onPressed: () => showChekDialog(context, ref), child: Text("Добавить отчет"))
 
 ,
-for (var chek in chekState.model.toList(growable: true))
+for (var chek in sorted)
              ExpansionTile(
         trailing: SizedBox.shrink(),
         collapsedShape: const ContinuousRectangleBorder(
@@ -94,7 +102,7 @@ for (var chek in chekState.model.toList(growable: true))
           Expanded(
             flex: 2,
             child: Text(
-                '${DateFormat('yyyy.MM.dd kk:mm').format(chek.date!)}'),
+                '${DateFormat('dd.MM.yyyy kk:mm').format(chek.date!)}'),
           ),
           ElevatedButton(
               onPressed: chek.status != "NOVAYA"
@@ -209,9 +217,9 @@ for (var chek in chekState.model.toList(growable: true))
                                     Navigator.pop(context);
                                       infoToast("Посылаем");
                                       
-                                      chek.status = "TEMP";
+                                      //chek.status = "TEMP";
                                       
-                                      chek.saveLocal();
+                                      //chek.saveLocal();
                                       bool ok = false;
                                       try{
                                         ok = 

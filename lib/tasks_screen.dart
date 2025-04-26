@@ -1,9 +1,11 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttsec/avto_widget.dart';
+import 'package:fluttsec/otchet_widget.dart';
 import 'package:fluttsec/src/models/avtoFoto.dart';
-import 'package:fluttsec/src/models/avtomobilLocal.dart';
+import 'package:fluttsec/src/models/currentUser.dart';
 import 'package:gal/gal.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:uuid/uuid.dart';
@@ -36,7 +38,7 @@ class TasksScreen extends HookConsumerWidget {
 
     useEffect(() {
       loadZayavkaFromPrefs(ref);
-
+_determinePosition();
       return () => {};
     }, []);
 
@@ -54,14 +56,28 @@ class TasksScreen extends HookConsumerWidget {
               )
               .toList();
           zFiltered.sort((a, b) {
-            if (a.nachalo != null && b.nachalo != null)
-              return b.nachalo!.compareTo(a.nachalo!);
+            if (a.nachalo != null && b.nachalo != null){
+              if(b.nachalo!.year!=a.nachalo!.year)
+                return b.nachalo!.year.compareTo(a.nachalo!.year);
+              if(b.nachalo!.month!=a.nachalo!.month)
+                return b.nachalo!.month.compareTo(a.nachalo!.month);
+              if(b.nachalo!.day!=a.nachalo!.day)
+                return b.nachalo!.day.compareTo(a.nachalo!.year);
+              if(b.nachalo!.hour!=a.nachalo!.hour)
+                return a.nachalo!.hour.compareTo(b.nachalo!.hour);
+              if(b.nachalo!.minute!=a.nachalo!.minute)
+                return a.nachalo!.minute.compareTo(b.nachalo!.minute);
+              if(b.nachalo!.second!=a.nachalo!.second)
+                return a.nachalo!.second.compareTo(b.nachalo!.second);
+            
+              return a.nachalo!.microsecond.compareTo(b.nachalo!.microsecond);
+            }
             else
               return 0;
           });
           ref.duties.findAll(
             onError: (e, label, adapter) {
-              infoToast("Нет связи");
+              //infoToast("Нет связи");
               return List.empty();
             },
           );
@@ -109,7 +125,7 @@ class TasksScreen extends HookConsumerWidget {
                      ),
                     Row(children: [
                       for (final u in stateCurrentUser.model)
-                        Center(
+                        Flexible(child:  Center(
                             child: Container(
                                 decoration: BoxDecoration(
                                   color: Color.fromARGB(255, 130, 238, 255),
@@ -125,8 +141,9 @@ class TasksScreen extends HookConsumerWidget {
                                 margin: EdgeInsets.all(10),
                                 child: Text(
                                   '${u.firstName} ${u.lastName} ',
+                                  softWrap: true,
                                   style: TextStyle(fontSize: 25),
-                                ))),
+                                )))),
                       for (final duty in stateDuty.model)
                         Center(
                             child: Container(
@@ -163,7 +180,7 @@ class TasksScreen extends HookConsumerWidget {
                             ),
                           ),
                           for (final ZayavkaRemote zayavka in zFiltered)
-                            zayavkaWidget(zayavka, context),
+                            zayavkaWidget(zayavka, context, stateCurrentUser.model),
                         ]))
                   ],
                 )
@@ -182,7 +199,7 @@ class TasksScreen extends HookConsumerWidget {
     );
   }
 
-  Container zayavkaWidget(ZayavkaRemote zayavka, BuildContext context) {
+  Container zayavkaWidget(ZayavkaRemote zayavka, BuildContext context, List<CurrentUser> model) {
     return Container(
       decoration: BoxDecoration(
         color: Color.fromARGB(255, 130, 238, 255),
@@ -378,16 +395,22 @@ class TasksScreen extends HookConsumerWidget {
                                 ),
                         ExpansionTile(
                             childrenPadding: EdgeInsets.all(5),
-                            title: Text('Автомобили'),
+                            title: Text('              Отчеты', style: TextStyle(fontSize: 22),),
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: <Widget>[
                                   const SizedBox(width: 8),
                                   ElevatedButton(
-                                    child: const Icon(Icons.car_repair),
+                                    style: ButtonStyle(elevation: WidgetStatePropertyAll(5) ,),
+                                    child: const Text("Добавить Объект", style: TextStyle(fontSize: 24),),
                                     onPressed: () {
+                                      if(
+                                      model.elementAt(0).tip=='OTCHET'){
+                                      novyjOtchet(context, zayavka);
+                                      }else{
                                       novoeAvto(context, zayavka);
+                                      }
                                       //  Navigator.push<Widget>(
                                       //context,
                                       //MaterialPageRoute(
@@ -401,10 +424,11 @@ class TasksScreen extends HookConsumerWidget {
                               ),
                               if (zayavka.avtomobili != null)
                                 for (AvtomobilRemote avto
-                                    in zayavka.avtomobili!.toList())
+                                    in sortedAvto(zayavka.avtomobili!.toList()))
+                                    for(CurrentUser u in model)
                                   Container(
                                       padding: EdgeInsets.only(bottom: 5),
-                                      child: AvtoWidget(avto, zayavka))
+                                      child: u.tip == 'OTCHET'? OtchetWidget(avto, zayavka): AvtoWidget(avto, zayavka))
                             ])
                       ],
                     ),
@@ -415,8 +439,20 @@ class TasksScreen extends HookConsumerWidget {
           ]),
     );
   }
-
+  List sortedAvto(List<AvtomobilRemote> avtos){
+  
+    avtos.sort((a, b) {
+    if(a.date == null)
+      return 1;
+    if(b.date == null)
+      return 1;
+    
+     return  b.date!.compareTo(a.date!);});
+    return avtos;
+  }
+  
   void novoeAvto(context, ZayavkaRemote zayavka) {
+
     showDialog(
       context: context,
       builder: (_) {
@@ -457,6 +493,7 @@ class TasksScreen extends HookConsumerWidget {
                         nomer: "ТС" + (n + 1).toString(),
                         marka: "",
                         status: "NOVAYA");
+                        initPosition(a);
                     a.saveLocal();
                     addFoto(zayavka, a);
                     Navigator.pop(context);
@@ -479,15 +516,58 @@ class TasksScreen extends HookConsumerWidget {
                       marka: marka,
                       status: "NOVAYA");
                   a.saveLocal();
+                  initPosition(a);
+                  Navigator.pop(context);
+                },
+                child: Text('Сохранить'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+ void novyjOtchet(context, ZayavkaRemote zayavka) {
 
-                  AvtomobilLocal al = AvtomobilLocal(
+    showDialog(
+      context: context,
+      builder: (_) {
+        var nomerController = TextEditingController();
+
+
+        return Dialog(
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              Container(
+                padding: EdgeInsets.all(10),
+                child: TextFormField(
+                  inputFormatters: [
+                    UpperCaseTextFormatter(),
+                  ],
+                  controller: nomerController,
+                  decoration: InputDecoration(hintText: 'объект'),
+                ),
+              ),
+             
+             
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Отмена'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // Send them to your email maybe?
+                  var nomer = nomerController.text;
+                  var uuid = Uuid();
+                  AvtomobilRemote a = AvtomobilRemote(
                       id: uuid.v4(),
                       zayavka: BelongsTo<ZayavkaRemote>(zayavka),
                       nomer: nomer,
-                      marka: marka,
+                      marka: "",
                       status: "NOVAYA");
-                  al.saveLocal();
-                  zayavka.saveLocal();
+                  a.saveLocal();
+                  initPosition(a);
                   Navigator.pop(context);
                 },
                 child: Text('Сохранить'),
@@ -667,4 +747,41 @@ class UpperCaseTextFormatter extends TextInputFormatter {
       selection: newValue.selection,
     );
   }
+}
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      Geolocator.openLocationSettings();
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition();
 }
