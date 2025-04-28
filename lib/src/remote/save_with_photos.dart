@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter_data/flutter_data.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/oborudovanieFoto.dart';
+import 'package:fluttsec/src/remote/login.dart';
 import 'package:fluttsec/src/remote/save_avto.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/foto.dart';
@@ -10,92 +12,84 @@ import 'package:fluttsec/src/models/foto.dart';
 
 
   
-Future<bool> sendAvto(
-    AvtomobilRemote avto, mytoken) async {
+Future<String> sendAvto(
+    AvtomobilRemote avto) async {
       
- 
+  bool ok = await login(getFullUsername, password.value);
+
+   for (Foto avtoFoto in avto.fotos.toList()) {
+  
+    Response response = await sendFile(avtoFoto.fileLocal!);
+
+    if (response.statusCode == 201) {
+      print(response.data);
+      String f = response.data['fileRef'];
+      avtoFoto.file = f;
+    } else {
+      avto.status = AvtomobilRemote.NOVAYA;
+      avto.saveLocal();
+      return "NE_OTVRAVILI_FOTO";
+    }
+
+  }
 
   for (AvtoFoto avtoFoto in avto.avtoFoto.toList()) {
-    var headers = {
-      'Content-Type': 'image/jpeg',
-      'Authorization': 'Bearer $mytoken'
-    };
-    var data = File(avtoFoto.fileLocal!).readAsBytesSync();
-
-    var dio = Dio();
-    var response = await dio.request(
-      '${site}rest/files?name=avtofoto.jpg',
-      options: Options(
-        method: 'POST',
-        headers: headers,
-      ),
-      data: data,
-    );
-
+    var response = await sendFile(avtoFoto.fileLocal!);
     if (response.statusCode == 201) {
       print(response.data);
       String f = response.data['fileRef'];
       avtoFoto.file = f;
     } else {
-      return false;
+      avto.status = AvtomobilRemote.NOVAYA;
+      avto.saveLocal();
+      return "NE_OTPRAWILI_AVTO_FOTO";
     }
 
   }
 
-  for (Foto avtoFoto in avto.fotos.toList()) {
-    var headers = {
-      'Content-Type': 'image/jpeg',
-      'Authorization': 'Bearer $mytoken'
-    };
-    var data = File(avtoFoto.fileLocal!).readAsBytesSync();
-    var n = avtoFoto.fileLocal!.lastIndexOf("/");
-    var name = avtoFoto.fileLocal!.substring(n+1);
-
-    var dio = Dio();
-    var response = await dio.request(
-      '${site}rest/files?name='+name,
-      options: Options(
-        method: 'POST',
-        headers: headers,
-      ),
-      data: data,
-    );
-
-    if (response.statusCode == 201) {
-      print(response.data);
-      String f = response.data['fileRef'];
-      avtoFoto.file = f;
-    } else {
-      return false;
-    }
-
-  }
+ 
 
   for (OborudovanieFoto oborudovanieFoto in avto.oborudovanieFotos.toList()) {
-    var headers = {
-      'Content-Type': 'image/jpeg',
-      'Authorization': 'Bearer $mytoken'
-    };
-    var data = File(oborudovanieFoto.fileLocal!).readAsBytesSync();
-
-    var dio = Dio();
-    var response = await dio.request(
-      '${site}rest/files?name=oborudovanie.jpg',
-      options: Options(
-        method: 'POST',
-        headers: headers,
-      ),
-      data: data,
-    );
+    var response = await sendFile(oborudovanieFoto.fileLocal!);
 
     if (response.statusCode == 201) {
       print(response.data);
       String f = response.data['fileRef'];
       oborudovanieFoto.file = f;
     } else {
-      return false;
+      avto.status = AvtomobilRemote.NOVAYA;
+      avto.saveLocal();
+      return "NE_OTPRAVILI_OBORUDOVANIE";
     }
   }
 
-  return saveAvto(avto, mytoken);
+  return saveAvto(avto);
+}
+
+
+Future<Response> sendFile(String fileLocal) async {
+  var data = File(fileLocal!).readAsBytesSync();
+
+    var dio = Dio();
+      var n = fileLocal!.lastIndexOf("/");
+ var name = fileLocal!.substring(n+1);
+    var response = await dio.request(
+      '${site}rest/files?name='+name,
+      options: Options(
+        method: 'POST',
+        headers: getHeaders(),
+      ),
+      data: data,
+    );
+    return response;
+}
+
+String get getFullUsername => company.value +"|"+user.value;
+
+Map<String, String> getHeaders() {
+   var headers = {
+    'Content-Type': 'image/jpeg',
+    'Authorization': 'Bearer ${token.value}'
+  };
+  return headers;
 }

@@ -2,8 +2,11 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:fluttsec/main.dart';
 import 'package:fluttsec/src/models/zayavkaRemote.dart';
+import 'package:fluttsec/src/remote/login.dart';
+import 'package:fluttsec/src/remote/save_with_photos.dart';
 
 Future<bool> updateZayavka(ZayavkaRemote zayavka, String mytoken, String status) async {
+    bool ok = await login(getFullUsername, password.value);
   var headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'

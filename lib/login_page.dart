@@ -116,10 +116,10 @@ class LoginPage extends HookConsumerWidget {
               return;
             }
             
-            var mytoken = token.value;
+            
             String t = loginController.text;
             if (t != "") {
-              bool ok = await login(companyController.text+"|"+ t, passwordController.text, mytoken);
+              bool ok = await login(companyController.text+"|"+ t, passwordController.text);
               if (ok) {
                 isLoading.value = false;
                 company.value = companyController.text;
@@ -139,7 +139,7 @@ class LoginPage extends HookConsumerWidget {
 
                  var fcm  = await FirebaseMessaging.instance.getToken();
                   
-                  bool ok = await updateUser(company.value+"|"+ user.value, fcm!, mytoken);
+                  bool ok = await updateUser(company.value+"|"+ user.value, fcm!, token.value);
                   if(!ok)
                     infoToast("Не удалось подписаться на пуш-уведомления");
                
@@ -152,8 +152,8 @@ class LoginPage extends HookConsumerWidget {
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.CENTER,
                     timeInSecForIosWeb: 1,
-                    backgroundColor: Colors.red,
-                    textColor: Colors.white,
+                    //backgroundColor: Colors.red,
+                   // textColor: Colors.white,
                     fontSize: 16.0);
               }
             } else {
@@ -163,8 +163,8 @@ class LoginPage extends HookConsumerWidget {
                   toastLength: Toast.LENGTH_SHORT,
                   gravity: ToastGravity.CENTER,
                   timeInSecForIosWeb: 1,
-                  backgroundColor: Colors.red,
-                  textColor: Colors.white,
+                 // backgroundColor: Colors.red,
+                 // textColor: Colors.white,
                   fontSize: 16.0);
             }
           },
@@ -174,7 +174,7 @@ class LoginPage extends HookConsumerWidget {
               height: 34,
               padding: const EdgeInsets.all(2.0),
               child: const CircularProgressIndicator(
-                color: Colors.white,
+              //  color: Colors.white,
                 strokeWidth: 3,
               ),
             )

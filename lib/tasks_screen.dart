@@ -1,9 +1,12 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttsec/avto_widget.dart';
+import 'package:fluttsec/otchet_widget.dart';
 import 'package:fluttsec/src/models/avtoFoto.dart';
-import 'package:fluttsec/src/models/avtomobilLocal.dart';
+import 'package:fluttsec/src/models/currentUser.dart';
+import 'package:fluttsec/src/notifications/app_notifications.dart';
 import 'package:gal/gal.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:uuid/uuid.dart';
@@ -36,7 +39,7 @@ class TasksScreen extends HookConsumerWidget {
 
     useEffect(() {
       loadZayavkaFromPrefs(ref);
-      
+      _determinePosition();
       return () => {};
     }, []);
 
@@ -53,10 +56,31 @@ class TasksScreen extends HookConsumerWidget {
                 (element) => element.status == 'NOVAYA',
               )
               .toList();
-          zFiltered.sort((a, b) 
-          
-          { if(a.nachalo!=null && b.nachalo!=null) return b.nachalo!.compareTo(a.nachalo!);else return 0;});
-          ref.duties.findAll();
+          zFiltered.sort((a, b) {
+            if (a.nachalo != null && b.nachalo != null) {
+              if (b.nachalo!.year != a.nachalo!.year)
+                return b.nachalo!.year.compareTo(a.nachalo!.year);
+              if (b.nachalo!.month != a.nachalo!.month)
+                return b.nachalo!.month.compareTo(a.nachalo!.month);
+              if (b.nachalo!.day != a.nachalo!.day)
+                return b.nachalo!.day.compareTo(a.nachalo!.day);
+              if (b.nachalo!.hour != a.nachalo!.hour)
+                return a.nachalo!.hour.compareTo(b.nachalo!.hour);
+              if (b.nachalo!.minute != a.nachalo!.minute)
+                return a.nachalo!.minute.compareTo(b.nachalo!.minute);
+              if (b.nachalo!.second != a.nachalo!.second)
+                return a.nachalo!.second.compareTo(b.nachalo!.second);
+
+              return a.nachalo!.microsecond.compareTo(b.nachalo!.microsecond);
+            } else
+              return 0;
+          });
+          ref.duties.findAll(
+            onError: (e, label, adapter) {
+              //infoToast("Нет связи");
+              return List.empty();
+            },
+          );
           final stateDuty = ref.duties.watchAll();
           final stateCurrentUser = ref.currentUsers.watchAll();
 
@@ -67,79 +91,76 @@ class TasksScreen extends HookConsumerWidget {
           return RefreshIndicator(
               key: _refreshIndicatorKey,
               onRefresh: () async {
-                await ref.duties.findAll();
-                ref.zayavkaRemotes.findAll();
+                await ref.duties.findAll(
+                  onError: (e, label, adapter) {
+                    return List.empty();
+                  },
+                );
+                ref.zayavkaRemotes.findAll(
+                  onError: (e, label, adapter) {
+                    return List.empty();
+                  },
+                );
 
                 // sendToCalendar(ref);
               },
               // Pull from top to show refresh indicator.
               child: ListView(
                 children: [
-                  Align(
+                  Container(
                     alignment: Alignment.topRight,
                     child: IconButton(
-                        onPressed: () => context.go('/settings'),
-                        icon: Icon(Icons.settings)),
-                  ),
-                  for (final u in stateCurrentUser.model)
-                  Center(child: 
-                    Container(
-                        decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade200,
-                  offset: Offset(0, 4),
-                  blurRadius: 8,
-                  spreadRadius: 0)
-              ],
-            ),
-                        margin: EdgeInsets.all(10),
-                        child: Text(
-                          '${u.firstName} ${u.lastName} ',
-                          style: TextStyle(fontSize: 25),
-                        ))),
-                  for (final duty in stateDuty.model)
-                  Center(child: 
-                    Container(
-                        decoration: BoxDecoration(
-                          //color: Colors.grey.shade200,
-                         
-                          borderRadius: BorderRadius.circular(10),
-                          
-                        ),
-                        margin: EdgeInsets.all(10),
-                        child: Text(
-                          '${duty.status}',
-                          style: TextStyle(fontSize: 25, color: Colors.red),
-                        ))),
-                   
-                  SizedBox(height: 10),
-
-                  Container(
-                     decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade200,
-                  offset: Offset(0, 4),
-                  blurRadius: 8,
-                  spreadRadius: 0)
-              ],
-            ),
-                    child: Column(
-                      children: [
-
-                  Center(
-                    child: Text(
-                      'заявки',
-                      style: TextStyle(fontSize: 30),
+                      onPressed: () {
+                        context.go('/settings');
+                      },
+                      icon: Icon(Icons.settings),
                     ),
                   ),
-                  for (final ZayavkaRemote zayavka in zFiltered)
-                    zayavkaWidget(zayavka, context),
+                  Row(children: [
+                    for (final u in stateCurrentUser.model)
+                      Flexible(
+                          child: Center(
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: Theme.of(context).colorScheme.surface
+                                  ),
+                                  margin: EdgeInsets.all(10),
+                                  child: Text(
+                                    '${u.firstName} ${u.lastName} ',
+                                    softWrap: true,
+                                    style: TextStyle(fontSize: 25),
+                                  )))),
+                    for (final duty in stateDuty.model)
+                      Center(
+                          child: Container(
+                              decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: Theme.of(context).colorScheme.surface
+                                  ),
+                              margin: EdgeInsets.all(10),
+                              child: Text(
+                                '${duty.status}',
+                                style:
+                                    TextStyle(fontSize: 25, color: Colors.red),
+                              ))),
+                  ]),
+                  SizedBox(height: 10),
+                  Container(
+                       decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: Theme.of(context).colorScheme.surface
+                                  ),
+                      child: Column(children: [
+                        Center(
+                          child: Text(
+                            'заявки',
+                            style: TextStyle(fontSize: 30),
+                          ),
+                        ),
+                        for (final ZayavkaRemote zayavka in zFiltered)
+                          zayavkaWidget(
+                              zayavka, context, stateCurrentUser.model),
                       ]))
                 ],
               ));
@@ -156,24 +177,14 @@ class TasksScreen extends HookConsumerWidget {
     );
   }
 
-  Container zayavkaWidget(ZayavkaRemote zayavka, BuildContext context) {
+  Container zayavkaWidget(
+      ZayavkaRemote zayavka, BuildContext context, List<CurrentUser> model) {
     return Container(
-      decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade200,
-                  offset: Offset(0, 4),
-                  blurRadius: 8,
-                  spreadRadius: 0)
-              ],
-            ),
+      
       margin: EdgeInsets.all(10),
       child: ExpansionTile(
           trailing: SizedBox.shrink(),
           childrenPadding: EdgeInsets.all(5),
-          collapsedBackgroundColor: Theme.of(context).colorScheme.primaryContainer,
           collapsedShape: const ContinuousRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(20))),
           title: Row(
@@ -183,9 +194,9 @@ class TasksScreen extends HookConsumerWidget {
               ),
               Expanded(
                 child:
-                    Text('${zayavka.client}', style: TextStyle(fontSize: 18)),
+                    Text('${zayavka.client}', style: TextStyle(fontSize: 12)),
               ),
-              Column(children: [
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 if (zayavka.nachalo != null)
                   Text('${DateFormat('dd.MM.yyyy').format(zayavka.nachalo!)}',
                       style: TextStyle(fontSize: 15)),
@@ -200,140 +211,195 @@ class TasksScreen extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Card(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      ElevatedButton(
-                        child: const Text('Закрыть'),
-                        onPressed: () async {
-                          showDeleteAlert(context, zayavka);
-                        },
-                      ),
-                      ElevatedButton(
-                        child: const Text('Отменилась'),
-                        onPressed: () async {
-                          showCancelAlert(context, zayavka);
-                        },
-                      ),
-                      ListTile(
-                          isThreeLine: true,
-                          subtitle: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                if (zayavka.nachalo != null)
-                                  Text(
-                                      '${DateFormat('dd.MM.yy HH:mm').format(zayavka.nachalo!)}',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold)),
-                                Text(
-                                  '${zayavka.client}',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      ),
-                                ),
-                                GestureDetector(
-                                  child: Text('${zayavka.adres}',
-                                      style: TextStyle(fontSize: 23)),
-                                  onTap: () =>
-                                      MapsLauncher.launchQuery(zayavka.adres!),
-                                ),
-                                ElevatedButton(
-                                    child: const Icon(Icons.navigation),
-                                    onPressed: () {
-                                      if (zayavka.lat != "" &&
-                                          zayavka.lng != "")
-                                        MapsLauncher.launchCoordinates(
-                                            double.parse(zayavka.lat!),
-                                            double.parse(zayavka.lng!));
-                                      else
-                                        MapsLauncher.launchQuery(
-                                            zayavka.adres!);
-                                    }),
-                                Row(children: [
-                                  Expanded(
-                                    child: Text('${zayavka.contact_name}',
+                  elevation: 10,
+                  child: Container(
+                    color: Theme.of(context).colorScheme.surface,
+                    padding: EdgeInsets.all(5),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Row(children: <Widget>[
+                          ElevatedButton(
+                            child: const Text('Закрыть'),
+                            onPressed: () async {
+                              showDeleteAlert(context, zayavka);
+                            },
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          ElevatedButton(
+                            child: const Text('Отменилась'),
+                            onPressed: () async {
+                              showCancelAlert(context, zayavka);
+                            },
+                          ),
+                        ]),
+                        ListTile(
+                            isThreeLine: true,
+                            subtitle: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  if (zayavka.nachalo != null)
+                                    Text(
+                                        '${DateFormat('dd.MM.yy HH:mm').format(zayavka.nachalo!)}',
                                         style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold)),
+                                  Container(
+                                   
+                                    child: Text(
+                                      '${zayavka.client}',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                  ),
+                                  Row(children: <Widget>[
+                                    Flexible(
+                                      child: GestureDetector(
+                                        child: Text('${zayavka.adres}',
+                                            style: TextStyle(fontSize: 23)),
+                                        onTap: () => MapsLauncher.launchQuery(
+                                            zayavka.adres!),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                        child: const Icon(Icons.navigation),
+                                        onPressed: () {
+                                          if (zayavka.lat != "" &&
+                                              zayavka.lng != "")
+                                            MapsLauncher.launchCoordinates(
+                                                double.parse(zayavka.lat!),
+                                                double.parse(zayavka.lng!));
+                                          else
+                                            MapsLauncher.launchQuery(
+                                                zayavka.adres!);
+                                        }),
+                                  ]),
+                                  Container(
+              
+                                    child: Row(children: [
+                                      Expanded(
+                                        child: Text('${zayavka.contact_name}',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      ElevatedButton(
+                                          child: const Icon(Icons.phone),
+                                          onPressed: () {
+                                            var s = zayavka.contact_number!;
+                                            if (s.startsWith('7')) s = '+' + s;
+                                            launchUrlString("tel://${s}");
+                                          }),
+                                    ]),
                                   ),
                                   SizedBox(
-                                    width: 20,
+                                    height: 5,
                                   ),
-                                  ElevatedButton(
-                                      child: const Icon(Icons.phone),
-                                      onPressed: () {
-                                        var s = zayavka.contact_number!;
-                                        if (s.startsWith('7')) s = '+' + s;
-                                        launchUrlString("tel://${s}");
-                                      }),
-                                ]),
-                                SelectableText(contextMenuBuilder:
-                                        (context, editableTextState) {
-                                  final TextEditingValue value =
-                                      editableTextState.currentTextEditingValue;
-                                  final List<ContextMenuButtonItem>
-                                      buttonItems =
-                                      editableTextState.contextMenuButtonItems;
-                                  buttonItems.insert(
-                                    0,
-                                    ContextMenuButtonItem(
-                                      label: 'Звони!',
-                                      onPressed: () {
-                                        String s = value.text.substring(
-                                            value.selection.start,
-                                            value.selection.end);
-                                        if (s.startsWith('7')) s = '+' + s;
-                                        launchUrlString("tel://${s}");
-                                      },
-                                    ),
-                                  );
-                                  return AdaptiveTextSelectionToolbar
-                                      .buttonItems(
-                                    anchors:
-                                        editableTextState.contextMenuAnchors,
-                                    buttonItems: buttonItems,
-                                  );
-                                }, '${zayavka.message} ',
-                                    style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500)),
-                              ])),
-                      ExpansionTile(
-                          childrenPadding: EdgeInsets.all(5),
-                          title: Text('Автомобили'),
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                const SizedBox(width: 8),
-                                ElevatedButton(
-                                  child: const Icon(Icons.car_repair),
-                                  onPressed: () {
-                                    novoeAvto(context, zayavka);
-                                    //  Navigator.push<Widget>(
-                                    //context,
-                                    //MaterialPageRoute(
-                                    //   builder: (context) => NewAvtoScreen(zayavka),
-                                    //  ),
-                                    // );
-                                  },
-                                ),
-                                const SizedBox(width: 8),
-                              ],
+                                  Container(
+                                   
+                                    child: SelectableText(contextMenuBuilder:
+                                            (context, editableTextState) {
+                                      final TextEditingValue value =
+                                          editableTextState
+                                              .currentTextEditingValue;
+                                      final List<ContextMenuButtonItem>
+                                          buttonItems = editableTextState
+                                              .contextMenuButtonItems;
+                                      buttonItems.insert(
+                                        0,
+                                        ContextMenuButtonItem(
+                                          label: 'Звони!',
+                                          onPressed: () {
+                                            String s = value.text.substring(
+                                                value.selection.start,
+                                                value.selection.end);
+                                            if (s.startsWith('7')) s = '+' + s;
+                                            launchUrlString("tel://${s}");
+                                          },
+                                        ),
+                                      );
+                                      return AdaptiveTextSelectionToolbar
+                                          .buttonItems(
+                                        anchors: editableTextState
+                                            .contextMenuAnchors,
+                                        buttonItems: buttonItems,
+                                      );
+                                    }, '${zayavka.message} ',
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500)),
+                                  ),
+                                ])),
+                        ExpansionTile(
+                            childrenPadding: EdgeInsets.all(5),
+                            title: Text(
+                              '              Отчеты',
+                              style: TextStyle(fontSize: 22),
                             ),
-                            if (zayavka.avtomobili != null)
-                              for (AvtomobilRemote avto
-                                  in zayavka.avtomobili!.toList())
-                                AvtoWidget(avto, zayavka)
-                          ])
-                    ],
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  const SizedBox(width: 8),
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                      elevation: WidgetStatePropertyAll(5),
+                                    ),
+                                    child: const Text(
+                                      "Добавить Объект",
+                                      style: TextStyle(fontSize: 24),
+                                    ),
+                                    onPressed: () {
+                                      if (model.elementAt(0).tip == 'OTCHET') {
+                                        novyjOtchet(context, zayavka);
+                                      } else {
+                                        novoeAvto(context, zayavka);
+                                      }
+                                      //  Navigator.push<Widget>(
+                                      //context,
+                                      //MaterialPageRoute(
+                                      //   builder: (context) => NewAvtoScreen(zayavka),
+                                      //  ),
+                                      // );
+                                    },
+                                  ),
+                                  const SizedBox(width: 8),
+                                ],
+                              ),
+                              if (zayavka.avtomobili != null)
+                                for (AvtomobilRemote avto
+                                    in sortedAvto(zayavka.avtomobili!.toList()))
+                                  for (CurrentUser u in model)
+                                    Container(
+                                        padding: EdgeInsets.only(bottom: 5),
+                                        child: u.tip == 'OTCHET'
+                                            ? OtchetWidget(avto, zayavka)
+                                            : AvtoWidget(avto, zayavka))
+                            ])
+                      ],
+                    ),
                   ),
                 ),
               ],
             )
           ]),
     );
+  }
+
+  List sortedAvto(List<AvtomobilRemote> avtos) {
+    avtos.sort((a, b) {
+      if (a.date == null) return 1;
+      if (b.date == null) return 1;
+
+      return a.date!.compareTo(b.date!);
+    });
+    return avtos;
   }
 
   void novoeAvto(context, ZayavkaRemote zayavka) {
@@ -348,20 +414,23 @@ class TasksScreen extends HookConsumerWidget {
           child: ListView(
             shrinkWrap: true,
             children: [
-               Container(padding: EdgeInsets.all(10),
-                child: 
-              TextFormField(
-                inputFormatters: [
-                  UpperCaseTextFormatter(),
-                ],
-                controller: nomerController,
-                decoration: InputDecoration(hintText: 'номер'),
-              ),),
-              Container(padding: EdgeInsets.all(10),
-                child:  TextFormField(
-                controller: markaController,
-                decoration: InputDecoration(hintText: 'марка'),
-              ),),
+              Container(
+                padding: EdgeInsets.all(10),
+                child: TextFormField(
+                  inputFormatters: [
+                    UpperCaseTextFormatter(),
+                  ],
+                  controller: nomerController,
+                  decoration: InputDecoration(hintText: 'номер'),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.all(10),
+                child: TextFormField(
+                  controller: markaController,
+                  decoration: InputDecoration(hintText: 'марка'),
+                ),
+              ),
               ElevatedButton(
                   onPressed: () {
                     var uuid = Uuid();
@@ -374,6 +443,7 @@ class TasksScreen extends HookConsumerWidget {
                         nomer: "ТС" + (n + 1).toString(),
                         marka: "",
                         status: "NOVAYA");
+                    initPosition(a);
                     a.saveLocal();
                     addFoto(zayavka, a);
                     Navigator.pop(context);
@@ -396,15 +466,55 @@ class TasksScreen extends HookConsumerWidget {
                       marka: marka,
                       status: "NOVAYA");
                   a.saveLocal();
+                  initPosition(a);
+                  Navigator.pop(context);
+                },
+                child: Text('Сохранить'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
-                  AvtomobilLocal al = AvtomobilLocal(
+  void novyjOtchet(context, ZayavkaRemote zayavka) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        var nomerController = TextEditingController();
+
+        return Dialog(
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              Container(
+                padding: EdgeInsets.all(10),
+                child: TextFormField(
+                  inputFormatters: [
+                    UpperCaseTextFormatter(),
+                  ],
+                  controller: nomerController,
+                  decoration: InputDecoration(hintText: 'объект'),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Отмена'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // Send them to your email maybe?
+                  var nomer = nomerController.text;
+                  var uuid = Uuid();
+                  AvtomobilRemote a = AvtomobilRemote(
                       id: uuid.v4(),
                       zayavka: BelongsTo<ZayavkaRemote>(zayavka),
                       nomer: nomer,
-                      marka: marka,
+                      marka: "",
                       status: "NOVAYA");
-                  al.saveLocal();
-                  zayavka.saveLocal();
+                  a.saveLocal();
+                  initPosition(a);
                   Navigator.pop(context);
                 },
                 child: Text('Сохранить'),
@@ -490,33 +600,31 @@ class TasksScreen extends HookConsumerWidget {
             : 'Уверены что хотите закрыть заявку?';
 
         return Dialog(
-          child: 
-          Container(
+          child: Container(
             padding: EdgeInsets.all(10),
-            child: 
-          ListView(
-            shrinkWrap: true,
-            children: [
-              Text(text),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Отмена'),
-              ),
-              ElevatedButton(
-                onPressed: hasnoopendAvtos == true
-                    ? () async {
-                        if (await updateZayavka(
-                            zayavka, token.value, "VYPOLNENA"))
-                          zayavka.status = "VYPOLNENA";
-                        zayavka.saveLocal();
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                Text(text),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Отмена'),
+                ),
+                ElevatedButton(
+                  onPressed: hasnoopendAvtos == true
+                      ? () async {
+                          if (await updateZayavka(
+                              zayavka, token.value, "VYPOLNENA"))
+                            zayavka.status = "VYPOLNENA";
+                          zayavka.saveLocal();
 
-                        Navigator.pop(context);
-                      }
-                    : null,
-                child: Text('Готово'),
-              ),
-            ],
-          ),
+                          Navigator.pop(context);
+                        }
+                      : null,
+                  child: Text('Готово'),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -565,7 +673,7 @@ class TasksScreen extends HookConsumerWidget {
       r.add(GestureDetector(
         child: Text(
           s.substring(element.start, element.end),
-          //style: TextStyle(color: Colors.blue.shade200),
+          
         ),
       ));
       st = element.end;
@@ -586,4 +694,41 @@ class UpperCaseTextFormatter extends TextInputFormatter {
       selection: newValue.selection,
     );
   }
+}
+
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      Geolocator.openLocationSettings();
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition();
 }

@@ -69,6 +69,14 @@ class ChekiScreen extends HookConsumerWidget {
         loading: () => const CircularProgressIndicator(),
         data: (_) {
           var chekState = ref.cheks.watchAll(remote: false);
+          var sorted = chekState.model.toList(growable: true);
+          sorted.sort((a, b) {
+            if(a.date==null)
+              return 1;
+            if(b.date==null)
+              return 1;
+            return b.date!.compareTo(a.date!);
+          },);
 
           return ListView(
             children: [
@@ -80,7 +88,7 @@ class ChekiScreen extends HookConsumerWidget {
 ElevatedButton(onPressed: () => showChekDialog(context, ref), child: Text("Добавить отчет"))
 
 ,
-for (var chek in chekState.model.toList(growable: true))
+for (var chek in sorted)
              ExpansionTile(
         trailing: SizedBox.shrink(),
         collapsedShape: const ContinuousRectangleBorder(
@@ -94,7 +102,7 @@ for (var chek in chekState.model.toList(growable: true))
           Expanded(
             flex: 2,
             child: Text(
-                '${DateFormat('yyyy.MM.dd kk:mm').format(chek.date!)}'),
+                '${DateFormat('dd.MM.yyyy kk:mm').format(chek.date!)}'),
           ),
           ElevatedButton(
               onPressed: chek.status != "NOVAYA"
@@ -102,9 +110,9 @@ for (var chek in chekState.model.toList(growable: true))
                   : () => showDeleteAlertAvto(context, chek), //showDeleteAlertAvto(context, ayavka, avto),
               child: const Icon(Icons.cancel)),
         ]),
-        collapsedBackgroundColor: chek.status != "NOVAYA"
-            ? Colors.grey.shade200
-            : Color.fromARGB(255, 247, 130, 139),
+       // collapsedBackgroundColor: chek.status != "NOVAYA"
+         //   ? Colors.grey.shade200
+           // : Color.fromARGB(255, 247, 130, 139),
         children: <Widget>[
           const SizedBox(width: 8),
           const SizedBox(width: 8),
@@ -115,8 +123,8 @@ for (var chek in chekState.model.toList(growable: true))
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+                //backgroundColor: WidgetStateProperty.all<Color>(
+                 //   Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.attach_file_rounded),
               onPressed: chek.status != "NOVAYA"
@@ -127,8 +135,8 @@ for (var chek in chekState.model.toList(growable: true))
             ),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+               // backgroundColor: WidgetStateProperty.all<Color>(
+               //     Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.add_a_photo),
               onPressed: chek.status != "NOVAYA"
@@ -139,8 +147,8 @@ for (var chek in chekState.model.toList(growable: true))
             ),
               ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+                //backgroundColor: WidgetStateProperty.all<Color>(
+              //      Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.file_download),
               onPressed: chek.status != "NOVAYA"
@@ -209,9 +217,9 @@ for (var chek in chekState.model.toList(growable: true))
                                     Navigator.pop(context);
                                       infoToast("Посылаем");
                                       
-                                      chek.status = "TEMP";
+                                      //chek.status = "TEMP";
                                       
-                                      chek.saveLocal();
+                                      //chek.saveLocal();
                                       bool ok = false;
                                       try{
                                         ok = 
@@ -219,18 +227,7 @@ for (var chek in chekState.model.toList(growable: true))
                                           chek, ref, token.value);
                                       }catch(e){
                                             
-                                            if (e
-                                                              .toString()
-                                                              .contains(
-                                                                  "401")) {
-                                                            user.value = '';
-                                                            token.value = '';
-                                                            chek.status =
-                                                                "NOVAYA";
-                                                            chek.saveLocal();
-                                                            context
-                                                                .go('/login');
-                                                          }
+                                           
                                       }
                                       if (ok) {
                                         chek.status = "GOTOWAYA";
@@ -275,6 +272,7 @@ for (var chek in chekState.model.toList(growable: true))
       final snackBar = SnackBar(
         content: const Text('фото не добавлено'),
       );
+
     }
   }
   addChekLocalFiles(Chek chek, context) async {
