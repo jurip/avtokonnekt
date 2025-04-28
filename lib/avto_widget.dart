@@ -9,13 +9,11 @@ import 'package:flutter_data/flutter_data.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttsec/image_screen.dart';
-import 'package:fluttsec/src/models/currentUser.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:multi_image_picker_plus/multi_image_picker_plus.dart';
 import 'package:multiple_image_camera/camera_file.dart';
 import 'package:multiple_image_camera/multiple_image_camera.dart';
 import 'package:fluttsec/main.dart';
-import 'package:fluttsec/main.data.dart';
 import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/avtomobilRemote.dart';
 import 'package:fluttsec/src/models/foto.dart';
@@ -30,7 +28,6 @@ import 'package:fluttsec/src/remote/save_with_photos.dart';
 import 'package:fluttsec/user_select_screen.dart';
 import 'package:fluttsec/usluga_select_screen.dart';
 import 'package:gal/gal.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -51,8 +48,6 @@ class AvtoWidget extends HookConsumerWidget {
   void _saveComment(String text) {}
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    //avto = ref.avtomobilRemotes.watch(avto);
-    //zayavka = ref.zayavkaRemotes.watch(zayavka);
     var commentController = TextEditingController(text: avto.comment);
 
     var _speechToText = useState(SpeechToText());
@@ -122,8 +117,8 @@ class AvtoWidget extends HookConsumerWidget {
           const SizedBox(width: 8),
           if (avto.nomerAG==null) ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(
-                  Colors.blue.shade100), // Change button color
+             // backgroundColor: WidgetStateProperty.all<Color>(
+             //     Colors.blue.shade100), // Change button color
             ),
             child: const Icon(Icons.add_a_photo),
             onPressed: notNew
@@ -139,8 +134,7 @@ class AvtoWidget extends HookConsumerWidget {
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+           
               ),
               child: const Icon(Icons.attach_file_rounded),
               onPressed: notNew
@@ -152,8 +146,7 @@ class AvtoWidget extends HookConsumerWidget {
             SizedBox(width: 5,),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+           
               ),
               child: const Icon(Icons.add_a_photo),
               onPressed: notNew
@@ -165,8 +158,6 @@ class AvtoWidget extends HookConsumerWidget {
             SizedBox(width: 5,),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.file_download),
               onPressed: notNew
@@ -193,8 +184,8 @@ class AvtoWidget extends HookConsumerWidget {
           ),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(
-                  Colors.blue.shade100), // Change button color
+              //backgroundColor: WidgetStateProperty.all<Color>(
+              //    Colors.blue.shade100), // Change button color
             ),
             child: const Icon(Icons.build_circle_rounded),
             onPressed: notNew
@@ -215,10 +206,7 @@ class AvtoWidget extends HookConsumerWidget {
               padding: EdgeInsets.all(0),
               child: Container(
                 margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.blue.shade200,
-                ),
+               
                 child:Column(children: [
                         Row(
                           children: [
@@ -299,8 +287,6 @@ class AvtoWidget extends HookConsumerWidget {
           ),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(
-                  Colors.blue.shade100), // Change button color
             ),
             child: const Icon(Icons.barcode_reader),
             onPressed: notNew
@@ -328,10 +314,7 @@ class AvtoWidget extends HookConsumerWidget {
               padding: EdgeInsets.all(0),
               child: Container(
                 margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.blue.shade200,
-                ),
+               
                 child: Row(
                   children: [
                     SizedBox(
@@ -359,8 +342,7 @@ class AvtoWidget extends HookConsumerWidget {
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+          
               ),
               child: const Icon(Icons.attach_file),
               onPressed: notNew
@@ -372,8 +354,7 @@ class AvtoWidget extends HookConsumerWidget {
             SizedBox(width: 5,),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+           
               ),
               child: const Icon(Icons.add_a_photo),
               onPressed: notNew
@@ -440,8 +421,7 @@ class AvtoWidget extends HookConsumerWidget {
           ),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(
-                  Colors.blue.shade100), // Change button color
+          
             ),
             child: const Icon(Icons.supervised_user_circle_outlined),
             onPressed: notNew
@@ -462,10 +442,7 @@ class AvtoWidget extends HookConsumerWidget {
               padding: EdgeInsets.all(0),
               child: Container(
                 margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.blue.shade200,
-                ),
+               
                 child: Column(children: [
                   Row(
                     children: [
@@ -574,67 +551,7 @@ class AvtoWidget extends HookConsumerWidget {
       r = await sendAvto(avto);
     } catch (e) {
       infoToast("Ошибка при отправке\n" + e.toString());
-     
-      /*
-      avto.status = "PENDING";
-      avto.saveLocal();
-      zayavka.saveLocal();
 
-      var b = avto.barcode
-          .map(
-            (Oborudovanie p0) => p0.code!,
-          )
-          .toList();
-      var f = avto.fotos.map((p0) => p0.fileLocal!).toList();
-      var o = avto.oborudovanieFotos
-          .map((OborudovanieFoto p0) => p0.fileLocal!)
-          .toList();
-      var p = avto.performance_service
-          .where(
-            (element) => element.dop == 'N',
-          )
-          .map(
-            (p0) => p0.code!,
-          )
-          .toList();
-      var pd = avto.performance_service
-          .where(
-            (element) => element.dop == 'Y',
-          )
-          .map((p0) => p0.code!)
-          .toList();
-*/
-      //final prefs = await SharedPreferences.getInstance();
-
-      //prefs.setString(avto.id!, "Eee");
-      /*
-      Workmanager().  registerOneOffTask(
-        avto.id!,
-        rescheduledTaskKey,
-        initialDelay: Duration(seconds: 10),
-        existingWorkPolicy: ExistingWorkPolicy.keep,
-        constraints: Constraints(
-          networkType: NetworkType.connected,
-        ),
-        inputData: <String, dynamic>{
-          'token': token.value,
-          'barcode': b,
-          'comment': avto.comment ?? '',
-          'date': DateTime.now().toIso8601String(),
-          'fotos': f,
-          'marka': avto.marka ?? "",
-          'nomer': avto.nomer ?? "",
-          'nomerAG': avto.nomerAG ?? "",
-          'oborudovanieFotos': o,
-          'performance_service': p,
-          'performance_service_dop': pd,
-          'status': avto.status!,
-          'id': avto.id.toString(),
-          'zayavkaId': avto.zayavka!.id.toString()
-        },
-      );
-
-      */
     }
     avto.status = r;
     avto.saveLocal();
@@ -812,13 +729,13 @@ Future<List<XFile>> pickMultiC(context) async {
     context: context,
     customDoneButton: Center( child: ElevatedButton(style: ButtonStyle(
       
-         backgroundColor: WidgetStateProperty<Color>.fromMap(
-          <WidgetStatesConstraint, Color>{
-            WidgetState.focused: Colors.blueAccent,
-            WidgetState.pressed | WidgetState.hovered: Colors.blue,
-            WidgetState.any: Colors.white,
-          },
-        ),
+        // backgroundColor: WidgetStateProperty<Color>.fromMap(
+        //  <WidgetStatesConstraint, Color>{
+        //    WidgetState.focused: Colors.blueAccent,
+        //    WidgetState.pressed | WidgetState.hovered: Colors.blue,
+        //    WidgetState.any: Colors.white,
+        //  },
+        //),
         ), onPressed: null, child: Text("Готово",style: TextStyle(fontSize: 40))))
   );
 
@@ -996,7 +913,7 @@ Stack carouselItem(file, BuildContext context, delete, notNew) {
         child: IconButton(
           icon: Icon(
             Icons.cancel,
-            color: Colors.black.withOpacity(0.5),
+           // color: Colors.black.withOpacity(0.5),
             size: 50,
           ),
           onPressed: notNew ? null : delete,
@@ -1023,13 +940,6 @@ GestureDetector filePicture(String file, BuildContext context) {
           ))
       : GestureDetector(
           onTap: () {
-            //Navigator.push<Widget>(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) =>
-            //         ImageScreen(foto.fileLocal!),
-            //   ),
-            //  );
           },
           child: Image(
             image: AssetImage("assets/images/file.png"),

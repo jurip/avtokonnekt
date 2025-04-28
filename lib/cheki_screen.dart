@@ -110,9 +110,9 @@ for (var chek in sorted)
                   : () => showDeleteAlertAvto(context, chek), //showDeleteAlertAvto(context, ayavka, avto),
               child: const Icon(Icons.cancel)),
         ]),
-        collapsedBackgroundColor: chek.status != "NOVAYA"
-            ? Colors.grey.shade200
-            : Color.fromARGB(255, 247, 130, 139),
+       // collapsedBackgroundColor: chek.status != "NOVAYA"
+         //   ? Colors.grey.shade200
+           // : Color.fromARGB(255, 247, 130, 139),
         children: <Widget>[
           const SizedBox(width: 8),
           const SizedBox(width: 8),
@@ -123,8 +123,8 @@ for (var chek in sorted)
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+                //backgroundColor: WidgetStateProperty.all<Color>(
+                 //   Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.attach_file_rounded),
               onPressed: chek.status != "NOVAYA"
@@ -135,8 +135,8 @@ for (var chek in sorted)
             ),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+               // backgroundColor: WidgetStateProperty.all<Color>(
+               //     Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.add_a_photo),
               onPressed: chek.status != "NOVAYA"
@@ -147,8 +147,8 @@ for (var chek in sorted)
             ),
               ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+                //backgroundColor: WidgetStateProperty.all<Color>(
+              //      Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.file_download),
               onPressed: chek.status != "NOVAYA"
@@ -272,6 +272,7 @@ for (var chek in sorted)
       final snackBar = SnackBar(
         content: const Text('фото не добавлено'),
       );
+
     }
   }
   addChekLocalFiles(Chek chek, context) async {

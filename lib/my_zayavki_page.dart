@@ -19,13 +19,11 @@ Future<void> _launchUrl() async {
 }
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
-bool isDarkMode = brightness == Brightness.dark;
     return Scaffold(
       body: 
       Container(
         child: Center(child: TasksScreen()),
-        decoration:!isDarkMode? BoxDecoration(
+        decoration:Theme.of(context).brightness == Brightness.light? BoxDecoration(
           image: DecorationImage(
             image: AssetImage("assets/images/11.jpg"),
             fit: BoxFit.fill,

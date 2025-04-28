@@ -152,8 +152,8 @@ class LoginPage extends HookConsumerWidget {
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.CENTER,
                     timeInSecForIosWeb: 1,
-                    backgroundColor: Colors.red,
-                    textColor: Colors.white,
+                    //backgroundColor: Colors.red,
+                   // textColor: Colors.white,
                     fontSize: 16.0);
               }
             } else {
@@ -163,8 +163,8 @@ class LoginPage extends HookConsumerWidget {
                   toastLength: Toast.LENGTH_SHORT,
                   gravity: ToastGravity.CENTER,
                   timeInSecForIosWeb: 1,
-                  backgroundColor: Colors.red,
-                  textColor: Colors.white,
+                 // backgroundColor: Colors.red,
+                 // textColor: Colors.white,
                   fontSize: 16.0);
             }
           },
@@ -174,7 +174,7 @@ class LoginPage extends HookConsumerWidget {
               height: 34,
               padding: const EdgeInsets.all(2.0),
               child: const CircularProgressIndicator(
-                color: Colors.white,
+              //  color: Colors.white,
                 strokeWidth: 3,
               ),
             )

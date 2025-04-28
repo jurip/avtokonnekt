@@ -106,15 +106,15 @@ class OtchetWidget extends HookConsumerWidget {
                   : () => showDeleteAlertAvto(context, zayavka, avto),
               child: const Icon(Icons.cancel)),
         ]),
-        collapsedBackgroundColor:
-            notNew ? Colors.grey.shade200 : Color.fromARGB(255, 247, 130, 139),
+       // collapsedBackgroundColor:
+       //     notNew ? Colors.grey.shade200 : Color.fromARGB(255, 247, 130, 139),
         children: <Widget>[
           const SizedBox(width: 8),
           const SizedBox(width: 8),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(
-                  Colors.blue.shade100), // Change button color
+          //    backgroundColor: WidgetStateProperty.all<Color>(
+         //         Colors.blue.shade100), // Change button color
             ),
             child: const Icon(Icons.add_a_photo),
             onPressed: notNew
@@ -156,8 +156,8 @@ class OtchetWidget extends HookConsumerWidget {
             SizedBox(width: 5,),
             ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all<Color>(
-                    Colors.blue.shade100), // Change button color
+                //backgroundColor: WidgetStateProperty.all<Color>(
+                 //   Colors.blue.shade100), // Change button color
               ),
               child: const Icon(Icons.file_download),
               onPressed: notNew
@@ -290,8 +290,8 @@ class OtchetWidget extends HookConsumerWidget {
           ),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(
-                  Colors.blue.shade100), // Change button color
+           //   backgroundColor: WidgetStateProperty.all<Color>(
+           //       Colors.blue.shade100), // Change button color
             ),
             child: const Icon(Icons.barcode_reader),
             onPressed: notNew
@@ -321,7 +321,7 @@ class OtchetWidget extends HookConsumerWidget {
                 margin: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: Colors.blue.shade200,
+                //  color: Colors.blue.shade200,
                 ),
                 child: Row(
                   children: [

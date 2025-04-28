@@ -4,6 +4,7 @@ import 'package:fluttsec/avto_widget.dart';
 import 'package:fluttsec/otchet_widget.dart';
 import 'package:fluttsec/src/models/avtoFoto.dart';
 import 'package:fluttsec/src/models/currentUser.dart';
+import 'package:fluttsec/src/notifications/app_notifications.dart';
 import 'package:gal/gal.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -38,7 +39,7 @@ class TasksScreen extends HookConsumerWidget {
 
     useEffect(() {
       loadZayavkaFromPrefs(ref);
-_determinePosition();
+      _determinePosition();
       return () => {};
     }, []);
 
@@ -56,23 +57,22 @@ _determinePosition();
               )
               .toList();
           zFiltered.sort((a, b) {
-            if (a.nachalo != null && b.nachalo != null){
-              if(b.nachalo!.year!=a.nachalo!.year)
+            if (a.nachalo != null && b.nachalo != null) {
+              if (b.nachalo!.year != a.nachalo!.year)
                 return b.nachalo!.year.compareTo(a.nachalo!.year);
-              if(b.nachalo!.month!=a.nachalo!.month)
+              if (b.nachalo!.month != a.nachalo!.month)
                 return b.nachalo!.month.compareTo(a.nachalo!.month);
-              if(b.nachalo!.day!=a.nachalo!.day)
-                return b.nachalo!.day.compareTo(a.nachalo!.year);
-              if(b.nachalo!.hour!=a.nachalo!.hour)
+              if (b.nachalo!.day != a.nachalo!.day)
+                return b.nachalo!.day.compareTo(a.nachalo!.day);
+              if (b.nachalo!.hour != a.nachalo!.hour)
                 return a.nachalo!.hour.compareTo(b.nachalo!.hour);
-              if(b.nachalo!.minute!=a.nachalo!.minute)
+              if (b.nachalo!.minute != a.nachalo!.minute)
                 return a.nachalo!.minute.compareTo(b.nachalo!.minute);
-              if(b.nachalo!.second!=a.nachalo!.second)
+              if (b.nachalo!.second != a.nachalo!.second)
                 return a.nachalo!.second.compareTo(b.nachalo!.second);
-            
+
               return a.nachalo!.microsecond.compareTo(b.nachalo!.microsecond);
-            }
-            else
+            } else
               return 0;
           });
           ref.duties.findAll(
@@ -92,100 +92,78 @@ _determinePosition();
               key: _refreshIndicatorKey,
               onRefresh: () async {
                 await ref.duties.findAll(
-                   onError: (e, label, adapter) {
-              
-              return List.empty();
-            },
+                  onError: (e, label, adapter) {
+                    return List.empty();
+                  },
                 );
                 ref.zayavkaRemotes.findAll(
-                   onError: (e, label, adapter) {
-              return List.empty();
-            },
+                  onError: (e, label, adapter) {
+                    return List.empty();
+                  },
                 );
 
                 // sendToCalendar(ref);
               },
               // Pull from top to show refresh indicator.
-              child: 
-             
-               
-                ListView(
-                  children: [
-                     Container(
-                      alignment: Alignment.topRight,
-                      child: 
-                     IconButton(
-                      
+              child: ListView(
+                children: [
+                  Container(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
                       onPressed: () {
-                      
-                       context.go('/settings');
+                        context.go('/settings');
                       },
                       icon: Icon(Icons.settings),
-                ),
-                     ),
-                    Row(children: [
-                      for (final u in stateCurrentUser.model)
-                        Flexible(child:  Center(
-                            child: Container(
-                                decoration: BoxDecoration(
-                                  color: Color.fromARGB(255, 130, 238, 255),
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Color.fromARGB(255, 130, 238, 255),
-                                        offset: Offset(0, 4),
-                                        //blurRadius: 8,
-                                        spreadRadius: 0)
-                                  ],
-                                ),
-                                margin: EdgeInsets.all(10),
-                                child: Text(
-                                  '${u.firstName} ${u.lastName} ',
-                                  softWrap: true,
-                                  style: TextStyle(fontSize: 25),
-                                )))),
-                      for (final duty in stateDuty.model)
+                    ),
+                  ),
+                  Row(children: [
+                    for (final u in stateCurrentUser.model)
+                      Flexible(
+                          child: Center(
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: Theme.of(context).colorScheme.surface
+                                  ),
+                                  margin: EdgeInsets.all(10),
+                                  child: Text(
+                                    '${u.firstName} ${u.lastName} ',
+                                    softWrap: true,
+                                    style: TextStyle(fontSize: 25),
+                                  )))),
+                    for (final duty in stateDuty.model)
+                      Center(
+                          child: Container(
+                              decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: Theme.of(context).colorScheme.surface
+                                  ),
+                              margin: EdgeInsets.all(10),
+                              child: Text(
+                                '${duty.status}',
+                                style:
+                                    TextStyle(fontSize: 25, color: Colors.red),
+                              ))),
+                  ]),
+                  SizedBox(height: 10),
+                  Container(
+                       decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: Theme.of(context).colorScheme.surface
+                                  ),
+                      child: Column(children: [
                         Center(
-                            child: Container(
-                                decoration: BoxDecoration(
-                                  //color: Colors.grey.shade200,
-
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                margin: EdgeInsets.all(10),
-                                child: Text(
-                                  '${duty.status}',
-                                  style: TextStyle(
-                                      fontSize: 25, color: Colors.red),
-                                ))),
-                    ]),
-                    SizedBox(height: 10),
-                    Container(
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 130, 238, 255),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Color.fromARGB(255, 130, 238, 255),
-                                offset: Offset(0, 4),
-                                blurRadius: 8,
-                                spreadRadius: 0)
-                          ],
-                        ),
-                        child: Column(children: [
-                          Center(
-                            child: Text(
-                              'заявки',
-                              style: TextStyle(fontSize: 30),
-                            ),
+                          child: Text(
+                            'заявки',
+                            style: TextStyle(fontSize: 30),
                           ),
-                          for (final ZayavkaRemote zayavka in zFiltered)
-                            zayavkaWidget(zayavka, context, stateCurrentUser.model),
-                        ]))
-                  ],
-                )
-             
-              );
+                        ),
+                        for (final ZayavkaRemote zayavka in zFiltered)
+                          zayavkaWidget(
+                              zayavka, context, stateCurrentUser.model),
+                      ]))
+                ],
+              ));
         });
   }
 
@@ -199,25 +177,14 @@ _determinePosition();
     );
   }
 
-  Container zayavkaWidget(ZayavkaRemote zayavka, BuildContext context, List<CurrentUser> model) {
+  Container zayavkaWidget(
+      ZayavkaRemote zayavka, BuildContext context, List<CurrentUser> model) {
     return Container(
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 130, 238, 255),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-              color: Color.fromARGB(255, 130, 238, 255),
-              offset: Offset(0, 4),
-              blurRadius: 8,
-              spreadRadius: 0)
-        ],
-      ),
+      
       margin: EdgeInsets.all(10),
       child: ExpansionTile(
           trailing: SizedBox.shrink(),
           childrenPadding: EdgeInsets.all(5),
-          collapsedBackgroundColor:
-              Theme.of(context).colorScheme.primaryContainer,
           collapsedShape: const ContinuousRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(20))),
           title: Row(
@@ -246,6 +213,7 @@ _determinePosition();
                 Card(
                   elevation: 10,
                   child: Container(
+                    color: Theme.of(context).colorScheme.surface,
                     padding: EdgeInsets.all(5),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -279,17 +247,7 @@ _determinePosition();
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold)),
                                   Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade200,
-                                      borderRadius: BorderRadius.circular(10),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.grey.shade200,
-                                            offset: Offset(0, 4),
-                                            blurRadius: 8,
-                                            spreadRadius: 0)
-                                      ],
-                                    ),
+                                   
                                     child: Text(
                                       '${zayavka.client}',
                                       style: TextStyle(
@@ -320,17 +278,7 @@ _determinePosition();
                                         }),
                                   ]),
                                   Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade200,
-                                      borderRadius: BorderRadius.circular(10),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.grey.shade200,
-                                            offset: Offset(0, 4),
-                                            blurRadius: 8,
-                                            spreadRadius: 0)
-                                      ],
-                                    ),
+              
                                     child: Row(children: [
                                       Expanded(
                                         child: Text('${zayavka.contact_name}',
@@ -354,62 +302,64 @@ _determinePosition();
                                     height: 5,
                                   ),
                                   Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all()),
-                                    child: 
-                                  SelectableText(contextMenuBuilder:
-                                          (context, editableTextState) {
-                                    final TextEditingValue value =
-                                        editableTextState
-                                            .currentTextEditingValue;
-                                    final List<ContextMenuButtonItem>
-                                        buttonItems = editableTextState
-                                            .contextMenuButtonItems;
-                                    buttonItems.insert(
-                                      0,
-                                      ContextMenuButtonItem(
-                                        label: 'Звони!',
-                                        onPressed: () {
-                                          String s = value.text.substring(
-                                              value.selection.start,
-                                              value.selection.end);
-                                          if (s.startsWith('7')) s = '+' + s;
-                                          launchUrlString("tel://${s}");
-                                        },
-                                      ),
-                                    );
-                                    return AdaptiveTextSelectionToolbar
-                                        .buttonItems(
-                                      anchors:
-                                          editableTextState.contextMenuAnchors,
-                                      buttonItems: buttonItems,
-                                    );
-                                  }, '${zayavka.message} ',
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w500)
-                                          ),
+                                   
+                                    child: SelectableText(contextMenuBuilder:
+                                            (context, editableTextState) {
+                                      final TextEditingValue value =
+                                          editableTextState
+                                              .currentTextEditingValue;
+                                      final List<ContextMenuButtonItem>
+                                          buttonItems = editableTextState
+                                              .contextMenuButtonItems;
+                                      buttonItems.insert(
+                                        0,
+                                        ContextMenuButtonItem(
+                                          label: 'Звони!',
+                                          onPressed: () {
+                                            String s = value.text.substring(
+                                                value.selection.start,
+                                                value.selection.end);
+                                            if (s.startsWith('7')) s = '+' + s;
+                                            launchUrlString("tel://${s}");
+                                          },
+                                        ),
+                                      );
+                                      return AdaptiveTextSelectionToolbar
+                                          .buttonItems(
+                                        anchors: editableTextState
+                                            .contextMenuAnchors,
+                                        buttonItems: buttonItems,
+                                      );
+                                    }, '${zayavka.message} ',
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500)),
                                   ),
-                                ])
-                                ),
+                                ])),
                         ExpansionTile(
                             childrenPadding: EdgeInsets.all(5),
-                            title: Text('              Отчеты', style: TextStyle(fontSize: 22),),
+                            title: Text(
+                              '              Отчеты',
+                              style: TextStyle(fontSize: 22),
+                            ),
                             children: [
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: <Widget>[
                                   const SizedBox(width: 8),
                                   ElevatedButton(
-                                    style: ButtonStyle(elevation: WidgetStatePropertyAll(5) ,),
-                                    child: const Text("Добавить Объект", style: TextStyle(fontSize: 24),),
+                                    style: ButtonStyle(
+                                      elevation: WidgetStatePropertyAll(5),
+                                    ),
+                                    child: const Text(
+                                      "Добавить Объект",
+                                      style: TextStyle(fontSize: 24),
+                                    ),
                                     onPressed: () {
-                                      if(
-                                      model.elementAt(0).tip=='OTCHET'){
-                                      novyjOtchet(context, zayavka);
-                                      }else{
-                                      novoeAvto(context, zayavka);
+                                      if (model.elementAt(0).tip == 'OTCHET') {
+                                        novyjOtchet(context, zayavka);
+                                      } else {
+                                        novoeAvto(context, zayavka);
                                       }
                                       //  Navigator.push<Widget>(
                                       //context,
@@ -425,10 +375,12 @@ _determinePosition();
                               if (zayavka.avtomobili != null)
                                 for (AvtomobilRemote avto
                                     in sortedAvto(zayavka.avtomobili!.toList()))
-                                    for(CurrentUser u in model)
-                                  Container(
-                                      padding: EdgeInsets.only(bottom: 5),
-                                      child: u.tip == 'OTCHET'? OtchetWidget(avto, zayavka): AvtoWidget(avto, zayavka))
+                                  for (CurrentUser u in model)
+                                    Container(
+                                        padding: EdgeInsets.only(bottom: 5),
+                                        child: u.tip == 'OTCHET'
+                                            ? OtchetWidget(avto, zayavka)
+                                            : AvtoWidget(avto, zayavka))
                             ])
                       ],
                     ),
@@ -439,20 +391,18 @@ _determinePosition();
           ]),
     );
   }
-  List sortedAvto(List<AvtomobilRemote> avtos){
-  
+
+  List sortedAvto(List<AvtomobilRemote> avtos) {
     avtos.sort((a, b) {
-    if(a.date == null)
-      return 1;
-    if(b.date == null)
-      return 1;
-    
-     return  b.date!.compareTo(a.date!);});
+      if (a.date == null) return 1;
+      if (b.date == null) return 1;
+
+      return a.date!.compareTo(b.date!);
+    });
     return avtos;
   }
-  
-  void novoeAvto(context, ZayavkaRemote zayavka) {
 
+  void novoeAvto(context, ZayavkaRemote zayavka) {
     showDialog(
       context: context,
       builder: (_) {
@@ -493,7 +443,7 @@ _determinePosition();
                         nomer: "ТС" + (n + 1).toString(),
                         marka: "",
                         status: "NOVAYA");
-                        initPosition(a);
+                    initPosition(a);
                     a.saveLocal();
                     addFoto(zayavka, a);
                     Navigator.pop(context);
@@ -527,13 +477,12 @@ _determinePosition();
       },
     );
   }
- void novyjOtchet(context, ZayavkaRemote zayavka) {
 
+  void novyjOtchet(context, ZayavkaRemote zayavka) {
     showDialog(
       context: context,
       builder: (_) {
         var nomerController = TextEditingController();
-
 
         return Dialog(
           child: ListView(
@@ -549,8 +498,6 @@ _determinePosition();
                   decoration: InputDecoration(hintText: 'объект'),
                 ),
               ),
-             
-             
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text('Отмена'),
@@ -726,7 +673,7 @@ _determinePosition();
       r.add(GestureDetector(
         child: Text(
           s.substring(element.start, element.end),
-          //style: TextStyle(color: Colors.blue.shade200),
+          
         ),
       ));
       st = element.end;
@@ -748,9 +695,9 @@ class UpperCaseTextFormatter extends TextInputFormatter {
     );
   }
 }
+
 Future<Position> _determinePosition() async {
   bool serviceEnabled;
-  
 
   // Test if location services are enabled.
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
